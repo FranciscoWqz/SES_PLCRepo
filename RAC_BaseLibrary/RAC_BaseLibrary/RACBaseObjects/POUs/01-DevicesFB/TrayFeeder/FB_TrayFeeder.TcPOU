@@ -1,0 +1,249 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_TrayFeeder" Id="{2b30ff38-a0f1-4bb6-9167-f3a00543eb17}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_TrayFeeder EXTENDS FB_Machine
+VAR_INPUT
+	// Material tray move permissive
+	bSafetyBoxDeliver_permissive		: BOOL;
+	
+	// Ask for replace material tray
+	bChangeTrayRequest 					: BOOL;
+END_VAR
+VAR_OUTPUT
+	// Material tray zone is safe to enter in
+	bSafetyBoxDeliver_isSafe			: BOOL;
+	
+	// Good material is on work position
+	bMaterial_ReadyToPick				: BOOL;
+END_VAR
+VAR
+	// Input: HMI Piece is good for process
+	bScanningPieceIsOK					: BOOL;
+	// Input: HMI Piece is no good for process
+	bScanningPieceIsNG					: BOOL;
+	
+	// Structure for IO Mapping
+	TrayFeederIO						: ST_TrayFeederIO;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[super^.MachineMain();]]></ST>
+    </Implementation>
+    <Method Name="Alarm" Id="{efd8ca54-b5f4-45f6-9eb8-2cb0c904cbd4}">
+      <Declaration><![CDATA[METHOD Alarm
+VAR
+	// R Trigger VAr
+	rTrigger							: R_TRIG;
+	// Step in wich timeout occur
+	diTimeoutStep						: DINT;
+	// Actual Timed Out Sequence Step Code
+	sSequenceCode						: STRING;
+	
+	// Async Process Concatenated Alarm Codes
+	sAsyncAlarmCodes					: STRING;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// 	Timeout preset valuie setting
+	IF ton_StepTimeout.PT<>tmStepTimeout THEN
+		ton_StepTimeout.PT					:= tmStepTimeout;
+	END_IF
+
+// 	TON for step timeout
+	ton_StepTimeout(IN:=((NOT ton_StepTimeout.Q) AND (diLastActiveStep=diActualSeqStep)));
+
+// 	Following of sequence for setting timeout
+	IF diLastActiveStep<>diActualSeqStep THEN
+		diLastActiveStep					:= diActualSeqStep;
+	END_IF
+
+// 	For setting acual timed out step alarm code
+	rTrigger(CLK:=ton_StepTimeout.Q);
+	IF rTrigger.Q THEN
+		diTimeoutStep := diActualSeqStep;
+		CASE diTimeoutStep OF
+		// Init process timeouts
+			EN_RobotMessaging.initStart: 			sSequenceCode := '';
+			
+		// Robot Auto
+			EN_RobotMessaging.autoStarts:			sSequenceCode := '';
+			
+		END_CASE
+		sSequenceCode:= CONCAT(STR1:=sSequenceCode,STR2:=sDeviceID);
+		sSequenceCode:= CONCAT(STR1:=sSequenceCode,STR2:=',');
+	END_IF
+
+// 	For deleting last sequence alarm code automatically
+	IF (diActualSeqStep<>diTimeoutStep AND diTimeoutStep<>EN_RobotMessaging.clearedCmd)THEN
+		sSequenceCode:= '';
+		diTimeoutStep:= EN_RobotMessaging.clearedCmd;
+	END_IF
+
+// 	For setting no lineal processes alarms
+	// Tray Feeder is not in auto mode
+	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='WFEEDOMD01',sIDToAdd:=sDeviceID,bActive:=NOT(TrayFeederIO.diin_StationStatus=EN_StationStatus.maintenance));
+	// Tray Feeder connection failed
+	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='EFEEDCON01',sIDToAdd:=sDeviceID,bActive:=(TrayFeederIO.uiin_ConnectionStatus=0));
+	// Tray Feeder EStop pressed
+	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='SFEEDALA01',sIDToAdd:=sDeviceID,bActive:=(TrayFeederIO.diin_StationStatus=EN_StationStatus.estopped));
+	// Tray Feeder Stucked in place safe box
+	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='EFEEDSTU01',sIDToAdd:=sDeviceID,bActive:=((NOT TrayFeederIO.bin_SafetyBoxPlace_OutOfZone) AND (TrayFeederIO.bout_SafetyBoxPlace_Permissive)));
+	// Safety gratings interrupted impede machine operation
+	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='WFEEDSTU01',sIDToAdd:=sDeviceID,bActive:=(FALSE));
+	
+// 	Concat all alarm codes
+	sAlarm:= CONCAT(STR1:=sSequenceCode,STR2:=sAsyncAlarmCodes);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Auto" Id="{14c02982-4d80-43cb-b362-810ef2a45b42}">
+      <Declaration><![CDATA[METHOD Auto]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//	 Keep sequencer in range
+	IF (diActualSeqStep<1000) OR (diActualSeqStep>1999) THEN
+		diActualSeqStep							:=	1000;
+	END_IF
+
+CASE	diActualSeqStep OF
+	EN_TrayFeederMessaging.waitInitStart:	//	Get down empty lifter to traslation height
+	//	Check if have tray on lifter
+	//	Move empty lifter to feed tray tower position
+	//	Lift feed tray tower to unlock height
+	//	Release feed tray tower
+	//	Get down feed tray tower to re lock height
+	//	Re lock feed tray tower
+	//	Get down new tray to traslation height
+	//	Move new tray to work position
+	//	Lift new tray to work position
+	//	Wait tray change request
+		bMaterial_ReadyToPick					:=	TrayFeederIO.bin_delivery_trayReady;
+	//	Move to tray reject position
+	//	Lift reject tray tower to unlock height
+	//	Unlock reject tray tower
+	//	Lift reject tray tower to re lock height
+	//	Re lock reject tray tower
+	//	Reset Auto Sequencer
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Init" Id="{4d7f3bd7-5591-417c-aa8a-edb0f1da1195}">
+      <Declaration><![CDATA[METHOD Init]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//	 Keep sequencer in range
+	IF (diActualSeqStep<0) OR (diActualSeqStep>999) THEN
+		diActualSeqStep							:=	0;
+	END_IF
+
+CASE diActualSeqStep OF
+	EN_TrayFeederMessaging.waitInitStart:				//	When init start bit permissive, set init start output and wait feeder confirm init started
+		TrayFeederIO.bout_Init_startPermissive		:=	bInit_StartPermissive;
+		IF bInit_StartPermissive THEN
+			TrayFeederIO.bout_Init_startPermissive	:=	FALSE;
+			
+		END_IF
+	//	Check status of servo and if have failure code resets it
+	//	Retract actuators needed for servo search refference
+	//	Servos search refference
+	//	Reset outputs
+	//	Set idle machine state and reset init sequencer
+		bInit_Finished								:=	TrayFeederIO.bin_initFinished;
+		IF bInit_Finished THEN
+			diActualSeqStep							:=999;
+		END_IF
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="IO" Id="{bb2c8379-8183-49ef-ae08-88a767e6e759}">
+      <Declaration><![CDATA[METHOD IO
+VAR
+	pDint										: POINTER TO DINT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// 	FB Direct Inputs
+	TrayFeederIO.bout_SafetyBoxPlace_Permissive		:= bSafetyBoxDeliver_permissive;
+	TrayFeederIO.bout_delivery_trayChangeRequest	:= bChangeTrayRequest;
+	TrayFeederIO.bout_scannninPieceIsOK				:= bScanningPieceIsOK;
+	TrayFeederIO.bout_scannninPieceIsNG				:= bScanningPieceIsNG;
+	
+//	Processing protocol raw data : INPUT BITS
+	TrayFeederIO.bin_ServosFailure					:= TrayFeederIO.eipInputs.byteArray[0].0;
+	TrayFeederIO.bin_initFinished					:= TrayFeederIO.eipInputs.byteArray[0].1;
+	TrayFeederIO.bin_SafetyBoxPlace_OutOfZone		:= TrayFeederIO.eipInputs.byteArray[0].2;
+	TrayFeederIO.bin_inScanningPosition				:= TrayFeederIO.eipInputs.byteArray[0].3;
+	TrayFeederIO.bin_delivery_trayReady				:= TrayFeederIO.eipInputs.byteArray[0].4;
+	
+//	Processing protocol raw data : INPUT BYTES
+	pDint											:= ADR(TrayFeederIO.eipInputs.byteArray[8]);
+	TrayFeederIO.diin_StationStatus					:= pDint^;
+	pDint 											:= ADR(TrayFeederIO.eipInputs.byteArray[12]);
+	TrayFeederIO.diin_Sequencer						:= pDint^;
+	
+//	Processing protocol raw data : OUTPUT BITS
+	TrayFeederIO.eipOutputs.byteArray[0].0 	:= TrayFeederIO.bout_Reset;
+	TrayFeederIO.eipOutputs.byteArray[0].1	:= TrayFeederIO.bout_Start;
+	TrayFeederIO.eipOutputs.byteArray[0].2	:= TrayFeederIO.bout_Stop;
+	TrayFeederIO.eipOutputs.byteArray[0].3	:= TrayFeederIO.bout_Init_startPermissive;
+	TrayFeederIO.eipOutputs.byteArray[0].4	:= TrayFeederIO.bout_SafetyBoxPlace_Permissive;
+	TrayFeederIO.eipOutputs.byteArray[0].5	:= TrayFeederIO.bout_scannninPieceIsOK;
+	TrayFeederIO.eipOutputs.byteArray[0].6	:= TrayFeederIO.bout_scannninPieceIsNG;
+	TrayFeederIO.eipOutputs.byteArray[0].7	:= TrayFeederIO.bout_delivery_trayChangeRequest;
+	
+// 	Processing protocol raw data : OUTPUT BYTES
+	pDint 											:= ADR(TrayFeederIO.eipOutputs.byteArray[8]);
+	pdint^											:= TrayFeederIO.diout_SequenceCmd;
+	
+// 	FB Direct Outputs
+	bSafetyBoxDeliver_isSafe						:= TrayFeederIO.bin_SafetyBoxPlace_OutOfZone;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Manual" Id="{5077696b-bd56-4559-a4ef-88e21aee4fd2}">
+      <Declaration><![CDATA[METHOD Manual]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//	Keep sequencer in range
+	IF (diActualSeqStep<2000) OR (diActualSeqStep>2999) THEN
+		diActualSeqStep							:=	0;
+	END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Pause" Id="{6c855993-3ed7-4798-8994-20a2955af25e}">
+      <Declaration><![CDATA[METHOD Pause]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[TrayFeederIO.bout_Stop						:=(TrayFeederIO.diin_StationStatus=EN_StationStatus.running);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Stop" Id="{2251370c-dec0-46d0-bcef-ec9c3377c5f8}">
+      <Declaration><![CDATA[{warning 'Add method implementation '}
+METHOD Stop
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_TrayFeeder">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TrayFeeder.Alarm">
+      <LineId Id="3" Count="47" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TrayFeeder.Auto">
+      <LineId Id="3" Count="23" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TrayFeeder.Init">
+      <LineId Id="3" Count="20" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TrayFeeder.IO">
+      <LineId Id="3" Count="33" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TrayFeeder.Manual">
+      <LineId Id="3" Count="2" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TrayFeeder.Pause">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TrayFeeder.Stop">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="MAIN_ST03" Id="{dc3e1128-42a6-4adf-9d15-fe50aa910b74}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN_ST03
+VAR
+	fbStation03							: RACBaseObjects.FB_Station;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[fbStation03(bInitFinished := FALSE);]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN_ST03">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

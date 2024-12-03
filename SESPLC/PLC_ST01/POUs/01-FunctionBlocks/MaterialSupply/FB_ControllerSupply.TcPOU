@@ -1,0 +1,169 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_ControllerSupply" Id="{459c0afa-ab86-4206-a507-51c5d643bf80}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_ControllerSupply EXTENDS RACBaseObjects.FB_Machine
+VAR_INPUT
+	bSafetyBoxPlace_Permissive			: BOOL;
+	bPlace_MaterialRequest				: BOOL;
+END_VAR
+VAR_OUTPUT
+	bSafetyBoxPlace_OutOfZone			: BOOL;
+	sPieceSN							: STRING;
+	bPlace_Done							: BOOL;
+END_VAR
+VAR
+	fbTrayFeeder						: RACBaseObjects.FB_TrayFeeder;
+	fbRobot								: RACBaseObjects.FB_Robot;
+	fbScanner							: RACBaseObjects.FB_Scanner;
+	
+	// Reject on belt in tray feeder safery box permissive
+	bSafetyBoxReject_permissive			AT%I*	: BOOL;
+	// Reject on belt in tray feeder material request
+	bReject_MaterialRequest				AT%I*	: BOOL;
+	// Reject on belt in tray feeder out of safery box
+	bSafetyBoxReject_OutOfZone			AT%Q*	: BOOL;
+	// Reject on belt in tray feeder reject done
+	bReject_Done						AT%Q*	: BOOL;
+	
+	// Auto procees is scanning
+	bScann								: BOOL;
+	
+	// OK esponse from Acuram MES consultimng
+	bPieceIsGood						: BOOL;
+	// NG esponse from Acuram MES consultimng
+	bPieceIsNG							: BOOL;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[SUPER^.MachineMain();
+//	Tray Feeder instance
+	fbTrayFeeder(						sDeviceID:=	'',
+										bStopExecution:=bStopExecution,
+										bAlarmReset:=bAlarmReset,
+										diStationState:=diStationState,
+										bInit_StartPermissive:=fbRobot.bInit_Finished,
+										bSafetyBoxDeliver_permissive:=fbRobot.bSafetyBoxPick_OutOfZone,
+										bChangeTrayRequest:=fbRobot.bPick_AllMaterialPicked);
+
+//	Robot instance
+	fbRobot(							sDeviceID:=	'',
+										bStopExecution:=bStopExecution,
+										bAlarmReset:=bAlarmReset,
+										diStationState:=diStationState,
+										bInit_StartPermissive:=bInit_StartPermissive,
+										bSafetyBoxPick_Permissive:=fbTrayFeeder.bSafetyBoxDeliver_isSafe,
+										bSafetyBoxPlace_Permissive:=bSafetyBoxPlace_permissive,
+										bSafetyBoxReject_Permissive:=bSafetyBoxReject_Permissive,
+										bOKMaterialReadyToPick:=fbTrayFeeder.bMaterial_ReadyToPick,
+										bNGMaterialReadyToPick:=FALSE,
+										bPiceIsGood:=bPieceIsGood,
+										bPiceIsNG:=bPieceIsNG,
+										bPlace_MaterialRequest:=bPlace_MaterialRequest,
+										bReject_MaterialRequest:=bReject_MaterialRequest,
+										bSafetyBoxPlace_OutOfZone=>bSafetyBoxPlace_OutOfZone,
+										bSafetyBoxReject_OutOfZone=>bSafetyBoxReject_OutOfZone,
+										bPlace_Done=>bPlace_Done,
+										bReject_Done=>bReject_Done);
+
+//	Scanner insance
+	fbScanner(							sDeviceID:=	'',
+										bStopExecution:=bStopExecution,
+										bAlarmReset:=bAlarmReset,
+										bIn_Trigger:=bScann,
+										bDisable:=FALSE,
+										iTotalRetries:=2,
+										Timeout:=t#1s);
+										]]></ST>
+    </Implementation>
+    <Method Name="Alarm" Id="{644d792d-8448-4efa-b96e-5581d18cc674}">
+      <Declaration><![CDATA[METHOD Alarm]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[sAlarm:= CONCAT(STR1:=fbTrayFeeder.sAlarm, STR2:=fbRobot.sAlarm);
+sAlarm:= CONCAT(STR1:=sAlarm,STR2:=fbScanner.sAlarm);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Auto" Id="{7b23c113-4db9-4441-8e07-48739b9176c4}">
+      <Declaration><![CDATA[METHOD Auto]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//	When finish reading save the code in a var
+	IF (fbRobot.diActualSeqStep=EN_RobotMessaging.waitingPieceStatus) THEN
+		bScann:=TRUE;
+		IF (fbScanner.bCompleted) AND (sPieceSN<>fbScanner.sCode) THEN
+			sPieceSN:=fbScanner.sCode;
+		END_IF
+	END_IF
+
+//	For clearing code in var
+	IF (fbRobot.diActualSeqStep<>EN_RobotMessaging.waitingPieceStatus) AND (fbRobot.diActualSeqStep<>EN_RobotMessaging.placing) AND (fbRobot.diActualSeqStep<>EN_RobotMessaging.placeFinished) THEN
+		bPieceIsGood:=FALSE;
+		bPieceIsNG:=FALSE;
+		sPieceSN:='';
+	END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Init" Id="{3eb92e04-2d9d-4282-9a9e-a46986eba4c2}">
+      <Declaration><![CDATA[METHOD Init]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bInit_Finished:=fbTrayFeeder.bInit_Finished AND fbRobot.bInit_Finished AND fbScanner.bConnected;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="IO" Id="{a10ed0ea-8d37-4f0b-8a5e-d5a742ef1fe1}">
+      <Declaration><![CDATA[{warning 'Add method implementation '}
+METHOD IO
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Manual" Id="{debd2cdf-578d-49db-a8a4-16eef76ad1f0}">
+      <Declaration><![CDATA[{warning 'Add method implementation '}
+METHOD Manual
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Pause" Id="{fb762fad-3231-4746-87c0-9e76b13c6cc5}">
+      <Declaration><![CDATA[{warning 'Add method implementation '}
+METHOD Pause
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Stop" Id="{a8461e05-338d-4ab9-81b7-04b947433c2b}">
+      <Declaration><![CDATA[{warning 'Add method implementation '}
+METHOD Stop
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_ControllerSupply">
+      <LineId Id="3" Count="37" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ControllerSupply.Alarm">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ControllerSupply.Auto">
+      <LineId Id="3" Count="12" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ControllerSupply.Init">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ControllerSupply.IO">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ControllerSupply.Manual">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ControllerSupply.Pause">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ControllerSupply.Stop">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

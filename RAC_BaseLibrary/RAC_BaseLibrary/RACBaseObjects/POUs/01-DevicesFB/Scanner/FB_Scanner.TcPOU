@@ -1,0 +1,165 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_Scanner" Id="{f4d4b807-5237-4e11-9227-7efd7367db22}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Scanner EXTENDS FB_Device
+
+//Alarms:
+//	 1:= No conectado
+//   2:= Deshabilitado
+//   3:= Error de lectura
+//   4:= Error en cambio de programa
+//   5:= Timeout
+
+VAR_INPUT
+	bIn_Trigger						: BOOL;
+	bIn_Reset						: BOOL;
+	bDisable						: BOOL;
+	iTotalRetries					: USINT		:= 2;
+	
+	//Time before alarm set
+	Timeout							: TIME;
+END_VAR
+
+VAR_OUTPUT
+	//String code
+		sCode						: STRING;
+		bCompleted					: BOOL;
+		bConnected					: BOOL;
+END_VAR
+VAR
+	tmrAlarm						: TON;
+	r_trig							: R_TRIG;
+	iStep							: USINT	:= 0;
+	
+	//To scanner
+	bOutReadRequest 		AT%Q*	: BOOL;
+	bOutErrorClear 			AT%Q*	: BOOL;
+	bOutReadClear 			AT%Q*	: BOOL;
+	
+	//From scanner
+	bInReadFailure			AT%I*	: BOOL;
+	bInBusy					AT%I*	: BOOL;
+	bInReady				AT%I*	: BOOL;
+	bInReadComplete			AT%I*	: BOOL;
+	iCommStatus 			AT%I*	: UINT;
+		
+		//Check the array lenght (this is 127 array, from keyence sr2000)
+	ResultData				AT%I*	: ARRAY[0..127]OF BYTE;
+	iResultDataSize			AT%I* 	: UINT;
+	
+	iRetryCounter				:USINT;
+	
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//If it's disabled, send the alarm and set on the code
+IF bDisable THEN
+	bCompleted:= TRUE;
+	sCode:= 'Disabled';
+	sAlarm:= 'Disabled';//Deshabilitado
+	RETURN;	
+END_IF
+
+//Update communication status
+bConnected:= iCommStatus = 0;
+
+CASE iStep OF
+	
+	0:		//Wait for trigger
+	
+		IF bIn_Trigger THEN
+			iRetryCounter:= 0;
+			iStep:= iStep+1;	
+		END_IF
+		
+	1:		//Check scanner disabled
+	
+		IF bDisable THEN
+			sAlarm:= 'Disabled';//Scanner disabled
+			sCode:= 'Disabled';
+			iStep:= 9;
+		END_IF
+		
+		iStep:= iStep+1;		
+
+	2:		//Check connection
+	
+		IF bConnected THEN
+			iStep:= iStep+1;
+		ELSE
+			sAlarm:= 'Disconnected';//Not connection
+			iStep:= 1;
+		END_IF
+
+	
+	3:		//Variable reset
+	
+		Reset();	
+		iStep:= iStep+1;
+	
+	4:		//Request to read code
+	
+		bOutReadRequest:= TRUE;
+		iStep:= iStep+1;
+	
+	5:		//Confirm read request
+		
+		IF bInBusy THEN
+			bOutReadRequest:= FALSE;		
+			iStep:= iStep+1;			
+		END_IF
+	
+	6:		//Wait for read completion
+	
+		tmrAlarm(IN:= TRUE, PT:= Timeout);
+		
+		IF bInReadComplete THEN		
+			iStep:= iStep+1;
+		ELSIF tmrAlarm.Q THEN
+			sAlarm:='Code read timeout';//Code read timeout
+			iStep:= 7;
+		END_IF
+	
+	7:		//Check for scan failure
+	
+		IF bInReadFailure THEN
+			IF  iRetryCounter< iTotalRetries THEN
+				iRetryCounter:= iRetryCounter+1;
+				iStep:= 1;
+				RETURN;				
+ 			END_IF  									
+			sAlarm:= 'Read code error';//Error de lectura de codigo
+				
+		END_IF
+		iStep:= iStep+1;
+
+	8:		//Read data
+	
+		//Move the byte data to the string result code
+		MEMMOVE(
+			destAddr	:= ADR(sCode),
+			srcAddr		:= ADR(ResultData),
+			n			:= iResultDataSize);							
+			iStep:= iStep+1;
+	
+	9:		//Wait for trigger remove
+	
+		bCompleted:= TRUE;
+		IF NOT bIn_Trigger THEN
+			iStep:= 0;
+		END_IF
+	
+END_CASE]]></ST>
+    </Implementation>
+    <Action Name="Reset" Id="{351794af-eac7-4062-a168-8a5b67885c5e}">
+      <Implementation>
+        <ST><![CDATA[tmrAlarm(IN:= FALSE);
+sCode := '';  
+sAlarm := '';
+bOutReadRequest := FALSE;
+bInReadComplete := FALSE;
+bOutReadClear := TRUE;
+bCompleted := FALSE;]]></ST>
+      </Implementation>
+    </Action>
+  </POU>
+</TcPlcObject>

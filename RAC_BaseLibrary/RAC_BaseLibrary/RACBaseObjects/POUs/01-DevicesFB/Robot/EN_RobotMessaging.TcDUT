@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="EN_RobotMessaging" Id="{b82cd2ff-aedf-4a46-a332-f9752b39847d}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+{attribute 'to_string'}
+TYPE EN_RobotMessaging :
+(
+	clearedCmd 					:=0,
+	ok							:=1,
+	retry						:=2,
+	skip						:=3,
+	retriesExceeded				:=4,
+	
+	initStart					:=10,
+	waitInitPermissive			:=20,
+	turnMotorsOFF				:=30,
+	resetEStop					:=40,
+	PPToMain					:=50,
+	turnMotorsON				:=60,
+	startTaskExecuion			:=70,
+	waitInitFinihsed			:=80,
+	waitRetrievalPerm			:=210,
+	stopTaskExecution			:=310,
+	initEndMotorsOFF			:=320,
+	initFinished				:=999,
+	
+	autoStarts					,
+	waitingPickPerm				,
+	pickingGood					,
+	pickingNG					,
+	waitingPieceStatus			,
+	waitingPlacePerm			,
+	placing						,
+	placeFinished				,
+	waitingRejectPerm			,
+	rejecting					,
+	rejectFinished				,
+	autoCycleFinished			:=1999,
+	
+	manualRetrieval				,
+	manualHomming				,
+	manualPick					,
+	manualCycPickTeach			,
+	manualPlace					,
+	manualCycPlaceTeach			,
+	manualReject				,
+	manualCycRejectTeach		
+)DINT := clearedCmd;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,127 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_Cylinder" Id="{524879c1-0b69-47d2-94c7-d22e7e78974b}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Cylinder EXTENDS FB_Device
+VAR_INPUT			
+	bExtendRequest					: BOOL;
+	bRetractRequest					: BOOL;	
+	
+	bPermisiveExtend				: BOOL;
+	bPermisiveRetract				: BOOL;			
+	
+//	Time for alarm setting
+	Timeout							: TIME;
+END_VAR
+VAR_OUTPUT
+	bIsExtended						: BOOL;
+	bIsRetracted					: BOOL;
+END_VAR
+VAR
+	bAutoExecutionOK				: BOOL;
+	bManualExecutionOK				: BOOL;
+	bIsExtending					: BOOL;
+	bIsRetracting					: BOOL;
+	bExecuteExtend					: BOOL;
+	bExecuteRetract					: BOOL;
+
+//	Cylinder extend output
+	bValveExtend					AT %Q* : BOOL;
+//	Cylinder retract output
+	bValveRetract 					AT %Q* : BOOL;
+	
+//	Clinder extended sensor
+	bSensorExtended					AT %I* : BOOL;
+//	Clinder retracted sensor
+	bSensorRetracted				AT %I* : BOOL;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//	Conditions to move cylinder
+	bAutoExecutionOK		:= (diStationState=EN_StationStatus.running) AND (NOT bStopExecution);
+	bManualExecutionOK		:= (diStationState=EN_StationStatus.maintenance) AND (NOT bStopExecution);
+	bExecuteExtend			:= ((bAutoExecutionOK OR bManualExecutionOK) AND bPermisiveExtend AND bExtendRequest AND (NOT bRetractRequest));
+	bExecuteRetract			:= ((bAutoExecutionOK OR bManualExecutionOK) AND bPermisiveRetract AND (NOT bExtendRequest) AND bRetractRequest);
+
+// If conditions for moving then move cylinder
+	IF bExecuteExtend OR bExecuteRetract THEN 
+		//	Extend cylinder valve
+			bValveExtend	:= bExecuteExtend;
+		//	Retract cylinder valve
+			bValveRetract	:= bExecuteRetract;
+	END_IF
+
+//	Conditions for considerate is executing and no reaching position
+	bIsExtending			:= bValveExtend AND (NOT bSensorExtended);
+	bIsRetracting			:= bValveRetract AND (NOT bSensorRetracted);
+//	Assign value to function block status
+	bIsExtended				:= bSensorExtended AND NOT bSensorRetracted;
+	bIsRetracted			:= bSensorRetracted AND NOT bSensorExtended;
+
+//	For setting alarms
+	Alarm();]]></ST>
+    </Implementation>
+    <Method Name="Alarm" Id="{32bc5784-77a4-4133-b51a-fbd12928e027}">
+      <Declaration><![CDATA[METHOD Alarm
+VAR 
+	bAlm_ExtendReqWithoutPerm		: BOOL;
+	bAlm_RetractReqWithoutPerm		: BOOL;
+	bAlm_BohSensors					: BOOL;
+	bAlm_BothActions				: BOOL;
+	bAlm_ReqActionNoValidOper		: BOOL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//	Timer for set action executing timeout alarm
+	ton_StepTimeout(		IN:=bIsExtending OR bIsRetracting,
+							PT:=Timeout);
+
+//	Extending request without permissive
+	IF bExtendRequest AND (NOT bPermisiveExtend) THEN
+		bAlm_ExtendReqWithoutPerm		:=TRUE;
+	END_IF
+
+//	Retracting request without permissive
+	IF bRetractRequest AND (NOT bPermisiveRetract) THEN
+		bAlm_RetractReqWithoutPerm		:=TRUE;
+	END_IF
+
+//	Both sensors active
+	IF bSensorExtended AND bSensorRetracted THEN
+		bAlm_BohSensors					:=TRUE;
+	END_IF
+
+//	Both actions requested
+	IF bRetractRequest AND (NOT bPermisiveRetract) THEN
+		bAlm_BothActions				:=TRUE;
+	END_IF
+
+//	Action request with no valid operation mode
+	IF (bExtendRequest OR bRetractRequest) AND (NOT bAutoExecutionOK) AND (NOT bManualExecutionOK) THEN
+		bAlm_ReqActionNoValidOper		:=TRUE;
+	END_IF
+
+//	General alarm reset
+	IF bAlarmReset THEN
+		bAlm_ExtendReqWithoutPerm		:= FALSE;
+		bAlm_RetractReqWithoutPerm		:= FALSE;
+		bAlm_BohSensors					:= FALSE;
+		bAlm_BothActions				:= FALSE;
+		bAlm_ReqActionNoValidOper		:= FALSE;
+	END_IF
+
+//	For extension timeout alarm setting
+	AlarmCodesHandling(sConcatCodes:=sAlarm,sCode:='WCYLISTU01',sIDToAdd:=sDeviceID,bActive:=(bIsExtending AND ton_StepTimeout.Q));
+//	For retraction timeout alarm setting
+	AlarmCodesHandling(sConcatCodes:=sAlarm,sCode:='WCYLISTU02',sIDToAdd:=sDeviceID,bActive:=(bIsRetracting AND ton_StepTimeout.Q));
+//	For extension request without permissive alarm setting
+	AlarmCodesHandling(sConcatCodes:=sAlarm,sCode:='WCYLIGEN01',sIDToAdd:=sDeviceID,bActive:=bAlm_ExtendReqWithoutPerm);
+//	For retraction request without permissive alarm setting
+	AlarmCodesHandling(sConcatCodes:=sAlarm,sCode:='WCYLIGEN02',sIDToAdd:=sDeviceID,bActive:=bAlm_RetractReqWithoutPerm);
+//	For both sensors detected alarm setting
+	AlarmCodesHandling(sConcatCodes:=sAlarm,sCode:='WCYLIDET01',sIDToAdd:=sDeviceID,bActive:=bAlm_BohSensors);
+//	For both actions requested simultaneously alarm setting
+	AlarmCodesHandling(sConcatCodes:=sAlarm,sCode:='ECYLIOMD01',sIDToAdd:=sDeviceID,bActive:=bAlm_BothActions);
+//	For request action in no valid operation mode alarm setting
+	AlarmCodesHandling(sConcatCodes:=sAlarm,sCode:='ECYLIOMD02',sIDToAdd:=sDeviceID,bActive:=bAlm_ReqActionNoValidOper);]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

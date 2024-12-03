@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_Vacuum" Id="{f9531b35-4007-4908-8918-76526d36fc74}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Vacuum EXTENDS FB_Device
+VAR_INPUT
+	bGrip							: BOOL;
+	Timeout							: TIME;
+END_VAR
+VAR_OUTPUT
+	Vacuum_Ok						: BOOL;
+	Blow_Ok							: BOOL;
+END_VAR
+VAR
+	VacuumValve				AT %Q*	: BOOL;
+	BlowValve				AT %Q*	: BOOL;
+	VaccumSensor			AT %I*	: BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//	If execute grip input then grip
+	VacuumValve						:=	bGrip;
+	BlowValve						:=	(NOT bGrip) AND VaccumSensor;
+
+//	Assing valiue to function block status
+	Vacuum_Ok							:= VaccumSensor AND NOT BlowValve;
+	Blow_Ok								:= BlowValve AND NOT VacuumValve;
+
+//	For setting alarms
+	Alarm();]]></ST>
+    </Implementation>
+    <Method Name="Alarm" Id="{8de2fcf2-2e3b-4735-b382-f976ceab4d57}">
+      <Declaration><![CDATA[METHOD Alarm]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//	Timer for set action executing timeout alarm
+	ton_StepTimeout(		IN:=(VacuumValve AND (NOT VaccumSensor)) OR (BlowValve AND VaccumSensor),
+							PT:=Timeout);
+
+//	For no vacc sensor feedback alarm setting
+	AlarmCodesHandling(sConcatCodes:=sAlarm,sCode:='EVACUDET01 ',sIDToAdd:=sDeviceID,bActive:=(VacuumValve AND ton_StepTimeout.Q));
+//	For no release success alarm setting
+	AlarmCodesHandling(sConcatCodes:=sAlarm,sCode:='EVACUDET02 ',sIDToAdd:=sDeviceID,bActive:=(BlowValve AND ton_StepTimeout.Q));]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

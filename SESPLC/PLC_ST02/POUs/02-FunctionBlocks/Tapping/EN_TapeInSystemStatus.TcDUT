@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="EN_TapeInSystemStatus" Id="{026e0f87-f8b7-41ac-bd0e-ccfbc49978ca}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+{attribute 'to_string'}
+TYPE EN_TapeInSystemStatus :
+(
+	tapeOnlyInPickPlate,
+	tapeGrippedInPicker,
+	tapeCutted,
+	tapeOnApplyPlates
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

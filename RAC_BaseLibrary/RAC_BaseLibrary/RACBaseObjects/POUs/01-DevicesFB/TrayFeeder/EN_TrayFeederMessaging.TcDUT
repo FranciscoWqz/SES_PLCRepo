@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="EN_TrayFeederMessaging" Id="{0f8b0073-a2d8-463c-968c-eb611f66abb7}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+{attribute 'to_string'}
+TYPE EN_TrayFeederMessaging :
+(
+	waitInitStart			:=0,
+	initFinished			:=999,
+	
+	autoProcessFinished		:=1999
+)DINT := waitInitStart;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

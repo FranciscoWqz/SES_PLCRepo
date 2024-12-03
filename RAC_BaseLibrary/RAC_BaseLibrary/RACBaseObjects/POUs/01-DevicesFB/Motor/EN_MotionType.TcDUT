@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="EN_MotionType" Id="{024dbda0-50f2-45da-b04e-29a69fc6bc01}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+{attribute 'to_string'}
+TYPE EN_MotionType :
+(
+	idle 			:= 0,
+	stop 			:= 1,
+	home 			:= 2,
+	jogPos 			:= 3,
+	jogNeg 			:= 4,
+	absolute 		:= 5,
+	relative 		:= 6
+);
+END_TYPE]]></Declaration>
+  </DUT>
+</TcPlcObject>

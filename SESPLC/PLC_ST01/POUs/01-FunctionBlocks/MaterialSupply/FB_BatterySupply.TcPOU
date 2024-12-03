@@ -1,0 +1,168 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_BatterySupply" Id="{174d994e-be67-4f6e-9f61-9168120df54b}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_BatterySupply EXTENDS RACBaseObjects.FB_Machine
+VAR_INPUT
+	bSafetyBoxPlace_permissive			: BOOL;
+	
+	bPlace_MaterialRequest				: BOOL;
+END_VAR
+VAR_OUTPUT
+	bSafetyBoxPlace_OutOfZone			: BOOL;
+	
+	sPieceSN							: STRING;
+	sPieceOnGantrySN					: STRING;
+	sPieceOnSliderSN					: STRING;
+	
+	bPlace_Done							: BOOL;
+END_VAR
+VAR
+	fbTrayFeeder						: RACBaseObjects.FB_TrayFeeder;
+	fbRobot								: RACBaseObjects.FB_Robot;
+	fbScanner							: RACBaseObjects.FB_Scanner;
+	
+	// Auto procees is scanning
+	bScann								: BOOL;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[SUPER^.MachineMain();
+//	Tray Feeder instance
+	fbTrayFeeder(						sDeviceID:=	'',
+										bStopExecution:=bStopExecution,
+										bAlarmReset:=bAlarmReset,
+										diStationState:=diStationState,
+										bInit_StartPermissive:=fbRobot.bInit_Finished,
+										bSafetyBoxDeliver_permissive:=fbRobot.bSafetyBoxPick_OutOfZone,
+										bChangeTrayRequest:=fbRobot.bPick_AllMaterialPicked);
+
+//	Robot instance
+	fbRobot(							sDeviceID:=	'',
+										bStopExecution:=bStopExecution,
+										bAlarmReset:=bAlarmReset,
+										diStationState:=diStationState,
+										bInit_StartPermissive:=bInit_StartPermissive,
+										bSafetyBoxPick_Permissive:=fbTrayFeeder.bSafetyBoxDeliver_isSafe,
+										bSafetyBoxPlace_Permissive:=bSafetyBoxPlace_permissive,
+										bSafetyBoxReject_Permissive:=FALSE,
+										bOKMaterialReadyToPick:=fbTrayFeeder.bMaterial_ReadyToPick,
+										bNGMaterialReadyToPick:=FALSE,
+										bPiceIsGood:=TRUE,
+										bPiceIsNG:=FALSE,
+										bPlace_MaterialRequest:=bPlace_MaterialRequest,
+										bReject_MaterialRequest:=FALSE,
+										bSafetyBoxPlace_OutOfZone=>bSafetyBoxPlace_OutOfZone,
+										bPlace_Done=>bPlace_Done);
+
+//	Scanner insance
+	fbScanner(							sDeviceID:=	'',
+										bStopExecution:=bStopExecution,
+										bAlarmReset:=bAlarmReset,
+										bIn_Trigger:=bScann,
+										bDisable:=FALSE,
+										iTotalRetries:=2,
+										Timeout:=t#1s);
+										]]></ST>
+    </Implementation>
+    <Method Name="Alarm" Id="{92f8f847-4bbb-49b0-90c0-ee4d6ac5ad7f}">
+      <Declaration><![CDATA[METHOD Alarm]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[sAlarm:= CONCAT(STR1:=fbTrayFeeder.sAlarm, STR2:=fbRobot.sAlarm);
+sAlarm:= CONCAT(STR1:=sAlarm,STR2:=fbScanner.sAlarm);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Auto" Id="{4f5384bf-b44f-4a01-b54d-42ab93e4da30}">
+      <Declaration><![CDATA[METHOD Auto
+VAR
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//	When slider is not taking piece, reaching delivery position or delivering unit, clear piece on slider code var
+	IF (fbTrayFeeder.diActualSeqStep<>1110) AND (fbTrayFeeder.diActualSeqStep<>1120) AND (fbTrayFeeder.diActualSeqStep<>1130) THEN
+		sPieceSN:='';
+	END_IF
+
+//	When finish reading save the code in a var
+	IF fbTrayFeeder.diActualSeqStep=1110 THEN
+		bScann:=TRUE;
+		IF (fbScanner.bCompleted) AND (sPieceSN<>fbScanner.sCode) THEN
+			sPieceSN:=fbScanner.sCode;
+		END_IF
+	END_IF
+
+//	When gantry takes the battery translate last serial code readed
+	IF (fbTrayFeeder.diActualSeqStep=1130) AND (sPieceOnGantrySN=sPieceSN) THEN
+		sPieceOnGantrySN:=sPieceSN;
+	END_IF
+
+//	When gantry release the battery translate serial code to other var
+	IF (fbTrayFeeder.diActualSeqStep=1150) AND (sPieceOnSliderSN<>sPieceOnGantrySN) THEN
+		sPieceOnSliderSN:=sPieceOnGantrySN;
+	END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Init" Id="{475a2b99-ca25-417d-a341-935d7671e03c}">
+      <Declaration><![CDATA[METHOD Init]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bInit_Finished:=fbTrayFeeder.bInit_Finished AND fbRobot.bInit_Finished AND fbScanner.bConnected;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="IO" Id="{dfc4259a-e026-4b8f-a3b5-16afbaddf784}">
+      <Declaration><![CDATA[{warning 'Add method implementation '}
+METHOD IO
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Manual" Id="{d94dba60-c477-4bbe-804a-c4c2d515ccef}">
+      <Declaration><![CDATA[{warning 'Add method implementation '}
+METHOD Manual
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Pause" Id="{3a21d47f-efff-43d9-afa2-98570106cfcd}">
+      <Declaration><![CDATA[{warning 'Add method implementation '}
+METHOD Pause
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Stop" Id="{c711b130-f538-4384-b6ab-46945978c516}">
+      <Declaration><![CDATA[{warning 'Add method implementation '}
+METHOD Stop
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_BatterySupply">
+      <LineId Id="3" Count="35" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_BatterySupply.Alarm">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_BatterySupply.Auto">
+      <LineId Id="3" Count="20" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_BatterySupply.Init">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_BatterySupply.IO">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_BatterySupply.Manual">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_BatterySupply.Pause">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_BatterySupply.Stop">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

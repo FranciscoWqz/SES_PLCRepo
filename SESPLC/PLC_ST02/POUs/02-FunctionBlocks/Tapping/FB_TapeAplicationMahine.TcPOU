@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_TapeAplicationMahine" Id="{d8f7cd8c-5f38-47b3-8e63-e8bc8ae14835}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_TapeAplicationMahine EXTENDS RACBaseObjects.FB_Machine
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	fbServo_Translational						: RACBaseObjects.FB_Motor;
+	fbTapeApplicator_Left						: FB_TapeApplicator;
+	fbTapeApplicator_Right						: FB_TapeApplicator;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[SUPER^.MachineMain();
+
+//	Both tape applicator systems traslation servo
+	fbServo_Translational(		sDeviceID:='',
+								bStopExecution:=bStopExecution,
+								bAlarmReset:=bAlarmReset,
+								diStationState:=diStationState,
+								bInit_StartPermissive:=(fbTapeApplicator_Left.bAllServosSafePosition AND fbTapeApplicator_Right.bAllServosSafePosition),
+								bMovePermissive:=(fbTapeApplicator_Left.bSafeConditions AND fbTapeApplicator_Right.bSafeConditions),
+								HomeDir:=TC2_MC2.MC_Direction.MC_Negative_Direction);
+
+//	Left tape applicator system
+	fbTapeApplicator_Left(		sDeviceID:='',
+								bStopExecution:=bStopExecution,
+								bAlarmReset:=bAlarmReset,
+								diStationState:=diStationState,
+								bInit_StartPermissive:=bInit_StartPermissive,
+								sSvoLiftID:='',
+								sSvoPickrID:='',
+								sCylScissorsID:='',
+								sCylTapeAppFrontID:='',
+								sCylTapeAppRearID:='',
+								sCylVaccID:='',
+								sCylPickerID:='');
+
+//	Right tape applicator system
+	fbTapeApplicator_Right(		sDeviceID:='',
+								bStopExecution:=bStopExecution,
+								bAlarmReset:=bAlarmReset,
+								diStationState:=diStationState,
+								bInit_StartPermissive:=bInit_StartPermissive,
+								sSvoLiftID:='',
+								sSvoPickrID:='',
+								sCylScissorsID:='',
+								sCylTapeAppFrontID:='',
+								sCylTapeAppRearID:='',
+								sCylVaccID:='',
+								sCylPickerID:='');]]></ST>
+    </Implementation>
+    <Method Name="Alarm" Id="{c28050a4-f7b8-4860-86ad-09c90b754eec}">
+      <Declaration><![CDATA[METHOD Alarm]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[sAlarm:= CONCAT(STR1:=fbServo_Translational.sAlarm, STR2:=fbTapeApplicator_Left.sAlarm);
+sAlarm:= CONCAT(STR1:=sAlarm,STR2:=fbTapeApplicator_Right.sAlarm);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Auto" Id="{ace4c0cf-43b4-4e7c-bdf4-6c529555c1c2}">
+      <Declaration><![CDATA[METHOD Auto
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Init" Id="{b660f720-3040-4b0d-a4d1-1bf142006951}">
+      <Declaration><![CDATA[METHOD Init]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bInit_Finished:= (fbServo_Translational.bInit_Finished AND fbTapeApplicator_Left.bInit_Finished AND fbTapeApplicator_Right.bInit_Finished);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="IO" Id="{d7bf8bf7-d872-466d-b73e-480de9f54789}">
+      <Declaration><![CDATA[METHOD IO]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Manual" Id="{f702c160-367d-4a60-a599-3eb2cdcf20c2}">
+      <Declaration><![CDATA[METHOD Manual
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Pause" Id="{1cf78948-45b9-48b1-9f11-ed7ffdd1be3c}">
+      <Declaration><![CDATA[METHOD Pause
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Stop" Id="{7bea1a0d-0905-4a9d-9944-8df8771b773a}">
+      <Declaration><![CDATA[METHOD Stop
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_TapeAplicationMahine">
+      <LineId Id="3" Count="36" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TapeAplicationMahine.Alarm">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TapeAplicationMahine.Auto">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TapeAplicationMahine.Init">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TapeAplicationMahine.IO">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TapeAplicationMahine.Manual">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TapeAplicationMahine.Pause">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TapeAplicationMahine.Stop">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

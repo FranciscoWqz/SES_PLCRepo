@@ -1,0 +1,604 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_Robot" Id="{e90e2b70-bb54-44b3-905f-f00f421c3d5e}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Robot EXTENDS FB_Machine
+VAR_INPUT
+	// Robot move in pick zone permissive
+	bSafetyBoxPick_Permissive			: BOOL;
+	// Robot move in place zone permissive
+	bSafetyBoxPlace_Permissive			: BOOL;
+	// Robot move in pick zone permissive
+	bSafetyBoxReject_Permissive			: BOOL;
+	
+	// Good material is on work position
+	bOKMaterialReadyToPick				: BOOL;
+	// NG material is on work position
+	bNGMaterialReadyToPick				: BOOL;
+	
+	// Piece is good for process
+	bPiceIsGood							: BOOL;
+	// Piece is no good for process
+	bPiceIsNG							: BOOL;
+	
+	// Material requested
+	bPlace_MaterialRequest				: BOOL;
+	
+	// Reject material request
+	bReject_MaterialRequest				: BOOL;
+END_VAR
+VAR_OUTPUT	
+	// Robot is out of pick safety zone
+	bSafetyBoxPick_OutOfZone 			: BOOL;
+	// Robot is out of place safety zone
+	bSafetyBoxPlace_OutOfZone 			: BOOL;
+	// Robot is out of reject safety zone
+	bSafetyBoxReject_OutOfZone 			: BOOL;
+	
+	// Ask for replace material tray
+	bPick_AllMaterialPicked 			: BOOL;
+	
+	// Material placed
+	bPlace_Done							: BOOL;
+	
+	// Material rejected
+	bReject_Done						: BOOL;
+END_VAR
+VAR
+	// Structure for IO Mapping
+	RobotIO								: ST_RobotIO;
+	
+	// Input: HMI Permissive to init with manually jogged robot
+	bRetrievalPermissive				: BOOL;
+	// Input: HMI Permissive to retry pick when retries exceeded
+	bPickRetryPermissive				: BOOL;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[SUPER^.MachineMain();]]></ST>
+    </Implementation>
+    <Method Name="Alarm" Id="{af16f43e-1a1e-4bcb-8ce3-c5736d0c63ca}">
+      <Declaration><![CDATA[METHOD Alarm
+VAR
+	// R Trigger VAr
+	rTrigger							: R_TRIG;
+	// Step in wich timeout occur
+	diTimeoutStep						: DINT;
+	// Actual Timed Out Sequence Step Code
+	sSequenceCode						: STRING;
+	
+	// Async Process Concatenated Alarm Codes
+	sAsyncAlarmCodes					: STRING;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//	Compare and asign time value to timeout
+	IF tmStepTimeout<>ton_StepTimeout.PT THEN
+		ton_StepTimeout.PT					:=	tmStepTimeout;
+	END_IF
+
+//	General timer step timeout
+	ton_StepTimeout(IN:=FALSE,PT:=T#1S);
+
+// For setting acual timed out step alarm code
+	rTrigger(CLK:=ton_StepTimeout.Q);
+	IF rTrigger.Q THEN
+		diTimeoutStep := diActualSeqStep;
+		CASE diTimeoutStep OF
+		// Init process timeouts
+			EN_RobotMessaging.initStart: 			sSequenceCode := 'EROBOPRO02';
+			EN_RobotMessaging.turnMotorsOFF: 		sSequenceCode := 'WROBOPRO04';
+			EN_RobotMessaging.resetEStop:			sSequenceCode := 'SROBOSEC01';
+			EN_RobotMessaging.PPToMain:				sSequenceCode := 'EROBOPRO04';
+			EN_RobotMessaging.turnMotorsON:			sSequenceCode := 'WROBOPRO03';
+			EN_RobotMessaging.startTaskExecuion:	sSequenceCode := 'EROBOPRO03';
+			EN_RobotMessaging.waitInitFinihsed:		sSequenceCode := 'WROBOPRO02';
+			EN_RobotMessaging.waitRetrievalPerm:	sSequenceCode := 'EROBOPOS01';
+			EN_RobotMessaging.stopTaskExecution:	sSequenceCode := 'EROBOPRO02';
+			
+		// Robot Auto
+			EN_RobotMessaging.autoStarts:			sSequenceCode := 'IROBOTIM01';
+			EN_RobotMessaging.waitingPickPerm:		sSequenceCode := 'IROBOTIM02';
+			EN_RobotMessaging.pickingGood,
+			EN_RobotMessaging.pickingNG:			sSequenceCode := 'IROBOTIM03';
+			EN_RobotMessaging.waitingPieceStatus:	sSequenceCode := 'IROBOTIM04';
+			EN_RobotMessaging.waitingPlacePerm:		sSequenceCode := 'IROBOTIM05';
+			EN_RobotMessaging.placing:				sSequenceCode := 'IROBOTIM06';
+			EN_RobotMessaging.placeFinished:		sSequenceCode := 'IROBOTIM07';
+			EN_RobotMessaging.waitingRejectPerm:	sSequenceCode := 'IROBOTIM08';
+			EN_RobotMessaging.rejecting:			sSequenceCode := 'IROBOTIM09';
+			EN_RobotMessaging.rejectFinished:		sSequenceCode := 'IROBOTIM10';
+		END_CASE
+		sSequenceCode:= CONCAT(STR1:=sSequenceCode,STR2:=sDeviceID);
+		sSequenceCode:= CONCAT(STR1:=sSequenceCode,STR2:=',');
+	END_IF
+
+// For deleting last sequence alarm code automatically
+	IF (diActualSeqStep<>diTimeoutStep AND diTimeoutStep<>EN_RobotMessaging.clearedCmd)THEN
+		sSequenceCode:= '';
+		diTimeoutStep:= EN_RobotMessaging.clearedCmd;
+	END_IF
+
+// For setting no lineal processes alarms
+	// Robot is not in auto mode
+	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='WROBOPRO01',sIDToAdd:=sDeviceID,bActive:=(NOT RobotIO.bin_AutoON));
+	// Robot connection failed
+	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='EROBOCON04',sIDToAdd:=sDeviceID,bActive:=(RobotIO.uiin_ConnectionStatus=0));
+	// Robot Battery low
+	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='WROBOALA01',sIDToAdd:=sDeviceID,bActive:=(NOT RobotIO.bin_SMBBatery));
+	// Robot EStop pressed
+	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='SROBOSEC01',sIDToAdd:=sDeviceID,bActive:=(NOT RobotIO.bin_EStop));
+	// Robot Stucked in pick safe box
+	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='WROBOSTU01',sIDToAdd:=sDeviceID,bActive:=((NOT RobotIO.bin_SafetyBoxPick_OutOfZone) AND (RobotIO.bout_SafetyBoxPick_Permissive)));
+	// Robot Stucked in place safe box
+	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='WROBOSTU01',sIDToAdd:=sDeviceID,bActive:=((NOT RobotIO.bin_SafetyBoxPlace_OutOfZone) AND (RobotIO.bout_SafetyBoxPlace_Permissive)));
+	// Robot Stucked in reject safe box
+	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='WROBOSTU01',sIDToAdd:=sDeviceID,bActive:=((NOT RobotIO.bin_SafetyBoxReject_OutOfZone) AND (RobotIO.bout_SafetyBoxReject_Permissive)));
+	// Cylinder doesn't reach start of stroke
+	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='WCYLISTU0201',sIDToAdd:=sDeviceID,bActive:=(RobotIO.bin_almRetCyl01));
+	// Cylinder doesn't reach end of stroke
+	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='WCYLISTU0101',sIDToAdd:=sDeviceID,bActive:=(RobotIO.bin_almExtCyl01));
+	// Cylinder both sensors detected
+	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='WCYLIDET0101',sIDToAdd:=sDeviceID,bActive:=(RobotIO.bin_almBothSnsrCyl01));
+	// Cylinder doesn't reach start of stroke
+	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='WCYLISTU0202',sIDToAdd:=sDeviceID,bActive:=(RobotIO.bin_almRetCyl02));
+	// Cylinder doesn't reach end of stroke
+	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='WCYLISTU0102',sIDToAdd:=sDeviceID,bActive:=(RobotIO.bin_almExtCyl02));
+	// Cylinder both sensors detected
+	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='WCYLIDET0102',sIDToAdd:=sDeviceID,bActive:=(RobotIO.bin_almBothSnsrCyl02));
+	// Cylinder doesn't reach start of stroke
+	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='WCYLISTU0203',sIDToAdd:=sDeviceID,bActive:=(RobotIO.bin_almRetCyl03));
+	// Cylinder doesn't reach end of stroke
+	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='WCYLISTU0103',sIDToAdd:=sDeviceID,bActive:=(RobotIO.bin_almExtCyl03));
+	// Cylinder both sensors detected
+	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='WCYLIDET0103',sIDToAdd:=sDeviceID,bActive:=(RobotIO.bin_almBothSnsrCyl03));
+
+// Concat all alarm codes
+	sAlarm:= CONCAT(STR1:=sSequenceCode,STR2:=sAsyncAlarmCodes);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Auto" Id="{44520924-c5fa-4245-96b5-70f8482a588f}">
+      <Declaration><![CDATA[METHOD Auto]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//	Keep sequencer in range
+	IF (diActualSeqStep<0) OR  (diActualSeqStep>999) THEN 
+		diActualSeqStep					:=	0;
+	END_IF
+
+CASE diActualSeqStep OF
+	EN_RobotMessaging.autoStarts:			//	Motors ON and Start Auto
+		ton_StepTimeout.IN					:=	RobotIO.bout_MotorsON OR RobotIO.bout_Start;
+		IF tmStepTimeout<>T#1S THEN
+			tmStepTimeout					:=	T#1S;
+		END_IF
+		
+		RobotIO.bout_MotorsON				:=	RobotIO.bin_MotorsOFF AND (NOT RobotIO.bin_MotorsON);
+		RobotIO.bout_Start					:=	(NOT RobotIO.bin_MainTaskExecuting) AND RobotIO.bin_MotorsON;
+		
+		IF RobotIO.bin_MotorsON AND (NOT RobotIO.bin_MotorsOFF) AND RobotIO.bin_MainTaskExecuting
+			AND ((RobotIO.diin_Sequencer=EN_RobotMessaging.waitingPickPerm) OR (RobotIO.diin_Sequencer=EN_RobotMessaging.waitingPieceStatus)
+			OR (RobotIO.diin_Sequencer=EN_RobotMessaging.waitingPlacePerm) OR (RobotIO.diin_Sequencer=EN_RobotMessaging.waitingRejectPerm)) THEN 
+			ton_StepTimeout.IN				:=	FALSE;
+			RobotIO.diout_SequenceCmd		:=	EN_RobotMessaging.clearedCmd;
+			diActualSeqStep					:=	RobotIO.diin_Sequencer;
+		END_IF
+		
+	EN_RobotMessaging.waitingPickPerm:		//	Robot wating for picking permiissve
+		IF NOT ton_StepTimeout.Q THEN 
+			ton_StepTimeout.IN				:=	TRUE;
+		END_IF
+		IF tmStepTimeout<>T#1S THEN
+			tmStepTimeout					:=	T#1S;
+		END_IF
+		
+		IF bOKMaterialReadyToPick AND (NOT bNGMaterialReadyToPick) THEN
+			RobotIO.diout_SequenceCmd		:=	EN_RobotMessaging.pickingGood;
+		ELSIF (NOT bOKMaterialReadyToPick) AND bNGMaterialReadyToPick THEN
+			RobotIO.diout_SequenceCmd		:=	EN_RobotMessaging.pickingNG;
+		END_IF
+		
+		IF (RobotIO.diin_Sequencer=RobotIO.diout_SequenceCmd) AND ((RobotIO.diout_SequenceCmd=EN_RobotMessaging.pickingGood) OR (RobotIO.diout_SequenceCmd=EN_RobotMessaging.pickingNG)) THEN 
+			ton_StepTimeout.IN				:=	FALSE;
+			RobotIO.diout_SequenceCmd		:=	EN_RobotMessaging.clearedCmd;
+			diActualSeqStep					:=	RobotIO.diin_Sequencer;
+		END_IF
+		
+	EN_RobotMessaging.pickingGood,
+	EN_RobotMessaging.pickingNG:			//	Robot picking
+		IF NOT ton_StepTimeout.Q THEN 
+			ton_StepTimeout.IN				:=	TRUE;
+		END_IF
+		IF tmStepTimeout<>T#2S THEN
+			tmStepTimeout					:=	T#2S;
+		END_IF
+		
+		IF (RobotIO.diin_Sequencer=EN_RobotMessaging.retriesExceeded) AND bPickRetryPermissive THEN 
+			RobotIO.diout_SequenceCmd		:=	en_RobotMessaging.retry;
+		END_IF
+		
+		IF (RobotIO.diin_Sequencer=EN_RobotMessaging.waitingPieceStatus) THEN 
+			ton_StepTimeout.IN				:=	FALSE;
+			RobotIO.diout_SequenceCmd		:=	en_RobotMessaging.clearedCmd;
+			diActualSeqStep					:=	RobotIO.diin_Sequencer;
+		END_IF
+		
+	EN_RobotMessaging.waitingPieceStatus:	//	Waiting piece on robot status
+		IF NOT ton_StepTimeout.Q THEN 
+			ton_StepTimeout.IN				:=	TRUE;
+		END_IF
+		IF tmStepTimeout<>T#1S THEN
+			tmStepTimeout					:=	T#1S;
+		END_IF
+		
+		IF bPiceIsGood AND (NOT bPiceIsNG) THEN 
+			RobotIO.diout_SequenceCmd		:=	en_RobotMessaging.waitingPlacePerm;
+		ELSIF (NOT bPiceIsGood) AND bPiceIsNG THEN 
+			RobotIO.diout_SequenceCmd		:=	en_RobotMessaging.waitingRejectPerm;
+		END_IF
+		
+		IF (RobotIO.diin_Sequencer=EN_RobotMessaging.waitingPlacePerm) OR (RobotIO.diin_Sequencer=EN_RobotMessaging.waitingRejectPerm) THEN 
+			ton_StepTimeout.IN				:=	FALSE;
+			RobotIO.diout_SequenceCmd		:=	en_RobotMessaging.clearedCmd;
+			diActualSeqStep					:=	RobotIO.diin_Sequencer;
+		END_IF
+		
+	EN_RobotMessaging.waitingPlacePerm:		//	Wait Place Material Request
+		IF NOT ton_StepTimeout.Q THEN 
+			ton_StepTimeout.IN				:=	TRUE;
+		END_IF
+		IF tmStepTimeout<>T#2S THEN
+			tmStepTimeout					:=	T#2S;
+		END_IF
+		
+		IF bPlace_MaterialRequest THEN
+			RobotIO.diout_SequenceCmd		:=	EN_RobotMessaging.placing;
+		END_IF
+		
+		IF (RobotIO.diin_Sequencer=EN_RobotMessaging.placing) THEN 
+			ton_StepTimeout.IN				:=	FALSE;
+			RobotIO.diout_SequenceCmd		:=	en_RobotMessaging.clearedCmd;
+			diActualSeqStep					:=	RobotIO.diin_Sequencer;
+		END_IF
+		
+	EN_RobotMessaging.placing:				//	Placing
+		IF NOT ton_StepTimeout.Q THEN 
+			ton_StepTimeout.IN				:=	TRUE;
+		END_IF
+		IF tmStepTimeout<>T#2S THEN
+			tmStepTimeout					:=	T#2S;
+		END_IF
+		
+		IF (RobotIO.diin_Sequencer=EN_RobotMessaging.placeFinished) THEN 
+			ton_StepTimeout.IN				:=	FALSE;
+			RobotIO.diout_SequenceCmd		:=	en_RobotMessaging.clearedCmd;
+			diActualSeqStep					:=	RobotIO.diin_Sequencer;
+		END_IF
+		
+	EN_RobotMessaging.placeFinished:		//	Placing finished informing
+		IF NOT ton_StepTimeout.Q THEN 
+			ton_StepTimeout.IN				:=	TRUE;
+		END_IF
+		IF tmStepTimeout<>T#1S THEN
+			tmStepTimeout					:=	T#1S;
+		END_IF
+		
+		bPlace_Done							:=	TRUE;
+		
+		IF (NOT bPlace_MaterialRequest) THEN 
+			RobotIO.diout_SequenceCmd		:=	EN_RobotMessaging.placeFinished;
+		END_IF
+		
+		
+		IF (RobotIO.diin_Sequencer<>EN_RobotMessaging.placeFinished) THEN 
+			ton_StepTimeout.IN				:=	FALSE;
+			RobotIO.diout_SequenceCmd		:=	en_RobotMessaging.clearedCmd;
+			diActualSeqStep					:=	EN_RobotMessaging.autoCycleFinished;
+		END_IF
+		
+	EN_RobotMessaging.waitingRejectPerm:	//	Wait reject material request
+		IF NOT ton_StepTimeout.Q THEN 
+			ton_StepTimeout.IN				:=	TRUE;
+		END_IF
+		IF tmStepTimeout<>T#2S THEN
+			tmStepTimeout					:=	T#2S;
+		END_IF
+		
+		IF bReject_MaterialRequest THEN
+			RobotIO.diout_SequenceCmd		:=	EN_RobotMessaging.rejecting;
+		END_IF
+		
+		IF (RobotIO.diin_Sequencer=EN_RobotMessaging.rejecting) THEN 
+			ton_StepTimeout.IN				:=	FALSE;
+			RobotIO.diout_SequenceCmd		:=	en_RobotMessaging.clearedCmd;
+			diActualSeqStep					:=	RobotIO.diin_Sequencer;
+		END_IF
+		
+	EN_RobotMessaging.rejecting:			//	Rejecting
+		IF NOT ton_StepTimeout.Q THEN 
+			ton_StepTimeout.IN				:=	TRUE;
+		END_IF
+		IF tmStepTimeout<>T#2S THEN
+			tmStepTimeout					:=	T#2S;
+		END_IF
+		
+		IF (RobotIO.diin_Sequencer=EN_RobotMessaging.rejectFinished) THEN 
+			ton_StepTimeout.IN						:=	FALSE;
+			RobotIO.diout_SequenceCmd		:=	en_RobotMessaging.clearedCmd;
+			diActualSeqStep					:=	RobotIO.diin_Sequencer;
+		END_IF
+		
+	EN_RobotMessaging.rejectFinished:		//	Rejecting finished informing
+		IF NOT ton_StepTimeout.Q THEN 
+			ton_StepTimeout.IN				:=	TRUE;
+		END_IF
+		IF tmStepTimeout<>T#1S THEN
+			tmStepTimeout					:=	T#1S;
+		END_IF
+		
+		bReject_Done						:=	TRUE;
+		
+		IF (NOT bReject_MaterialRequest) THEN 
+			RobotIO.diout_SequenceCmd		:=	EN_RobotMessaging.rejectFinished;
+		END_IF
+		
+		
+		IF (RobotIO.diin_Sequencer<>EN_RobotMessaging.rejectFinished) THEN 
+			ton_StepTimeout.IN				:=	FALSE;
+			RobotIO.diout_SequenceCmd		:=	en_RobotMessaging.clearedCmd;
+			diActualSeqStep					:=	EN_RobotMessaging.autoCycleFinished;
+		END_IF
+		
+	EN_RobotMessaging.autoCycleFinished:	//	Re start auto sequencer
+		diActualSeqStep						:=	EN_RobotMessaging.autoStarts;
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Init" Id="{8cc53d64-9a91-4f8a-90a3-48d0ecd0d381}">
+      <Declaration><![CDATA[METHOD Init]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//	Keep sequencer in range
+	IF (diActualSeqStep<0) OR  (diActualSeqStep>999) THEN 
+		diActualSeqStep						:=	0;
+	END_IF
+
+CASE diActualSeqStep OF
+	EN_RobotMessaging.initStart:			//	Wait for init start  perrmissive
+		RobotIO.diout_SequenceCmd			:=	EN_RobotMessaging.clearedCmd;
+		bInit_Finished						:=	FALSE;
+		
+		IF bInit_StartPermissive THEN
+			InitStep(bCondition:=(NOT RobotIO.bin_MainTaskExecuting),
+					tmTmrTimeout:=T#1S,
+					NextStep:=EN_RobotMessaging.turnMotorsOFF,
+					bOutput=>RobotIO.bout_Stop);
+		ELSE
+			ton_StepTimeout.IN				:= FALSE;
+		END_IF
+		
+	EN_RobotMessaging.turnMotorsOFF:		//	Turn OFF Motors
+		InitStep(bCondition:=(NOT RobotIO.bin_MotorsON) AND RobotIO.bin_MotorsOFF,
+					tmTmrTimeout:=T#1S,
+					NextStep:=EN_RobotMessaging.resetEStop,
+					bOutput=>RobotIO.bout_MotorsOFF);
+		
+	EN_RobotMessaging.resetEStop:			//	Reset E Stop
+		InitStep(bCondition:=RobotIO.bin_EStop,
+					tmTmrTimeout:=T#1S,
+					NextStep:=EN_RobotMessaging.PPToMain,
+					bOutput=>RobotIO.bout_ResetEStop);
+		
+	EN_RobotMessaging.PPToMain:				//	PP to Main
+		InitStep(bCondition:=RobotIO.bin_PPMoved,
+					tmTmrTimeout:=T#1S,
+					NextStep:=EN_RobotMessaging.turnMotorsON,
+					bOutput=>RobotIO.bout_PPToMain);
+		
+	EN_RobotMessaging.turnMotorsON:			//	Motors ON
+		InitStep(bCondition:=RobotIO.bin_MotorsON AND (NOT RobotIO.bin_MotorsOFF),
+					tmTmrTimeout:=T#1S,
+					NextStep:=EN_RobotMessaging.startTaskExecuion,
+					bOutput=>RobotIO.bout_MotorsON);
+		
+	EN_RobotMessaging.startTaskExecuion:	//	Start Main Task
+		InitStep(bCondition:=RobotIO.bin_MainTaskExecuting,
+					tmTmrTimeout:=T#1S,
+					NextStep:=EN_RobotMessaging.waitInitFinihsed,
+					bOutput=>RobotIO.bout_Start);
+		
+	EN_RobotMessaging.waitInitFinihsed:		//	Wait init finished or ask for permissive to execute retrieval because of robot manually jogged
+		InitStep(bCondition:=(RobotIO.diin_Sequencer=EN_RobotMessaging.initFinished) OR (RobotIO.diin_Sequencer=EN_RobotMessaging.waitRetrievalPerm),
+					tmTmrTimeout:=T#1S,
+					NextStep:=RobotIO.diin_Sequencer);
+		
+	EN_RobotMessaging.waitRetrievalPerm:	//	Wait retrieval permissive from HMI and Handle Hand Shake with robot
+		tmStepTimeout						:=	T#5S;
+		ton_StepTimeout.IN					:=	TRUE;
+		
+		IF (RobotIO.diin_Sequencer=EN_RobotMessaging.waitRetrievalPerm) AND bRetrievalPermissive THEN
+			RobotIO.diout_SequenceCmd		:=	EN_RobotMessaging.ok;
+		ELSE
+			RobotIO.diout_SequenceCmd		:=	EN_RobotMessaging.clearedCmd;
+			diActualSeqStep					:=	EN_RobotMessaging.waitInitFinihsed;
+		END_IF
+		
+	EN_RobotMessaging.stopTaskExecution:	//	Stop program execution and turn off motors
+		InitStep(bCondition:=NOT RobotIO.bin_MainTaskExecuting,
+					tmTmrTimeout:=T#1S,
+					NextStep:=EN_RobotMessaging.initEndMotorsOFF,
+					bOutput=>RobotIO.bout_Stop);
+		
+	EN_RobotMessaging.initEndMotorsOFF:		// Turn Motors OFF
+		InitStep(bCondition:=NOT RobotIO.bin_MotorsON AND RobotIO.bin_MotorsOFF,
+					tmTmrTimeout:=T#1S,
+					NextStep:=EN_RobotMessaging.initFinished,
+					bOutput=>RobotIO.bout_MotorsOFF);
+		
+	EN_RobotMessaging.initFinished:			//	Init Finished
+		bInit_Finished						:=	TRUE;
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="InitStep" Id="{3dfe4e7f-b7a4-431c-9eb5-74a7c60a577a}">
+      <Declaration><![CDATA[METHOD InitStep
+VAR_INPUT
+	bCondition						: BOOL;
+	tmTmrTimeout					: TIME;
+	NextStep						: DINT;;
+END_VAR
+VAR_OUTPUT
+	bOutput							: BOOL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bOutput								:=	(NOT bCondition) AND (NOT RobotIO.bin_SystemInputBusy) AND (NOT ton_StepTimeout.Q);
+
+tmStepTimeout						:=	tmTmrTimeout;
+ton_StepTimeout.IN					:=	bOutput OR RobotIO.bin_SystemInputBusy;
+
+IF bCondition THEN
+	RobotIO.diout_SequenceCmd		:=	EN_RobotMessaging.clearedCmd;
+	diActualSeqStep					:=	NextStep;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="IO" Id="{5cc9a6f7-adec-4175-abc8-2ccef7e71be9}">
+      <Declaration><![CDATA[METHOD IO
+VAR
+	pDint									: POINTER TO DINT;
+	pReal									: POINTER TO REAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//	FB Direct Inputs
+	RobotIO.bout_SafetyBoxPick_Permissive 	:= bSafetyBoxPick_Permissive;
+	RobotIO.bout_SafetyBoxPlace_Permissive 	:= bSafetyBoxPlace_Permissive;
+	RobotIO.bout_SafetyBoxReject_Permissive := bSafetyBoxReject_Permissive;
+	
+//	Processing protocol raw INPUT data : BITS
+	RobotIO.bin_EStop 						:= RobotIO.eipInputs.byteArray[0].0;
+	RobotIO.bin_PPMoved 					:= RobotIO.eipInputs.byteArray[0].1;
+	RobotIO.bin_MotorsOFF 					:= RobotIO.eipInputs.byteArray[0].2;
+	RobotIO.bin_MotorsON					:= RobotIO.eipInputs.byteArray[0].3;
+	RobotIO.bin_SystemInputBusy				:= RobotIO.eipInputs.byteArray[0].4;
+	RobotIO.bin_RunchainOK 					:= RobotIO.eipInputs.byteArray[0].5;
+	RobotIO.bin_AutoON 						:= RobotIO.eipInputs.byteArray[0].6;
+	RobotIO.bin_MainTaskExecuting 			:= RobotIO.eipInputs.byteArray[0].7;
+	RobotIO.bin_SMBBatery 					:= RobotIO.eipInputs.byteArray[1].0;
+	RobotIO.bin_RobotNotMoving				:= RobotIO.eipInputs.byteArray[1].1;
+	
+	RobotIO.bin_SafetyBoxPick_OutOfZone 	:= RobotIO.eipInputs.byteArray[1].2;
+	RobotIO.bin_SafetyBoxPlace_OutOfZone 	:= RobotIO.eipInputs.byteArray[1].3;
+	RobotIO.bin_SafetyBoxReject_OutOfZone 	:= RobotIO.eipInputs.byteArray[1].4;
+	RobotIO.bin_Pick_AllMaterialPicked		:= RobotIO.eipInputs.byteArray[1].5;
+	
+	RobotIO.bin_almRetCyl01 				:= RobotIO.eipInputs.byteArray[1].6;
+	RobotIO.bin_almExtCyl01					:= RobotIO.eipInputs.byteArray[1].7;
+	RobotIO.bin_almBothSnsrCyl01			:= RobotIO.eipInputs.byteArray[2].0;
+	RobotIO.bin_almRetCyl02 				:= RobotIO.eipInputs.byteArray[2].1;
+	RobotIO.bin_almExtCyl02					:= RobotIO.eipInputs.byteArray[2].2;
+	RobotIO.bin_almBothSnsrCyl02			:= RobotIO.eipInputs.byteArray[2].3;
+	RobotIO.bin_almRetCyl03 				:= RobotIO.eipInputs.byteArray[2].4;
+	RobotIO.bin_almExtCyl03					:= RobotIO.eipInputs.byteArray[2].5;
+	RobotIO.bin_almBothSnsrCyl02			:= RobotIO.eipInputs.byteArray[2].6;
+	
+//	Processing protocol raw INPUT data : BYTES
+	pDint 									:= ADR(RobotIO.eipInputs.byteArray[8]);
+	RobotIO.diin_Sequencer					:= pDint^;
+	
+//	Processing protocol raw OUTPUT data : BITS
+	RobotIO.eipOutputs.byteArray[0].0 	:= RobotIO.bout_ResetEStop;
+	RobotIO.eipOutputs.byteArray[0].1 	:= RobotIO.bout_PPToMain;
+	RobotIO.eipOutputs.byteArray[0].2 	:= RobotIO.bout_MotorsOFF;
+	RobotIO.eipOutputs.byteArray[0].3 	:= RobotIO.bout_MotorsON;
+	RobotIO.eipOutputs.byteArray[0].4 	:= RobotIO.bout_Stop;
+	RobotIO.eipOutputs.byteArray[0].5 	:= RobotIO.bout_Start;
+	
+	// In initializaion safety box is bypassed for robot can retrieval
+	IF diActualSeqStep=EN_RobotMessaging.waitInitFinihsed OR diActualSeqStep=EN_RobotMessaging.waitRetrievalPerm THEN
+		RobotIO.eipOutputs.byteArray[0].6 		:= TRUE;
+		RobotIO.eipOutputs.byteArray[0].7 		:= TRUE;
+		RobotIO.eipOutputs.byteArray[1].0 		:= TRUE;
+	ELSE
+		RobotIO.eipOutputs.byteArray[0].6 		:= RobotIO.bout_SafetyBoxPick_Permissive;
+		RobotIO.eipOutputs.byteArray[0].7 		:= RobotIO.bout_SafetyBoxPlace_Permissive;
+		RobotIO.eipOutputs.byteArray[1].0 		:= RobotIO.bout_SafetyBoxReject_Permissive;
+	END_IF
+	
+// Processing protocol raw OUTPUT data : BYTES
+	pDint 									:= ADR(RobotIO.eipOutputs.byteArray[8]);
+	pdint^									:= RobotIO.diout_SequenceCmd;
+	pReal 									:= ADR(RobotIO.eipOutputs.byteArray[12]);
+	pReal^									:= RobotIO.rout_XCompensation;
+	pReal 									:= ADR(RobotIO.eipOutputs.byteArray[16]);
+	pReal^									:= RobotIO.rout_ZCompensation;
+	
+//	FB Direct Outputs
+	bSafetyBoxPick_OutOfZone 				:= RobotIO.bin_SafetyBoxPick_OutOfZone;
+	bSafetyBoxPlace_OutOfZone 				:= RobotIO.bin_SafetyBoxPlace_OutOfZone;
+	bSafetyBoxReject_OutOfZone				:= RobotIO.bin_SafetyBoxReject_OutOfZone;
+	bPick_AllMaterialPicked 				:= RobotIO.bin_Pick_AllMaterialPicked;
+	]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Manual" Id="{7577e3b1-977f-4dbe-b643-5b6e02b61fae}">
+      <Declaration><![CDATA[METHOD Manual
+VAR
+	manualCommand				:	EN_RobotMessaging;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF (RobotIO.diin_Sequencer=EN_RobotMessaging.clearedCmd) THEN 
+	RobotIO.diout_SequenceCmd			:=	manualCommand;
+ELSE
+	RobotIO.diout_SequenceCmd			:=	EN_RobotMessaging.clearedCmd;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Pause" Id="{f2ee94f7-9003-4711-8b38-257f21399d53}">
+      <Declaration><![CDATA[METHOD Pause]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[RobotIO.bout_Stop						:=	RobotIO.bin_MainTaskExecuting AND (NOT ton_StepTimeout.Q);
+RobotIO.bout_MotorsOFF					:=	NOT RobotIO.bin_MainTaskExecuting AND RobotIO.bin_MotorsON;
+
+ton_StepTimeout.IN						:=	RobotIO.bout_Stop;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Stop" Id="{d284f9e9-d4dd-4401-a943-bcdc01dee2c5}">
+      <Declaration><![CDATA[METHOD Stop]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[Pause();
+RobotIO.bout_PPToMain				:=	NOT RobotIO.bin_PPMoved;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_Robot">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Robot.Alarm">
+      <LineId Id="3" Count="81" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Robot.Auto">
+      <LineId Id="3" Count="189" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Robot.Init">
+      <LineId Id="3" Count="78" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Robot.InitStep">
+      <LineId Id="3" Count="7" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Robot.IO">
+      <LineId Id="3" Count="67" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Robot.Manual">
+      <LineId Id="3" Count="4" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Robot.Pause">
+      <LineId Id="3" Count="2" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Robot.Stop">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

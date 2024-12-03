@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_Machine" Id="{2442273f-2138-4437-8f7d-62c18138966f}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK ABSTRACT FB_Machine EXTENDS FB_Device
+VAR_INPUT
+	// Init start permissive
+	bInit_StartPermissive				: BOOL;
+END_VAR
+VAR_OUTPUT
+	// Init finished
+	bInit_Finished						: BOOL;
+END_VAR
+VAR 
+	// Sequencer
+	diActualSeqStep						: DINT;
+	
+	// Var to follow sequencer and evaluate timeout	
+	diLastActiveStep					: DINT;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="Alarm" Id="{5c4e9040-85fb-42f3-950e-f18eee3611b5}">
+      <Declaration><![CDATA[METHOD ABSTRACT Alarm
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Auto" Id="{3acf333e-32eb-4207-bce3-a9f4d922cde3}">
+      <Declaration><![CDATA[METHOD ABSTRACT Auto
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Init" Id="{dce19b1f-3049-4562-927d-6a25ff8f918e}">
+      <Declaration><![CDATA[METHOD ABSTRACT Init]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="IO" Id="{74b2782d-f0d8-430d-83cf-35621e5af6cb}">
+      <Declaration><![CDATA[METHOD ABSTRACT IO
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="MachineMain" Id="{a04fffb4-6340-4509-9109-87d2c57f0dd7}">
+      <Declaration><![CDATA[METHOD MachineMain]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//	Enable Setting Alarm Routine Execution
+	IO();
+
+//	Machine state control
+
+CASE diStationState OF
+	EN_StationStatus.stopped,			
+	EN_StationStatus.estopped:			//Enables Stop Routine Execution
+		bInit_Finished := FALSE;
+		Stop();
+	EN_StationStatus.initializing:		//Enables Init Routine Execution
+		Init();
+	EN_StationStatus.idle:				//Enables Pause Routine
+		Pause();
+	EN_StationStatus.running:			//Enables Auto Routine Execution
+		Auto();
+	EN_StationStatus.maintenance:		//Enables Manual Routine Execution
+		Manual();
+END_CASE
+
+//	Enable Setting Alarm Routine Execution
+	Alarm();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Manual" Id="{8359edb3-69bc-4db2-8bd3-b94445442104}">
+      <Declaration><![CDATA[METHOD ABSTRACT Manual
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Pause" Id="{7049837b-b277-40bc-8312-db5bf3575f58}">
+      <Declaration><![CDATA[METHOD ABSTRACT Pause
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Stop" Id="{96d8c6ee-be96-4655-8ca4-7740499e09cd}">
+      <Declaration><![CDATA[METHOD ABSTRACT Stop
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

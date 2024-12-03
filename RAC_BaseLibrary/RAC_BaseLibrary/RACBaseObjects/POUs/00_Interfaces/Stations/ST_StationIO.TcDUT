@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="ST_StationIO" Id="{51e3ab50-fb67-4dd8-8f50-5653f154026b}">
+    <Declaration><![CDATA[TYPE ST_StationIO :
+STRUCT
+	bResetButton			AT %I* 		:BOOL;
+	bStopButton 			AT %I* 		:BOOL;	
+	bStartButton 			AT %I* 		:BOOL;
+	
+	bResetInterface						:BOOL;
+	bStopInterface 						:BOOL;
+	bPauseInterface 					:BOOL;
+	bInitStartInterface					:BOOL;
+	bAutoStartInterface 				:BOOL;
+	
+	EmergencyStop 			AT %I* 		:BOOL;
+	SafetyReady 			AT %I* 		:BOOL;
+	AutoModeSelector 		AT %I* 		:BOOL;
+	Interlock 				AT %I* 		:BOOL;
+	OpUser 					AT %I*		:BOOL;
+	PressureSwitch 			AT %I* 		:BOOL;				
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

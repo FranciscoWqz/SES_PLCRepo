@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_RobotIO" Id="{be99baa2-426b-43b0-9084-8d7c52b80cb9}">
+    <Declaration><![CDATA[TYPE ST_RobotIO :
+STRUCT
+	uiin_ConnectionStatus					AT %I*		:UINT;
+	eipInputs								AT %I*		:ST_RAC_EIP;
+	eipOutputs								AT %Q*		:ST_RAC_EIP;
+	
+	diin_Sequencer		 					:DINT;
+	diout_SequenceCmd						:DINT;
+	rout_XCompensation						:REAL;
+	rout_ZCompensation						:REAL;
+	
+	bin_EStop	 							:BOOL;
+	bin_PPMoved	 							:BOOL;
+	bin_MotorsOFF	 						:BOOL;
+	bin_MotorsON	 						:BOOL;
+	bin_SystemInputBusy	 					:BOOL;
+	bin_RunchainOK	 						:BOOL;
+	bin_AutoON	 							:BOOL;
+	bin_MainTaskExecuting	 				:BOOL;
+	bin_SMBBatery	 						:BOOL;
+	bin_RobotNotMoving						:BOOL;
+	
+	bout_ResetEStop							:BOOL;
+	bout_PPToMain							:BOOL;
+	bout_MotorsOFF							:BOOL;
+	bout_MotorsON							:BOOL;
+	bout_Start								:BOOL;
+	bout_Stop								:BOOL;
+	
+	bin_SafetyBoxPick_OutOfZone	 			:BOOL;
+	bin_SafetyBoxPlace_OutOfZone	 		:BOOL;
+	bin_SafetyBoxReject_OutOfZone	 		:BOOL;
+	bout_SafetyBoxPick_Permissive 			:BOOL;
+	bout_SafetyBoxPlace_Permissive 			:BOOL;
+	bout_SafetyBoxReject_Permissive 		:BOOL;
+	
+	bin_Pick_AllMaterialPicked				:BOOL;
+	
+	bin_almRetCyl01							:BOOL;
+	bin_almExtCyl01							:BOOL;
+	bin_almBothSnsrCyl01					:BOOL;
+	bin_almRetCyl02							:BOOL;
+	bin_almExtCyl02							:BOOL;
+	bin_almBothSnsrCyl02					:BOOL;
+	bin_almRetCyl03							:BOOL;
+	bin_almExtCyl03							:BOOL;
+	bin_almBothSnsrCyl03					:BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

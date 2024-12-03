@@ -1,0 +1,452 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_Motor" Id="{6d4e9fa7-b06d-4ba0-a3d2-d2eb5f7a62ce}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Motor EXTENDS FB_Machine
+VAR_INPUT
+	// Movement type
+	MovementType						: EN_MotionType;
+	
+	// Trigger to execute configured command
+	bExecute							: BOOL						:= FALSE;
+	
+	// Movements permissive
+	bMovePermissive						: BOOL						:= FALSE;
+	
+	// Position to reach
+	lrPosition							: LREAL						:= 0;
+	
+	// Search for origin refference direction
+	HomeDir								: TC2_MC2.MC_Direction 		:= TC2_MC2.MC_Direction.MC_Current_Direction;
+END_VAR
+VAR_OUTPUT
+	bDone								: BOOL						:= FALSE;
+	bMotorMoving						: BOOL						:= FALSE;
+	lrActualPosition					: LREAL						:= 0;
+END_VAR
+VAR
+	// HMI disable motor for manual manipulation
+	bDisableMotor						: BOOL						:= FALSE;
+	bMotorEN							: BOOL						:= FALSE;
+	bMotorStop							: BOOL						:= FALSE;
+	bMotorPause							: BOOL						:= FALSE;
+	bMotorErrorReset					: BOOL						:= FALSE;
+	bJogPos								: BOOL						:= FALSE;
+	bJogNeg								: BOOL						:= FALSE;
+	bTrigger							: BOOL						:= FALSE;
+	bTargetPositionNoMatch				: BOOL						:= FALSE;
+	lrOverride							: LREAL						:= 0;
+	lrTargetPosition					: LREAL						:= 0;
+	lrPositionWhenTrig					: LREAL						:= 0;
+	lrActualVelocity					: LREAL						:= 0;
+	lrActualAcc							: LREAL						:= 0;
+	lrActualTorque						: LREAL						:= 0;
+	lrActualTargetPos					: LREAL						:= 0;
+	Motor								: TC2_MC2.AXIS_REF;
+	mcPower								: TC2_MC2.MC_Power;
+	mcMoveAbs							: TC2_MC2.MC_MoveAbsolute;
+	mcMoveRel							: TC2_MC2.MC_MoveRelative;
+	mcPauseMove							: TC2_MC2.MC_Halt;
+	mcStopMove							: TC2_MC2.MC_Stop;
+	mcJog								: TC2_MC2.MC_Jog;
+	mcHomeMove							: TC2_MC2.MC_Home;
+	mcReset								: TC2_MC2.MC_Reset;
+	HomeOptions							: TC2_MC2.ST_HomingOptions;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// If station indicates stop execution reset sequence value
+	IF bStopExecution THEN
+		diActualSeqStep 				:= 0;
+	END_IF
+
+// Update status
+Motor.ReadStatus();
+
+// For clearing servo errors
+	mcReset(		Axis				:= Motor,
+					Execute				:= ((bAlarmReset OR bMotorErrorReset) AND Motor.Status.Error));
+
+// For enablng motor
+	// If motor is not enabled, station status is different to e_stopped and DisableMotor input bit is false: Enable motor
+	bMotorEN:= Motor.Status.Disabled AND (diStationState <> EN_StationStatus.estopped) AND (NOT bDisableMotor);
+	mcPower(		Axis				:= Motor,
+					Enable				:= bMotorEN,
+					Enable_Positive		:= bMotorEN,
+					Enable_Negative		:= bMotorEN,
+					Override			:= lrOverride);
+
+// Station status main
+SUPER^.MachineMain();
+
+// For auto and mintenance station status, depending on the motion type input: motor operates	
+IF bMovePermissive AND ((diStationState=EN_StationStatus.running) OR (diStationState=EN_StationStatus.maintenance)) THEN
+	CASE MovementType OF
+		// For finding origin refference in auto and manual station state
+		EN_MotionType.home:
+		mcHomeMove(		Axis				:= Motor,
+						Execute				:= bTrigger,
+						HomingMode			:= TC2_MC2.MC_HomingMode.MC_DefaultHoming,
+						Options				:= HomeOptions);
+						
+		// For jogging in auto and manual station state
+		EN_MotionType.jogNeg, EN_MotionType.jogPos:
+		mcJog(			Axis				:= Motor,
+						JogForward			:= NOT Motor.Status.Moving AND bJogPos,
+						JogBackwards		:= NOT Motor.Status.Moving AND bJogNeg,
+						Mode				:= TC2_MC2.E_JogMode.MC_JOGMODE_STANDARD_SLOW);
+						
+		// For executing relative movements in auto and manual station state
+		EN_MotionType.relative:	
+		mcMoveRel(		Axis				:= Motor,
+						Execute				:= (NOT Motor.Status.Moving AND bTrigger),
+						Distance			:= lrTargetPosition);
+						
+		// For executing absolute movements in auto and manual station state						
+		EN_MotionType.absolute:
+		mcMoveAbs(		Axis				:= Motor,
+						Execute				:= (NOT Motor.Status.Moving AND bTrigger),
+						Position			:= lrTargetPosition);
+	END_CASE
+END_IF
+
+// For pausing actual movement
+	mcPauseMove(	Axis				:= Motor,
+					Execute				:= bMotorPause AND Motor.Status.Moving);
+	IF bMotorPause THEN
+		bMotorPause						:= Motor.Status.Moving;		
+	END_IF
+
+// For stopping actual movement
+	mcStopMove(		Axis				:= Motor,
+					execute				:= ((bStopExecution OR bMotorStop OR (NOT bMovePermissive)) AND Motor.Status.Moving));
+	IF bMotorStop THEN
+		bMotorStop						:= Motor.Status.Moving;		
+	END_IF]]></ST>
+    </Implementation>
+    <Method Name="Alarm" Id="{33f1140f-9aed-40db-8e75-a76ab6a617eb}">
+      <Declaration><![CDATA[METHOD PRIVATE Alarm
+VAR
+	// R Trigger VAr
+	rTrigger							: R_TRIG;
+	// Step in wich timeout occur
+	diTimeoutStep						: DINT;
+	// Actual Timed Out Sequence Step Code
+	sSequenceCode						: STRING;
+	
+	// Async Process Concatenated Alarm Codes
+	sAsyncAlarmCodes					: STRING;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Timeout preset valuie setting
+IF ton_StepTimeout.PT<>tmStepTimeout THEN
+	ton_StepTimeout.PT					:= tmStepTimeout;
+END_IF
+
+// TON for step timeout
+ton_StepTimeout(IN:=((NOT ton_StepTimeout.Q) AND (diLastActiveStep=diActualSeqStep)));
+
+// Following of sequence for setting timeout
+	IF diLastActiveStep<>diActualSeqStep THEN
+		diLastActiveStep					:= diActualSeqStep;
+	END_IF
+
+// For setting acual timed out step alarm code
+	rTrigger(CLK:=ton_StepTimeout.Q);
+	IF rTrigger.Q THEN
+		diTimeoutStep := diActualSeqStep;
+		CASE diTimeoutStep OF
+		// Init process timeouts
+			0:										sSequenceCode := 'ISERVPRO01';
+			10:										sSequenceCode := 'ESERVPRO01';
+			20:										sSequenceCode := 'ESERVTIM01';
+		// Auto / Manual process timeout
+			1001, 2001:								sSequenceCode := 'ESERVPOS01';
+			1010, 2010:								sSequenceCode := 'ESERVTIM01';
+			1011, 2011:								sSequenceCode := 'ESERVTIM02';
+			1012, 2012:								sSequenceCode := 'ESERVTIM02';
+		END_CASE
+		sSequenceCode:= CONCAT(STR1:=sSequenceCode,STR2:=sDeviceID);
+		sSequenceCode:= CONCAT(STR1:=sSequenceCode,STR2:=',');
+	END_IF
+
+// For deleting last sequence alarm code automatically
+	IF (diActualSeqStep<>diTimeoutStep AND diTimeoutStep<>0)THEN
+		sSequenceCode:= '';
+		diTimeoutStep:= 0;
+	END_IF
+
+// For setting no lineal processes alarms
+	//If not homed
+	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='SSERVPOS01',sIDToAdd:=sDeviceID,bActive:=(NOT (Motor.Status.Homed OR Motor.Status.Homing)));
+	// If do not have safe move condition
+	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='SSERVSEC01',sIDToAdd:=sDeviceID,bActive:=(NOT bMovePermissive));
+	// If servo has an alarm
+	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='ESERVALA02',sIDToAdd:=sDeviceID,bActive:=Motor.Status.Error);
+	
+// Concat all alarm codes
+	sAlarm:= CONCAT(STR1:=sSequenceCode,STR2:=sAsyncAlarmCodes);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Auto" Id="{fee837fc-e8fa-4244-8203-d8992aaff7ed}">
+      <Declaration><![CDATA[METHOD Auto]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Update the speed if value chages
+	IF Motor.PlcToNc.Override<>100 THEN
+		lrOverride 						:= 100;
+	END_IF
+
+// Keep sequencer in range
+	IF (diActualSeqStep<1000) OR (diActualSeqStep>1999) THEN
+		diActualSeqStep					:= 1000;
+	END_IF
+
+// General sequence for executing movemen
+	MovementExecution(diInitialStep:=1000);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Init" Id="{77f898d7-2f78-4536-a3bd-768aa143b787}">
+      <Declaration><![CDATA[METHOD Init
+VAR
+	bGoHome								: BOOL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Update the speed if value chages
+	IF Motor.PlcToNc.Override<>30 THEN
+		lrOverride 						:= 30;
+	END_IF
+
+// Keep sequencer in range
+	IF (diActualSeqStep<0) OR (diActualSeqStep>999) THEN
+		diActualSeqStep					:= 0;
+	END_IF
+
+// Initialization Steps
+CASE diActualSeqStep OF
+	0:		// Wait Init start permissive
+		tmStepTimeout					:= T#1S;	// ISERVPRO01
+		bInit_Finished					:= FALSE;
+		IF bInit_StartPermissive THEN
+			HomeOptions.ReferenceMode 	:= TC2_MC2.E_EncoderReferenceMode.ENCODERREFERENCEMODE_HARDWARELATCHNEG;
+			HomeOptions.SearchDirection	:= HomeDir;
+			diActualSeqStep				:=10; 
+		END_IF
+		
+	10:		// Check if motor have error and try of reset them
+		tmStepTimeout					:= T#500MS;	// ESERVPRO01
+		bMotorErrorReset 				:= ((Motor.Status.Error) AND (NOT ton_StepTimeout.Q));
+		IF NOT Motor.Status.Error THEN
+			bMotorErrorReset			:= FALSE;
+			diActualSeqStep				:= 20;
+		END_IF
+		
+	20:		// Motor search home refference
+		tmStepTimeout					:= T#5S;	// ESERVTIM01
+		bGoHome							:= NOT ton_StepTimeout.Q;
+		bInit_Finished					:= mcHomeMove.Done;
+		IF bInit_Finished THEN
+			bGoHome						:= FALSE;
+			diActualSeqStep				:= 999; 
+		END_IF
+END_CASE
+
+// Homming FB only for  initialization
+mcHomeMove(		Axis				:= Motor,
+				Execute				:= bGoHome,
+				HomingMode			:= TC2_MC2.MC_HomingMode.MC_DefaultHoming,
+				Options				:= HomeOptions);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="IO" Id="{737d1c80-6323-42c1-a7b0-4ad0b7b3a5c1}">
+      <Declaration><![CDATA[METHOD IO]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bMotorMoving								:= Motor.Status.Moving;
+lrActualPosition							:= Motor.NcToPlc.ActPos;
+lrActualVelocity							:= Motor.NcToPlc.ActVelo;
+lrActualAcc									:= Motor.NcToPlc.ActAcc;
+lrActualTorque								:= Motor.NcToPlc.ActTorque;
+lrActualTargetPos							:= Motor.NcToPlc.TargetPos;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Manual" Id="{5fc89af8-5f4c-469e-b802-e0930cc5e5e4}">
+      <Declaration><![CDATA[METHOD Manual]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Update the speed if value chages
+	IF Motor.PlcToNc.Override<>30 THEN
+		lrOverride := 30;
+	END_IF
+	
+// Keep sequencer in range
+	IF (diActualSeqStep<2000) OR (diActualSeqStep>2999) THEN
+		diActualSeqStep					:= 2000;
+	END_IF
+
+// For jogging motor
+IF MovementType = EN_MotionType.jogNeg THEN
+	bJogPos:= 	FALSE;
+	bJogNeg:=	 bExecute;
+ELSIF MovementType = EN_MotionType.jogPos THEN
+	bJogPos:= 	bExecute;
+	bJogNeg:=	FALSE;
+ELSE
+	bJogPos:= 	FALSE;
+	bJogNeg:=	FALSE;
+	
+	// General sequence for executing movemen
+	MovementExecution(diInitialStep:=2000);
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="MovementExecution" Id="{113492b9-d346-46b5-bc82-dc5dc463f168}">
+      <Declaration><![CDATA[METHOD MovementExecution
+VAR_INPUT
+	diInitialStep						: DINT;
+END_VAR
+VAR
+	bTriggered							: BOOL;
+	diStartMoveStp						: DINT;
+	diWaitHomeFinishedStp				: DINT;
+	diWaitAbsFinishStp					: DINT;
+	diWaitRelFinishStp					: DINT;
+	diFinalStp							: DINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[diStartMoveStp						:= diInitialStep+1;
+diWaitHomeFinishedStp				:= diInitialStep+10;
+diWaitAbsFinishStp					:= diInitialStep+11;
+diWaitRelFinishStp					:= diInitialStep+12;
+diFinalStp							:= diInitialStep+999;
+
+// Wait start movement trigger
+IF diActualSeqStep = diInitialStep THEN
+	tmStepTimeout					:= T#5000S;	// No alarm
+	
+	// Latch when Execute input is on
+	IF bExecute THEN
+		lrPositionWhenTrig			:= 0;
+		lrTargetPosition			:= 0;
+		bTriggered					:= TRUE;
+		bDone						:= FALSE;
+		diActualSeqStep				:= diStartMoveStp;
+	END_IF
+END_IF
+
+// Start movement
+IF diActualSeqStep = diStartMoveStp THEN	
+	tmStepTimeout					:= T#50MS;	// ESERVPOS01
+	
+	// Trigger for movement function blocks and retrys
+	bTrigger						:= bTriggered AND (NOT ton_StepTimeout.Q);
+	
+	IF bTrigger THEN
+		CASE MovementType OF
+			EN_MotionType.home :
+				IF Motor.Status.HomingBusy THEN
+					diActualSeqStep	:= diWaitHomeFinishedStp;
+				END_IF
+			EN_MotionType.absolute :
+				IF Motor.Status.Moving THEN
+					diActualSeqStep	:= diWaitAbsFinishStp;
+				END_IF
+			EN_MotionType.relative :
+				lrPositionWhenTrig	:= Motor.NcToPlc.ActPos;
+				lrTargetPosition	:= lrPosition;
+				IF Motor.Status.Moving THEN
+					diActualSeqStep	:= diWaitRelFinishStp;
+				END_IF
+		END_CASE
+	END_IF
+END_IF
+
+// Wait home finished
+IF diActualSeqStep = diWaitHomeFinishedStp THEN	
+	tmStepTimeout					:= T#10S;	// ESERVTIM01
+	IF Motor.Status.Homed THEN
+		diActualSeqStep				:= diFinalStp;
+	END_IF
+END_IF
+
+// Wait absolute movement finished
+IF diActualSeqStep = diWaitAbsFinishStp THEN	
+	tmStepTimeout					:= T#5S;	// ESERVTIM02
+	IF Motor.Status.InTargetPosition THEN
+		IF lrTargetPosition = Motor.NcToPlc.ActPos THEN
+			bTargetPositionNoMatch	:= FALSE;
+			diActualSeqStep			:=	diFinalStp;
+		ELSE
+			bTargetPositionNoMatch	:= TRUE;
+		END_IF
+	END_IF
+END_IF
+
+// Wait relative movement finished
+IF diActualSeqStep = diWaitRelFinishStp THEN
+	tmStepTimeout					:= T#5S;	// ESERVTIM02
+	IF Motor.Status.InTargetPosition THEN
+		IF (lrPositionWhenTrig + lrTargetPosition) = Motor.NcToPlc.ActPos THEN
+			bTargetPositionNoMatch	:= FALSE;
+			diActualSeqStep			:=	diFinalStp;
+		ELSE
+			bTargetPositionNoMatch	:= TRUE;
+		END_IF
+	END_IF
+END_IF
+
+// Auto cycle completed
+IF diActualSeqStep = diFinalStp THEN	
+	bDone							:= TRUE;
+	bTriggered						:= FALSE;
+	bTrigger						:= FALSE;
+	diActualSeqStep					:= diInitialStep;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Pause" Id="{c4e45ed3-d473-428f-9c6b-1d32d8a57ac2}">
+      <Declaration><![CDATA[METHOD Pause]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bMotorPause						:= Motor.Status.Moving;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Stop" Id="{7ab547c0-9eab-4564-890e-b7719ea0bcbd}">
+      <Declaration><![CDATA[METHOD Stop]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bInit_Finished					:= FALSE;
+bMotorStop 						:= Motor.Status.Moving;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_Motor">
+      <LineId Id="3" Count="66" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Motor.Alarm">
+      <LineId Id="3" Count="46" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Motor.Auto">
+      <LineId Id="3" Count="10" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Motor.Init">
+      <LineId Id="3" Count="42" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Motor.IO">
+      <LineId Id="3" Count="4" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Motor.Manual">
+      <LineId Id="3" Count="22" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Motor.MovementExecution">
+      <LineId Id="3" Count="86" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Motor.Pause">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Motor.Stop">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

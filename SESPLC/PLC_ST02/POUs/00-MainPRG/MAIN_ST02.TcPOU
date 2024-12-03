@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="MAIN_ST02" Id="{ddb5e944-244f-4bc4-9985-a5e8801bc9a9}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN_ST02
+VAR
+	fbStation02							: RACBaseObjects.FB_Station;
+	fbTapeApplicationMachine			: FB_TapeAplicationMahine;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[fbStation02(bInitFinished := fbTapeApplicationMachine.bInit_Finished);
+
+
+fbTapeApplicationMachine(
+							sDeviceID := 			'', 
+    						bStopExecution := 		fbStation02.bStop,
+							bAlarmReset := 			fbStation02.bAlarmReset,
+							diStationState := 		fbStation02.diStationState,
+							bInit_StartPermissive 	:= FALSE,
+);]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN_ST02">
+      <LineId Id="3" Count="8" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

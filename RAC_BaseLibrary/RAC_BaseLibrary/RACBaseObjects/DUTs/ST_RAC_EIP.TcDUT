@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_RAC_EIP" Id="{70caefc4-8e68-44c0-a3ea-60b178333bf6}">
+    <Declaration><![CDATA[TYPE ST_RAC_EIP :
+STRUCT
+	byteArray 		: ARRAY [0..39] OF BYTE;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

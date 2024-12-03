@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_LightTower" Id="{f351574d-6f75-4144-ba3a-23a3745caf6f}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_LightTower EXTENDS FB_Device
+VAR_INPUT
+	diStationState					: EN_StationStatus;
+END_VAR
+VAR
+	Green	 			AT %Q* 		:BOOL;
+	Ambar	 			AT %Q* 		:BOOL;
+	Red		 			AT %Q* 		:BOOL;
+	Buzzer 				AT %Q* 		:BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

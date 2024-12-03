@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_Bimanual" Id="{a5709532-78d9-4de9-b90c-12c4dc9054e6}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Bimanual EXTENDS FB_Device
+VAR_INPUT
+	diStationState					: EN_StationStatus;
+END_VAR
+VAR
+	Sensor 				AT %I* 		: BOOL;	
+	Green 				AT %Q* 		: BOOL;
+	Ambar 				AT %Q* 		: BOOL;
+	Red 				AT %Q* 		: BOOL;
+	Blink 				AT %Q* 		: BOOL;
+	END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

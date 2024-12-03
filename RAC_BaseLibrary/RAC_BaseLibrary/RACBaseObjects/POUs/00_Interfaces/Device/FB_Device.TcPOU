@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="FB_Device" Id="{f6faf5f6-9e87-4f01-904e-dc0c3deeaa4b}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK  FB_Device
+VAR_INPUT
+	// Status of Master station
+	diStationState 						: EN_StationStatus;
+	
+	// Device Identification Number
+	sDeviceID							: STRING;
+	
+	// Stop executions
+	bStopExecution						: BOOL;
+	
+	// Station Alarm Reset
+	bAlarmReset							: BOOL;
+END_VAR
+VAR_OUTPUT
+	// Display current active alarms in device, in a CVS file concatenating type string
+	sAlarm								: STRING;
+END_VAR
+VAR 
+	// Var to set timeout value in each step
+	tmStepTimeout						: TIME		:=T#1S;
+	
+	// General timeout TON
+	ton_StepTimeout						: TON;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="AlarmCodesHandling" Id="{6b0f9cb5-0446-4d5b-af40-424a0f6fac8a}">
+      <Declaration><![CDATA[METHOD AlarmCodesHandling : STRING
+VAR_INPUT
+	// Concatenated codes string
+	sConcatCodes						:	STRING;
+	// Code for add or delete
+	sCode								:	STRING;
+	// Device ID for add to alarm code
+	sIDToAdd							:	STRING;
+	// If alarm is active: TRUE
+	bActive								:	BOOL;
+END_VAR
+VAR
+	// Code with ID and separator added
+	sProcessedCode						:	STRING;
+	// Position where code was found
+	iPosWhereFindCode					:	INT;
+	// Length of code seeked
+	iLengthOfCode						:	INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//	Add device ID, separator, seek code in concatenated codes string obtan position in the string and lentgh of seeked code
+	sProcessedCode:= CONCAT(STR1:=sCode,STR2:=sIDToAdd);
+	sProcessedCode:= CONCAT(STR1:=sProcessedCode,STR2:=',');
+	iPosWhereFindCode:= FIND(STR1:=sConcatCodes,STR2:=sProcessedCode);
+	iLengthOfCode:= LEN(STR:=sProcessedCode);
+
+//	If code was not found add alarm is active add it to concatenated codes string
+	IF (iPosWhereFindCode=0) AND (bActive) THEN
+		AlarmCodesHandling:= CONCAT(STR1:=sConcatCodes,STR2:=sProcessedCode);
+//	If code was found add alarm is not active delete it from concatenated codes string
+	ELSIF (iPosWhereFindCode<>0) AND (NOT bActive) THEN
+		AlarmCodesHandling:= DELETE(STR:=sConcatCodes,LEN:=iLengthOfCode,POS:=iPosWhereFindCode);
+//	Default case return input value
+	ELSE
+		AlarmCodesHandling:= sConcatCodes;
+	END_IF]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_TrayFeederIO" Id="{b62f1b05-2443-424e-9f52-f13881056235}">
+    <Declaration><![CDATA[TYPE ST_TrayFeederIO :
+STRUCT
+	uiin_ConnectionStatus					AT %I*		:UINT;
+	eipInputs								AT %I*		:ST_RAC_EIP;
+	eipOutputs								AT %Q*		:ST_RAC_EIP;
+	
+	diin_StationStatus						:DINT;
+	diin_Sequencer		 					:DINT;
+	diout_SequenceCmd						:DINT;
+	
+	bin_ServosFailure						:BOOL;
+	bin_initFinished						:BOOL;
+	
+	bout_Reset								:BOOL;
+	bout_Start								:BOOL;
+	bout_Stop								:BOOL;
+	bout_Init_startPermissive				:BOOL;
+	
+	bin_SafetyBoxPlace_OutOfZone	 		:BOOL;
+	bout_SafetyBoxPlace_Permissive 			:BOOL;
+	
+	
+	bin_inScanningPosition					:BOOL;
+	bout_scannninPieceIsOK					:BOOL;
+	bout_scannninPieceIsNG					:BOOL;
+	
+	bin_delivery_trayReady					:BOOL;
+	bout_delivery_trayChangeRequest			:BOOL;
+END_STRUCT
+END_TYPE]]></Declaration>
+  </DUT>
+</TcPlcObject>

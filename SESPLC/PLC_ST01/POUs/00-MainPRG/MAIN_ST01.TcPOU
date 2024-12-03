@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="MAIN_ST01" Id="{9d1691a3-5908-4ed4-af9f-582490a1a007}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN_ST01
+VAR
+	fbStation01							: RACBaseObjects.FB_Station;
+	fbControllerSupply					: FB_ControllerSupply;
+	fbBatterySupply						: FB_BatterySupply;
+	//EndcapAsm							: FB_EndcapAsm_ST;
+	//RailControl						: FB_RailControl;
+	
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[	fbStation01(bInitFinished:=fbControllerSupply.bInit_Finished AND fbBatterySupply.bInit_Finished);
+
+//	fbRailControl(						);
+
+	fbControllerSupply(					sDeviceID:='',
+										bStopExecution:=fbStation01.bStop,
+										bAlarmReset:=fbStation01.bAlarmReset,
+										diStationState:=fbStation01.diStationState,
+										bInit_StartPermissive:=TRUE,
+										bSafetyBoxPlace_permissive:=FALSE,
+										bPlace_MaterialRequest:=FALSE);
+
+	fbBatterySupply(					sDeviceID:='',
+										bStopExecution:=fbStation01.bStop,
+										bAlarmReset:=fbStation01.bAlarmReset,
+										diStationState:=fbStation01.diStationState,
+										bInit_StartPermissive:=TRUE);
+
+//	fbEndcapAsm(						);]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN_ST01">
+      <LineId Id="3" Count="17" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

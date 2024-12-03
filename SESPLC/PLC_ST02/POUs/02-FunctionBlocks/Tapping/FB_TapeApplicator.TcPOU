@@ -1,0 +1,278 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_TapeApplicator" Id="{7d000dbe-2b57-4c44-8d2c-69dd74943703}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_TapeApplicator EXTENDS RACBaseObjects.FB_Machine
+VAR_INPUT
+	sSvoLiftID								: STRING;
+	sSvoPickrID								: STRING;
+	sCylScissorsID							: STRING;
+	sCylTapeAppFrontID						: STRING;
+	sCylTapeAppRearID						: STRING;
+	sCylVaccID								: STRING;
+	sCylPickerID							: STRING;
+	sVaccPickPlateID						: STRING;
+	sVaccFrontPlateID						: STRING;
+	sVaccRearPlateID						: STRING;
+END_VAR
+VAR_OUTPUT
+	bSafeConditions							: BOOL							:=FALSE;
+	
+	bAllServosSafePosition					: BOOL							:=FALSE;
+	bAllCylinderSafePosition				: BOOL							:=FALSE;
+END_VAR
+VAR
+	bServo_Lift_isSafePosition				: BOOL							:=FALSE;
+	bServo_Picker_isSafePosition			: BOOL							:=FALSE;
+	
+	bTapeInPicker							AT%I* : BOOL;
+		
+	tapeInSystemStatus						: EN_TapeInSystemStatus			:=EN_TapeInSystemStatus.tapeOnlyInPickPlate;
+
+	fbServo_Lift							: RACBaseObjects.FB_Motor;
+	fbServo_Picker							: RACBaseObjects.FB_Motor;
+	
+	fbCyl_Scissors							: RACBaseObjects.FB_Cylinder;
+	fbCyl_TapeApplicatorFront				: RACBaseObjects.FB_Cylinder;
+	fbCyl_TapeApplicatorRear				: RACBaseObjects.FB_Cylinder;
+	fbCyl_Vacc								: RACBaseObjects.FB_Cylinder;
+	fbCyl_Picker							: RACBaseObjects.FB_Cylinder;
+	
+	fbVacc_PickPlate						: RACBaseObjects.FB_Vacuum;
+	fbVacc_FrontPlate						: RACBaseObjects.FB_Vacuum;
+	fbVacc_RearPlate						: RACBaseObjects.FB_Vacuum;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[SUPER^.MachineMain();
+
+//	Lift tape applicator
+	fbServo_Lift(				sDeviceID:=sSvoLiftID,
+								bStopExecution:=bStopExecution,
+								bAlarmReset:=bAlarmReset,
+								diStationState:=diStationState,
+								bInit_StartPermissive:=fbCyl_TapeApplicatorFront.bIsRetracted AND fbCyl_TapeApplicatorRear.bIsRetracted,
+								bMovePermissive:=bServo_Picker_isSafePosition AND fbCyl_TapeApplicatorFront.bIsRetracted AND fbCyl_TapeApplicatorRear.bIsRetracted,
+								HomeDir:=TC2_MC2.MC_Direction.MC_Negative_Direction);
+	bServo_Lift_isSafePosition		:= (fbServo_Lift.lrActualPosition<=20) OR (fbServo_Lift.lrActualPosition>=100);
+
+//	Move tape picker rear - front						
+	fbServo_Picker(				sDeviceID:=sSvoPickrID,
+								bStopExecution:=bStopExecution,
+								bAlarmReset:=bAlarmReset,
+								diStationState:=diStationState,
+								bInit_StartPermissive:=fbServo_Lift.bInit_Finished,
+								bMovePermissive:=bServo_Lift_isSafePosition,
+								HomeDir:=TC2_MC2.MC_Direction.MC_Negative_Direction);
+	bServo_Picker_isSafePosition	:= (fbServo_Picker.lrActualPosition<=100);
+
+//	Scissors Cylinder
+	fbCyl_Scissors(				sDeviceID:=sCylScissorsID,
+								bStopExecution:=bStopExecution,
+								bAlarmReset:=bAlarmReset,
+								bPermisiveExtend:=TRUE,
+								bPermisiveRetract:=TRUE,
+								Timeout:=T#1S);
+
+//	Tape applicator frontal Cylinder
+	fbCyl_TapeApplicatorFront(	sDeviceID:=sCylTapeAppFrontID,
+								bStopExecution:=bStopExecution,
+								bAlarmReset:=bAlarmReset,
+								bPermisiveExtend:=bServo_Lift_isSafePosition,
+								bPermisiveRetract:=TRUE,
+								Timeout:=T#1S);
+
+//	Tape applicator rear Cylinder
+	fbCyl_TapeApplicatorRear(	sDeviceID:=sCylTapeAppRearID,
+								bStopExecution:=bStopExecution,
+								bAlarmReset:=bAlarmReset,
+								bPermisiveExtend:=bServo_Lift_isSafePosition,
+								bPermisiveRetract:=TRUE,
+								Timeout:=T#1S);
+
+//	Vacc Cylinder
+	fbCyl_Vacc(					sDeviceID:=sCylVaccID,
+								bStopExecution:=bStopExecution,
+								bAlarmReset:=bAlarmReset,
+								bPermisiveExtend:=bServo_Picker_isSafePosition,
+								bPermisiveRetract:=bServo_Picker_isSafePosition,
+								Timeout:=T#1S);
+
+//	Picker Cylinder
+	fbCyl_Picker(				sDeviceID:=sCylPickerID,
+								bStopExecution:=bStopExecution,
+								bAlarmReset:=bAlarmReset,
+								bPermisiveExtend:=TRUE,
+								bPermisiveRetract:=TRUE,
+								Timeout:=T#1S);
+
+//	Pick Plate Vaccum Generator
+	fbVacc_PickPlate(			sDeviceID:=sVaccPickPlateID,
+								bStopExecution:=bStopExecution,
+								bAlarmReset:=bAlarmReset,
+								Timeout:=T#1S);
+
+//	Front Plate Vaccum Generator
+	fbVacc_FrontPlate(			sDeviceID:=sVaccFrontPlateID,
+								bStopExecution:=bStopExecution,
+								bAlarmReset:=bAlarmReset,
+								Timeout:=T#1S);
+
+//	Rear Plate Vaccum Generator
+	fbVacc_FrontPlate(			sDeviceID:=sVaccRearPlateID,
+								bStopExecution:=bStopExecution,
+								bAlarmReset:=bAlarmReset,
+								Timeout:=T#1S);]]></ST>
+    </Implementation>
+    <Method Name="Alarm" Id="{6d46daf7-b0ff-4145-8a93-bfc8d3b9397a}">
+      <Declaration><![CDATA[METHOD Alarm]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[sAlarm:= CONCAT(STR1:=fbServo_Lift.sAlarm,STR2:=fbServo_Picker.sAlarm);
+sAlarm:= CONCAT(STR1:=sAlarm,STR2:=fbCyl_Scissors.sAlarm);
+sAlarm:= CONCAT(STR1:=sAlarm,STR2:=fbCyl_TapeApplicatorFront.sAlarm);
+sAlarm:= CONCAT(STR1:=sAlarm,STR2:=fbCyl_TapeApplicatorRear.sAlarm);
+sAlarm:= CONCAT(STR1:=sAlarm,STR2:=fbCyl_Vacc.sAlarm);
+sAlarm:= CONCAT(STR1:=sAlarm,STR2:=fbCyl_Picker.sAlarm);
+sAlarm:= CONCAT(STR1:=sAlarm,STR2:=fbVacc_PickPlate.sAlarm);
+sAlarm:= CONCAT(STR1:=sAlarm,STR2:=fbVacc_FrontPlate.sAlarm);
+sAlarm:= CONCAT(STR1:=sAlarm,STR2:=fbVacc_RearPlate.sAlarm);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Auto" Id="{339c2743-241c-4307-bf7a-4e924d93f8fa}">
+      <Declaration><![CDATA[METHOD Auto]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//	Keep sequencer in range
+	IF (diActualSeqStep<1000) OR (diActualSeqStep>1999) THEN
+		diActualSeqStep:=1000;
+	END_IF
+
+//	Automatic sequence
+	CASE diActualSeqStep OF
+		1000:	//	Evaluate status of tape in system
+		1001:	//	Validate tape is on vacc supported in pick plate
+		1010:	//	Open picker cylinder
+		1020:	//	Move pick servo to tape pick position
+		1030:	//	Close picker cylinder
+		1040:	//	Move pick servo to tape release postion
+		1050:	//	Turn ON Vacc in front and rear plate
+		1060:	//	Open picker cylinder
+		1070:	//	
+		1099:	//	Turn OFF vacc in rear and front plate, retract rear plate cylinder and move lift servo to safe position
+	END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Init" Id="{2bb67d95-5fca-45ac-b8ed-b68848700abb}">
+      <Declaration><![CDATA[METHOD Init]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//	Keep sequencer in range
+	IF (diActualSeqStep<0) OR (diActualSeqStep>999) THEN
+		diActualSeqStep:=0;
+	END_IF
+
+//	Initialization sequence
+	CASE diActualSeqStep OF
+		0:		//	Wait init start permissive
+			IF bInit_StartPermissive THEN
+				diActualSeqStep								:=	10;
+			END_IF
+		10:		//	Turn ON pick plate vaccum generator and validate feedback
+			IF NOT fbVacc_PickPlate.bGrip THEN
+				fbVacc_PickPlate.bGrip						:=	TRUE;
+			END_IF
+			IF fbVacc_PickPlate.Vacuum_Ok THEN
+				diActualSeqStep								:=	20;
+			END_IF
+		20:		//	Update tape in system status
+			IF fbCyl_Picker.bIsRetracted AND bTapeInPicker THEN
+				tapeInSystemStatus						:=	EN_TapeInSystemStatus.tapeGrippedInPicker;
+			END_IF
+			IF (tapeInSystemStatus=EN_TapeInSystemStatus.tapeGrippedInPicker) AND fbCyl_Scissors.bIsRetracted THEN
+				tapeInSystemStatus						:=	EN_TapeInSystemStatus.tapeCutted;
+			END_IF
+			IF (tapeInSystemStatus=EN_TapeInSystemStatus.tapeGrippedInPicker) AND fbCyl_Scissors.bIsRetracted THEN
+				tapeInSystemStatus						:=	EN_TapeInSystemStatus.tapeOnApplyPlates;
+			END_IF
+			diActualSeqStep								:=	30;
+		30:		//	Set cylincer in safe position to init servos
+			fbCyl_TapeApplicatorFront.bRetractRequest	:=	(NOT fbCyl_TapeApplicatorFront.bIsRetracted);
+			fbCyl_TapeApplicatorRear.bRetractRequest	:=	(NOT fbCyl_TapeApplicatorRear.bIsRetracted);
+			fbCyl_Vacc.bRetractRequest					:=	(NOT fbCyl_Vacc.bIsRetracted);
+			IF fbCyl_Scissors.bIsExtended AND fbCyl_TapeApplicatorFront.bIsRetracted AND fbCyl_TapeApplicatorRear.bIsRetracted AND fbCyl_Vacc.bIsRetracted THEN 
+				diActualSeqStep							:=	30;
+			END_IF
+		40:		//	Wait servos init finished
+			IF fbServo_Lift.bInit_Finished AND fbServo_Picker.bInit_Finished THEN
+				diActualSeqStep							:=	40;
+			END_IF
+		50:		//	Set scissors cylinder open
+			fbCyl_Scissors.bExtendRequest				:=	NOT fbCyl_Scissors.bIsExtended;
+			IF fbCyl_Scissors.bIsExtended THEN 
+				diActualSeqStep							:=	60;
+			END_IF
+		100:	//	Validate pick plate vaccum
+			bInit_Finished								:= fbVacc_PickPlate.Vacuum_Ok;
+			IF bInit_Finished THEN
+				diActualSeqStep							:=	999;
+			END_IF
+	END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="IO" Id="{2ecdd830-d60b-4a64-b922-8de45b760d49}">
+      <Declaration><![CDATA[METHOD IO]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bAllServosSafePosition						:=	bServo_Lift_isSafePosition AND bServo_Picker_isSafePosition;
+bAllCylinderSafePosition					:=	fbCyl_TapeApplicatorFront.bIsRetracted AND fbCyl_TapeApplicatorRear.bIsRetracted AND fbCyl_Vacc.bIsRetracted;
+bSafeConditions								:=	bAllServosSafePosition AND bAllCylinderSafePosition;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Manual" Id="{80065dd8-44ad-42ee-9c92-dd7e489c3124}">
+      <Declaration><![CDATA[METHOD Manual
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Pause" Id="{c9e707f2-8863-48dc-8f00-1cbd0c6ef8cf}">
+      <Declaration><![CDATA[METHOD Pause
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Stop" Id="{017c6435-bf2d-4d4f-b522-a8a9bdd0e82d}">
+      <Declaration><![CDATA[METHOD Stop
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_TapeApplicator">
+      <LineId Id="3" Count="77" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TapeApplicator.Alarm">
+      <LineId Id="3" Count="7" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TapeApplicator.Auto">
+      <LineId Id="3" Count="16" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TapeApplicator.Init">
+      <LineId Id="3" Count="49" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TapeApplicator.IO">
+      <LineId Id="3" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TapeApplicator.Manual">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TapeApplicator.Pause">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TapeApplicator.Stop">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
