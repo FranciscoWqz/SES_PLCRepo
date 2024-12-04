@@ -1,0 +1,279 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_Conveyor" Id="{8d2aabfa-c6af-4fd2-bb62-8d8d82d55f8e}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK INTERNAL FB_Conveyor EXTENDS FB_Machine
+VAR_INPUT
+	//All subproces in safe position
+	bIn_SafeToMove					: BOOL;
+	//All subprocess completed
+	bIn_AllProcessComplete			: BOOL;
+	//Distance between nests
+	lrDistance						: LREAL;
+	//If requires offset after home sequence
+	lrOffsetPos						: LREAL;
+	
+	//Nest clamps control
+	bIn_IsClamped					: BOOL;
+	bIn_IsUnclamped					: BOOL;
+END_VAR
+VAR_OUTPUT
+	//Move done, ready to receive from transfer
+	bOut_ReadyToReceive				: BOOL;
+	//Rail ready, in last position
+	bOut_ReadyToSend				: BOOL;
+	//Step complete
+	bOut_MoveDone					: BOOL;
+	
+	bOut_ClampRequest				: BOOL;
+	bOut_UnclampRequest				: BOOL;
+	
+END_VAR
+VAR
+	Motor						: FB_Motor;
+	
+	//For rail track
+	iCounter 					: USINT;
+	tmpNest						: ST_Nest;
+	
+	bManualStep					: BOOL;
+	bSensorLoadPos				: BOOL;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//Run the standar main for any machine
+SUPER^.MachineMain();
+]]></ST>
+    </Implementation>
+    <Method Name="Alarm" Id="{7c9922bb-3f6c-4217-8c8e-28d829c5af7b}">
+      <Declaration><![CDATA[METHOD Alarm
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Auto" Id="{623573d0-5010-4df3-b237-7401dfe7b62d}">
+      <Declaration><![CDATA[METHOD Auto
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Run Auto sequence for the Motor
+Motor.Auto();
+
+IF diActualSeqStep<1000 OR diActualSeqStep> 2000 THEN
+	diActualSeqStep:= 1000;
+END_IF
+
+CASE diActualSeqStep OF
+	1000:						//Reset variables
+		bOut_MoveDone:= FALSE;
+		bSafetyBoxPlace_OutOfZone:= FALSE;
+		Motor.bExecute:= FALSE;
+		diActualSeqStep:= 1010;
+		
+	1010: 					//Check conditions
+		diActualSeqStep:= 1020;
+		
+	1020:					//Check for safety conditions to move
+		//Absolute move, just once after homming
+		IF bIn_SafeToMove   THEN
+			//First move, absolute type, just if requires after home
+			Motor.MovementType:= EN_MotionType.absolute;
+			Motor.lrPosition:= THIS^.lrOffsetPos;
+			
+			motor.bExecute:= TRUE;
+			IF Motor.bDone THEN
+				diActualSeqStep:= 1050;
+			END_IF
+		END_IF
+	
+	1030:					//Reset variables and wait for motor done false
+		Motor.bExecute:= FALSE;
+		bOut_MoveDone:= FALSE;
+		IF NOT Motor.bDone THEN
+			diActualSeqStep:= 1040;
+		END_IF
+		
+	1040:					//Step move	
+		bOut_MoveDone:= FALSE;
+		IF bIn_SafeToMove THEN
+			Motor.MovementType:= EN_MotionType.relative;
+			Motor.lrPosition:= lrDistance;
+			
+			Motor.bExecute:= TRUE;
+			IF Motor.bDone THEN
+				diActualSeqStep:=1050;		
+			END_IF
+		END_IF
+		
+	1050:					//Update the rail positions
+		fnUpdateRailPosition();
+		diActualSeqStep:= 1060;
+		
+	1060:					//Send the move complete
+		bOut_MoveDone:= TRUE;
+		IF bIn_AllProcessComplete THEN
+			bOut_MoveDone:= FALSE;
+			diActualSeqStep:= 1070;
+		END_IF
+	
+	1070:					//Handshake, wait for the process complete fall
+		IF NOT bIn_AllProcessComplete THEN
+			diActualSeqStep:= 1080;
+		END_IF
+	
+	1080:					//Confirm for safety conditions
+		IF bIn_SafeToMove THEN
+			diActualSeqStep:= 1090;
+		END_IF
+	1100:					//Return sequence
+		diActualSeqStep:= 1030;
+	
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Action Name="fnUpdateRailPosition" Id="{f695cc79-0d1f-4da5-b0a3-7bf06866712c}">
+      <Implementation>
+        <ST><![CDATA[
+//Save the last nest info
+tmpNest:= GVL_Rails.Nests[Constants.Total_Nest];
+
+//Update in 1 every nest info from top to bottom
+FOR iCounter:= Constants.Total_Nest - 1 TO 0 BY -1 DO
+	GVL_Rails.Nests[iCounter +1] :=  GVL_Rails.Nests [iCounter];	
+END_FOR
+
+//Update the first position by the saved info
+GVL_Rails.Nests[1]:= tmpNest;
+]]></ST>
+      </Implementation>
+    </Action>
+    <Method Name="Init" Id="{104f715f-6c9d-4ce6-a031-23594cf1b1e7}">
+      <Declaration><![CDATA[METHOD Init
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE  diActualSeqStep OF
+	0:					//Reset variables and stop motor
+		Motor.bStopExecution:= TRUE;
+		IF NOT Motor.bMotorMoving THEN
+			diActualSeqStep:= 10;
+		END_IF
+		
+	10:					//Check status
+		diActualSeqStep:= 20;
+		
+	20:					//Wait for the initial permisive
+		IF bInit_StartPermissive THEN
+			diActualSeqStep:= 30;
+		END_IF
+		
+	30: 				//Unlock cylinder
+		bOut_ClampRequest:= FALSE;
+		bOut_UnclampRequest:= TRUE;
+		
+		IF bIn_IsUnclamped THEN
+			bOut_UnclampRequest:= FALSE;
+			diActualSeqStep:= 40;
+		END_IF
+		
+	40: 				//Run Motor Init to Home sequence
+		Motor.Init();
+		IF Motor.bInit_Finished THEN
+			diActualSeqStep:= 50;	
+		END_IF
+				
+	50:					//Initial done
+		bInit_Finished:= TRUE;
+		diActualSeqStep:= 1000;	
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="IO" Id="{b82eba14-9c27-4dcb-9877-c0473c342155}">
+      <Declaration><![CDATA[METHOD IO
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Declare and run devices and add safety conditions
+Motor(bMovePermissive:= bIn_SafeToMove);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Manual" Id="{78865fe1-6d2b-4819-aa78-31d6b6d38fe7}">
+      <Declaration><![CDATA[METHOD Manual
+
+VAR
+	r_trig						: R_TRIG;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF bManualStep THEN
+	r_trig(clk:= TRUE);
+	IF r_trig.Q THEN				//Update params only once
+		Motor.MovementType:= EN_MotionType.relative;
+		Motor.lrPosition:= Motor.lrActualPosition+ lrDistance;
+		Motor.bExecute:= FALSE;
+			
+	END_IF
+		Motor.bExecute:= TRUE;
+	
+	IF Motor.bDone THEN
+		bManualStep:= FALSE;
+		Motor.bExecute:= FALSE;
+	END_IF	
+ELSE
+	
+	Motor.bExecute:= FALSE;
+
+
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Pause" Id="{aff142ed-3f28-43b5-925c-660aa5fd3fae}">
+      <Declaration><![CDATA[METHOD Pause
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Stop" Id="{0cc6e966-ea03-461d-a0b2-d837164665d6}">
+      <Declaration><![CDATA[METHOD Stop
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_Conveyor">
+      <LineId Id="3" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Conveyor.Alarm">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Conveyor.Auto">
+      <LineId Id="3" Count="71" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Conveyor.fnUpdateRailPosition">
+      <LineId Id="2" Count="10" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Conveyor.Init">
+      <LineId Id="3" Count="15" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="38" Count="1" />
+      <LineId Id="21" Count="12" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Conveyor.IO">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Conveyor.Manual">
+      <LineId Id="3" Count="18" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Conveyor.Pause">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Conveyor.Stop">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="GVL_Rails" Id="{d0c88661-c0f2-4baa-9dad-68f3ec69001e}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+		Nests	: ARRAY[1..Constants.Total_Nest] OF ST_Nest;
+	
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

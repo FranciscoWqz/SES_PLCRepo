@@ -35,7 +35,16 @@
     </SelectedLibraryCategories>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="DUTs\ST_Nest.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\ST_RAC_EIP.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GVLs\Constants.TcGVL">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GVLs\GVL_Rails.TcGVL">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="PlcTask.TcTTO">
@@ -60,6 +69,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="POUs\01-DevicesFB\Bmanual\FB_Bimanual.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\01-DevicesFB\Conveyor\FB_Conveyor.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="POUs\01-DevicesFB\Cylinder\FB_Cylinder.TcPOU">
@@ -111,6 +123,7 @@
     <Folder Include="POUs\01-DevicesFB\Cylinder" />
     <Folder Include="POUs\01-DevicesFB\LightTower" />
     <Folder Include="POUs\01-DevicesFB\Motor" />
+    <Folder Include="POUs\01-DevicesFB\Conveyor" />
     <Folder Include="POUs\01-DevicesFB\Robot" />
     <Folder Include="POUs\01-DevicesFB\Scanner" />
     <Folder Include="POUs\01-DevicesFB\TrayFeeder" />

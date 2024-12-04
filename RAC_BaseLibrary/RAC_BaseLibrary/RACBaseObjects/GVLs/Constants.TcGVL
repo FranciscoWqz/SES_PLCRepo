@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="Constants" Id="{93dfd102-023b-42e1-97d9-bf01ba954425}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL CONSTANT
+	
+	Total_Nest						: USINT		:= 155;
+	
+	LoadPos							: USINT		:= 1;
+	NestScanPos						: USINT		:= 2;
+	ControllerScanPos				: USINT		:= 4;	
+	BatteryConnectPos		 		: USINT		:= 5;
+	DisplayScanPos		 			: USINT		:= 18;	
+	BatteryDisconnectPos			: USINT		:= 20;
+	TappingPos						: USINT		:= 23;
+						
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>
