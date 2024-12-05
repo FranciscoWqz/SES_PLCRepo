@@ -1447,7 +1447,7 @@ External Setpoint Generation:
 			</ArrayInfo>
 		</DataType>
 	</DataTypes>
-	<Project ProjectGUID="{4B9770AA-D8BA-45A5-A9AE-8227E575C83C}" TargetNetId="192.168.0.6.1.1" Target64Bit="true" ShowHideConfigurations="#x6">
+	<Project ProjectGUID="{4B9770AA-D8BA-45A5-A9AE-8227E575C83C}" Target64Bit="true" ShowHideConfigurations="#x6">
 		<System>
 			<Settings MaxCpus="4" NonWinCpus="3">
 				<Cpu/>
@@ -2122,7 +2122,7 @@ External Setpoint Generation:
 				</Instance>
 			</Project>
 			<Project GUID="{18BBD500-7124-4BBD-8858-94E7E7E0784A}" Name="PLC_ST02" PrjFilePath="PLC_ST02\PLC_ST02.plcproj" TmcFilePath="PLC_ST02\PLC_ST02.tmc" ReloadTmc="true" AmsPort="852" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502040" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="PLC_ST02\PLC_ST02.tmc" TmcHash="{E92C57DF-9869-FDB6-267E-B8DEA5658936}">
+				<Instance Id="#x08502040" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="PLC_ST02\PLC_ST02.tmc" TmcHash="{4BA06378-0C04-6788-3110-51B35AE962C0}">
 					<Name>PLC_ST02 Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -2638,9 +2638,6 @@ External Setpoint Generation:
 			</OwnerB>
 		</OwnerA>
 		<OwnerA Name="TIPC^PLC_ST01^PLC_ST01 Instance">
-			<OwnerB Name="TIID^Device 1 (ECAT EIP Scanner (EL6652))^Robot01_Controller">
-				<Link VarA="PlcST01Task Inputs^MAIN_ST01.fbControllerSupply.fbRobot.RobotIO.eipInputs" VarB="Connection 1 (Input/Output)^Inputs^inputRaw"/>
-			</OwnerB>
 			<OwnerB Name="TIID^Device 1 (ECAT EIP Scanner (EL6652))^Robot02_Battery">
 				<Link VarA="PlcST01Task Inputs^MAIN_ST01.fbBatterySupply.fbRobot.RobotIO.eipInputs" VarB="Connection 2 (Input/Output)^Inputs^inputRaw"/>
 			</OwnerB>

@@ -21,7 +21,7 @@
     <Title>Base Objects Library</Title>
     <ProjectVersion>24.12.1</ProjectVersion>
     <DefaultNamespace>RACBaseObjects</DefaultNamespace>
-    <Author>Erick Miklos Vidal Rodriguez</Author>
+    <Author>RAC Team</Author>
     <Description>Base library for base devices and machines in RAC LATAM</Description>
     <LibraryCategories>
       <LibraryCategory xmlns="">

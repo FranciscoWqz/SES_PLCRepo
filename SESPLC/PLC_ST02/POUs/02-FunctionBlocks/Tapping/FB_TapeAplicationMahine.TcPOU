@@ -21,8 +21,7 @@ END_VAR
 								bAlarmReset:=bAlarmReset,
 								diStationState:=diStationState,
 								bInit_StartPermissive:=(fbTapeApplicator_Left.bAllServosSafePosition AND fbTapeApplicator_Right.bAllServosSafePosition),
-								bMovePermissive:=(fbTapeApplicator_Left.bSafeConditions AND fbTapeApplicator_Right.bSafeConditions),
-								HomeDir:=TC2_MC2.MC_Direction.MC_Negative_Direction);
+								bMovePermissive:=(fbTapeApplicator_Left.bSafeConditions AND fbTapeApplicator_Right.bSafeConditions));
 
 //	Left tape applicator system
 	fbTapeApplicator_Left(		sDeviceID:='',
@@ -100,7 +99,8 @@ sAlarm:= CONCAT(STR1:=sAlarm,STR2:=fbTapeApplicator_Right.sAlarm);]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_TapeAplicationMahine">
-      <LineId Id="3" Count="36" />
+      <LineId Id="3" Count="8" />
+      <LineId Id="13" Count="26" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_TapeAplicationMahine.Alarm">

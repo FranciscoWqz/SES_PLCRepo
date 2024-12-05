@@ -51,8 +51,7 @@ END_VAR
 								bAlarmReset:=bAlarmReset,
 								diStationState:=diStationState,
 								bInit_StartPermissive:=fbCyl_TapeApplicatorFront.bIsRetracted AND fbCyl_TapeApplicatorRear.bIsRetracted,
-								bMovePermissive:=bServo_Picker_isSafePosition AND fbCyl_TapeApplicatorFront.bIsRetracted AND fbCyl_TapeApplicatorRear.bIsRetracted,
-								HomeDir:=TC2_MC2.MC_Direction.MC_Negative_Direction);
+								bMovePermissive:=bServo_Picker_isSafePosition AND fbCyl_TapeApplicatorFront.bIsRetracted AND fbCyl_TapeApplicatorRear.bIsRetracted);
 	bServo_Lift_isSafePosition		:= (fbServo_Lift.lrActualPosition<=20) OR (fbServo_Lift.lrActualPosition>=100);
 
 //	Move tape picker rear - front						
@@ -61,8 +60,7 @@ END_VAR
 								bAlarmReset:=bAlarmReset,
 								diStationState:=diStationState,
 								bInit_StartPermissive:=fbServo_Lift.bInit_Finished,
-								bMovePermissive:=bServo_Lift_isSafePosition,
-								HomeDir:=TC2_MC2.MC_Direction.MC_Negative_Direction);
+								bMovePermissive:=bServo_Lift_isSafePosition);
 	bServo_Picker_isSafePosition	:= (fbServo_Picker.lrActualPosition<=100);
 
 //	Scissors Cylinder
@@ -246,7 +244,9 @@ bSafeConditions								:=	bAllServosSafePosition AND bAllCylinderSafePosition;]]
       </Implementation>
     </Method>
     <LineIds Name="FB_TapeApplicator">
-      <LineId Id="3" Count="77" />
+      <LineId Id="3" Count="8" />
+      <LineId Id="13" Count="8" />
+      <LineId Id="23" Count="57" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_TapeApplicator.Alarm">
