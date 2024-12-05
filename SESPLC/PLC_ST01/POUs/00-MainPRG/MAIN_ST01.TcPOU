@@ -4,6 +4,7 @@
     <Declaration><![CDATA[PROGRAM MAIN_ST01
 VAR
 	fbStation01							: RACBaseObjects.FB_Station;
+	fbConveyor							: RACBaseObjects.FB_Conveyor;
 	fbControllerSupply					: FB_ControllerSupply;
 	fbBatterySupply						: FB_BatterySupply;
 	//EndcapAsm							: FB_EndcapAsm_ST;
@@ -12,6 +13,18 @@ VAR
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[	fbStation01(bInitFinished:=fbControllerSupply.bInit_Finished AND fbBatterySupply.bInit_Finished);
+
+	fbConveyor(							sDeviceID:='',
+										bStopExecution:=fbStation01.bStop,
+										bAlarmReset:=fbStation01.bAlarmReset,
+										diStationState:=fbStation01.diStationState,
+										bInit_StartPermissive:=TRUE,
+										bIn_SafeToMove:=FALSE,
+										bIn_AllProcessComplete:=FALSE,
+										lrDistance:=0,
+										lrOffsetPos:=0,
+										bIn_IsClamped:=FALSE,
+										bIn_IsUnclamped:=FALSE);
 
 //	fbRailControl(						);
 
@@ -32,7 +45,13 @@ END_VAR]]></Declaration>
 //	fbEndcapAsm(						);]]></ST>
     </Implementation>
     <LineIds Name="MAIN_ST01">
-      <LineId Id="3" Count="17" />
+      <LineId Id="3" Count="0" />
+      <LineId Id="30" Count="4" />
+      <LineId Id="4" Count="0" />
+      <LineId Id="37" Count="1" />
+      <LineId Id="40" Count="3" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="5" Count="15" />
       <LineId Id="2" Count="0" />
     </LineIds>
   </POU>

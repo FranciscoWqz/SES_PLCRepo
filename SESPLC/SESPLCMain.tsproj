@@ -1906,7 +1906,7 @@ External Setpoint Generation:
 		</Motion>
 		<Plc>
 			<Project GUID="{4D5621D0-6B94-459B-B4CC-290DF5B1AA61}" Name="PLC_ST01" PrjFilePath="PLC_ST01\PLC_ST01.plcproj" TmcFilePath="PLC_ST01\PLC_ST01.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="PLC_ST01\PLC_ST01.tmc" TmcHash="{B541E7A3-95FA-7906-BA91-DA28C1A6F095}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="PLC_ST01\PLC_ST01.tmc" TmcHash="{D4253EB2-0264-0534-D4F4-6E5D237F3484}">
 					<Name>PLC_ST01 Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -1946,6 +1946,10 @@ External Setpoint Generation:
 						<Var>
 							<Name>MAIN_ST01.fbStation01.system.PressureSwitch</Name>
 							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbConveyor.Motor.Motor.NcToPlc</Name>
+							<Type GUID="{25521FAA-EA5F-4C7F-8864-BBCCDACD2E98}" Namespace="MC">NCTOPLC_AXIS_REF</Type>
 						</Var>
 						<Var>
 							<Name>MAIN_ST01.fbControllerSupply.fbTrayFeeder.TrayFeederIO.uiin_ConnectionStatus</Name>
@@ -2053,6 +2057,10 @@ External Setpoint Generation:
 					<Vars VarGrpType="2" AreaNo="1">
 						<Name>PlcST01Task Outputs</Name>
 						<Var>
+							<Name>MAIN_ST01.fbConveyor.Motor.Motor.PlcToNc</Name>
+							<Type GUID="{96B75FEB-2D84-43BE-A3EC-D9A681F27D52}" Namespace="MC">PLCTONC_AXIS_REF</Type>
+						</Var>
+						<Var>
 							<Name>MAIN_ST01.fbControllerSupply.fbTrayFeeder.TrayFeederIO.eipOutputs</Name>
 							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
 						</Var>
@@ -2122,7 +2130,7 @@ External Setpoint Generation:
 				</Instance>
 			</Project>
 			<Project GUID="{18BBD500-7124-4BBD-8858-94E7E7E0784A}" Name="PLC_ST02" PrjFilePath="PLC_ST02\PLC_ST02.plcproj" TmcFilePath="PLC_ST02\PLC_ST02.tmc" ReloadTmc="true" AmsPort="852" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502040" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="PLC_ST02\PLC_ST02.tmc" TmcHash="{E92C57DF-9869-FDB6-267E-B8DEA5658936}">
+				<Instance Id="#x08502040" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="PLC_ST02\PLC_ST02.tmc" TmcHash="{B53E51AA-2D7F-DE39-73DB-419AB22273B2}">
 					<Name>PLC_ST02 Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">

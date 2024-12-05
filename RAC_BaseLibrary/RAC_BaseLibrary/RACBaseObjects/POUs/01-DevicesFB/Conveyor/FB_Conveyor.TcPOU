@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_Conveyor" Id="{8d2aabfa-c6af-4fd2-bb62-8d8d82d55f8e}" SpecialFunc="None">
-    <Declaration><![CDATA[FUNCTION_BLOCK INTERNAL FB_Conveyor EXTENDS FB_Machine
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Conveyor EXTENDS FB_Machine
 VAR_INPUT
 	//All subproces in safe position
 	bIn_SafeToMove					: BOOL;
@@ -26,6 +26,8 @@ VAR_OUTPUT
 	
 	bOut_ClampRequest				: BOOL;
 	bOut_UnclampRequest				: BOOL;
+	
+	bSafetyBoxPlace_OutOfZone		: BOOL;
 	
 END_VAR
 VAR
@@ -66,10 +68,7 @@ SUPER^.MachineMain();
       <Declaration><![CDATA[METHOD Auto
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[//Run Auto sequence for the Motor
-Motor.Auto();
-
-IF diActualSeqStep<1000 OR diActualSeqStep> 2000 THEN
+        <ST><![CDATA[IF diActualSeqStep<1000 OR diActualSeqStep> 2000 THEN
 	diActualSeqStep:= 1000;
 END_IF
 
@@ -259,7 +258,7 @@ END_IF]]></ST>
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_Conveyor.Auto">
-      <LineId Id="3" Count="71" />
+      <LineId Id="6" Count="68" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_Conveyor.fnUpdateRailPosition">
