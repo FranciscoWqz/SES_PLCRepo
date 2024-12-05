@@ -107,9 +107,7 @@ IF bMovePermissive AND ((diStationState=EN_StationStatus.running) OR (diStationS
 						Position			:= lrTargetPosition,
 						Velocity			:= lrSpeed);
 	END_CASE
-	IF bTrigger THEN
-		bTrigger							:= FALSE;
-	END_IF
+	bTrigger							:= FALSE;
 END_IF
 
 // For pausing actual movement
@@ -415,7 +413,7 @@ bMotorStop 						:= Motor.Status.Moving;]]></ST>
       <LineId Id="49" Count="5" />
       <LineId Id="239" Count="0" />
       <LineId Id="55" Count="0" />
-      <LineId Id="240" Count="2" />
+      <LineId Id="241" Count="0" />
       <LineId Id="56" Count="13" />
       <LineId Id="2" Count="0" />
     </LineIds>
