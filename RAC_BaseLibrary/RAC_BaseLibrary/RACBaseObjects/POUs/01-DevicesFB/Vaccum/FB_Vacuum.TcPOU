@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_Vacuum" Id="{f9531b35-4007-4908-8918-76526d36fc74}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_Vacuum EXTENDS FB_Device
 VAR_INPUT
@@ -14,6 +14,7 @@ VAR
 	VacuumValve				AT %Q*	: BOOL;
 	BlowValve				AT %Q*	: BOOL;
 	VaccumSensor			AT %I*	: BOOL;
+	tmrBlow							: TP;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -41,5 +42,61 @@ END_VAR
 	AlarmCodesHandling(sConcatCodes:=sAlarm,sCode:='EVACUDET02 ',sIDToAdd:=sDeviceID,bActive:=(BlowValve AND ton_StepTimeout.Q));]]></ST>
       </Implementation>
     </Method>
+    <Method Name="Pick" Id="{7a8bb277-e95f-446d-a6b9-288a0c9e0a5c}">
+      <Declaration><![CDATA[METHOD Pick : bool
+VAR_INPUT	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[BlowValve:= FALSE;
+VacuumValve:= TRUE;
+
+//IF NOT VaccumSensor THEN
+//	SetAlarm('Vacuum not reached!');
+//ELSE
+//	SetAlarm('');	
+//END_IF
+
+Pick := VaccumSensor;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Release" Id="{fecf298a-d878-4a03-bda7-5624c8bf16fd}">
+      <Declaration><![CDATA[METHOD Release : bool
+VAR_INPUT
+	Blow			: BOOL 	:= FALSE;
+	BlowPulse		: TIME	:= T#100MS;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[VacuumValve:= FALSE;
+tmrBlow(In:= TRUE, PT:= BlowPulse);
+
+IF blow AND tmrBlow.Q THEN
+	BlowValve:= TRUE;
+ELSE
+	BlowValve:= FALSE;		
+END_IF
+
+
+
+Release := NOT VaccumSensor AND tmrBlow.Q;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_Vacuum">
+      <LineId Id="3" Count="8" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Vacuum.Alarm">
+      <LineId Id="3" Count="6" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Vacuum.Pick">
+      <LineId Id="3" Count="8" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Vacuum.Release">
+      <LineId Id="3" Count="10" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
   </POU>
 </TcPlcObject>
