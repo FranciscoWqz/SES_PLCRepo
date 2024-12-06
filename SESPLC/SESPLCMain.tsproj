@@ -1906,7 +1906,7 @@ External Setpoint Generation:
 		</Motion>
 		<Plc>
 			<Project GUID="{4D5621D0-6B94-459B-B4CC-290DF5B1AA61}" Name="PLC_ST01" PrjFilePath="PLC_ST01\PLC_ST01.plcproj" TmcFilePath="PLC_ST01\PLC_ST01.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e">
-				<Instance Id="#x01010010" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="PLC_ST01\PLC_ST01.tmc" TmcHash="{D4253EB2-0264-0534-D4F4-6E5D237F3484}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="PLC_ST01\PLC_ST01.tmc" TmcHash="{D4253EB2-0264-0534-D4F4-6E5D237F3484}">
 					<Name>PLC_ST01 Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -2124,6 +2124,9 @@ External Setpoint Generation:
 							<CycleTime>10000000</CycleTime>
 						</Context>
 					</Contexts>
+					<TaskPouOids>
+						<TaskPouOid Prio="20" OTCID="#x08502001"/>
+					</TaskPouOids>
 				</Instance>
 			</Project>
 			<Project GUID="{18BBD500-7124-4BBD-8858-94E7E7E0784A}" Name="PLC_ST02" PrjFilePath="PLC_ST02\PLC_ST02.plcproj" TmcFilePath="PLC_ST02\PLC_ST02.tmc" ReloadTmc="true" AmsPort="852" FileArchiveSettings="#x000e" SymbolicMapping="true">

@@ -20,6 +20,12 @@ VAR_OUTPUT
 	byAvailableNests				: BYTE;
 END_VAR
 VAR
+	// Timmers for considering cart in place
+	tonCartIsInPlace				: TON;
+	
+	// Timmers for considering cart removed
+	tonCartRemoved					: TON;
+
 	// Occuped nests in reject cart
 	siOccupedNests					: SINT;
 	
@@ -51,25 +57,66 @@ END_VAR]]></Declaration>
     <Method Name="Alarm" Id="{a2e3233f-e38e-4263-92eb-523118066f8e}">
       <Declaration><![CDATA[METHOD  Alarm]]></Declaration>
       <Implementation>
-        <ST><![CDATA[]]></ST>
+        <ST><![CDATA[//	Step timeout
+	ton_StepTimeout(					IN:= diActualSeqStep=diLastActiveStep,
+										PT:= T#1S);
+
+// 	Following of sequence for setting timeout
+	IF diLastActiveStep<>diActualSeqStep THEN
+		diLastActiveStep					:= diActualSeqStep;
+	END_IF
+
+//	For setting an sequence alarm code
+	IF ton_StepTimeout.Q THEN
+		CASE diActualSeqStep OF
+			10: 	sAlarm				:= '';	// Init wait cart in position timeout
+			50: 	sAlarm				:= '';	// Cart clamping timeout
+			110: 	sAlarm				:= '';	// Cart removal timeout
+			1000: 	sAlarm				:= '';	// Cart in position and clamped timeout
+			1100: 	sAlarm				:= '';	// Cart removal timeout
+		END_CASE
+	END_IF
+
+//	Concat general alarm codes with cart lock cylinder alarm codes
+	sAlarm								:= CONCAT(STR1:=sAlarm,STR2:=fbCartLock.sAlarm);]]></ST>
       </Implementation>
     </Method>
     <Method Name="Auto" Id="{ceee8003-41cf-4c72-a85c-d9e2b0f68d8c}">
       <Declaration><![CDATA[METHOD  Auto]]></Declaration>
       <Implementation>
-        <ST><![CDATA[//Check for cart in position and nest availability
-IF bCartPresence AND iIn_RejectNests > 0 THEN
-	fbCartLock.RetractAction();
-//If cart is not detected, unlock it
-ELSIF NOT bCartPresence THEN					
-	fbCartLock.ExtendAction();
-	SetAlarm('Cart not present in reject transfer St01 -> St02');			
-			
-//Else means that is cart, but not detected nest availability
-ELSE
-	fbCartLock.ExtendAction();
-	SetAlarm('Available nests not detected, check sensor alignment or cart replace');
-END_IF]]></ST>
+        <ST><![CDATA[//	Keep sequencer in range
+	IF diActualSeqStep<1000 OR diActualSeqStep>1999 THEN
+		diActualSeqStep					:= 1000;
+	END_IF
+
+CASE diActualSeqStep OF
+	1000:								//	Check for cart in position and it is clamped
+		IF tonCartIsInPlace.Q AND fbCartLock.bIsExtended THEN
+			fbCartLock.bRetractRequest	:= FALSE;
+			fbCartLock.bExtendRequest	:= FALSE;
+			diActualSeqStep				:= 1050;
+	
+		ELSIF tonCartIsInPlace.Q AND fbCartLock.bIsRetracted THEN
+			fbCartLock.bRetractRequest	:= FALSE;
+			fbCartLock.bExtendRequest	:= TRUE;
+	
+		ELSE
+			fbCartLock.bExtendRequest	:= FALSE;
+			fbCartLock.bRetractRequest	:= TRUE;
+		END_IF
+	1050:								//	If there are not availability of places in cart release it and wait it has been removed
+		IF siOccupedNests>=8 THEN
+			fbCartLock.bExtendRequest	:= FALSE;
+			fbCartLock.bRetractRequest	:= TRUE;
+		END_IF
+		IF fbCartLock.bIsRetracted THEN
+			diActualSeqStep				:= 1100;
+		END_IF
+	1100:								//	Waiting cart removal
+		IF tonCartRemoved.Q THEN
+			diActualSeqStep				:= 1000;
+		END_IF
+END_CASE]]></ST>
       </Implementation>
     </Method>
     <Action Name="CountNests" Id="{3b2313c9-83b0-41af-9e3b-f1539f266f22}">
@@ -107,59 +154,67 @@ END_IF]]></ST>
       <Implementation>
         <ST><![CDATA[//	Keep sequencer in range
 	IF diActualSeqStep<0 OR diActualSeqStep>999 THEN
-		diActualSeqStep				:= 0;
+		diActualSeqStep					:= 0;
 	END_IF
 
 CASE diActualSeqStep OF
-	0:								//	Wait for the initial permisive and reset values
+	0:									//	Wait for the initial permisive and reset values
 		IF  bInit_StartPermissive THEN
-			fbCartLock.bRetractRequest:= FALSE;
-			fbCartLock.bExtendRequest:= FALSE;
-			diActualSeqStep 		:= 10;
+			fbCartLock.bRetractRequest	:= FALSE;
+			fbCartLock.bExtendRequest	:= FALSE;
+			diActualSeqStep 			:= 10;
 		END_IF
-	10:								// Check cart is in place
-		IF bCartPresence THEN
-			diActualSeqStep 		:= 50;
+	10:									// Check cart is in place
+		IF tonCartIsInPlace.Q THEN
+			diActualSeqStep 			:= 50;
 		ELSE
 			fbCartLock.bRetractRequest:=TRUE;
 		END_IF
-	50:								// Confirm cart is clamped
-		fbCartLock.bRetractRequest	:= FALSE;
-		fbCartLock.bExtendRequest	:= TRUE;
+	50:									// Confirm cart is clamped
+		fbCartLock.bRetractRequest		:= FALSE;
+		fbCartLock.bExtendRequest		:= TRUE;
 		IF fbCartLock.bIsExtended THEN
-			fbCartLock.bExtendRequest:= FALSE;
-			diActualSeqStep			:= 100;
+			fbCartLock.bExtendRequest	:= FALSE;
+			diActualSeqStep				:= 100;
 		END_IF
-	100:							// Check reject nest availability for release cart
+	100:								// Check reject nest availability for release cart
 		IF siOccupedNests>=4 THEN
-			diActualSeqStep			:= 110;
+			diActualSeqStep				:= 110;
 		ELSE
-			diActualSeqStep 		:= 999;
+			diActualSeqStep 			:= 999;
 		END_IF
-	110:							// Unlock cart and wait it's removed
-		bRemovePiecesRequest		:= TRUE;
-		fbCartLock.bRetractRequest:= TRUE;
-		IF fbCartLock.bIsRetracted AND NOT bCartPresence THEN
-			diActualSeqStep			:= 0;
+	110:								// Unlock cart and wait it's removed
+		bRemovePiecesRequest			:= TRUE;
+		fbCartLock.bRetractRequest		:= TRUE;
+		IF fbCartLock.bIsRetracted AND tonCartRemoved.Q THEN
+			diActualSeqStep				:= 0;
 		END_IF
-	999:							// Init finished
-		bInit_Finished				:= TRUE;
+	999:								// Init finished
+		bInit_Finished					:= TRUE;
 END_CASE]]></ST>
       </Implementation>
     </Method>
     <Method Name="IO" Id="{39def025-d6fb-42e4-a8f1-838c4d1768f8}">
       <Declaration><![CDATA[METHOD  IO]]></Declaration>
       <Implementation>
-        <ST><![CDATA[//	If all places are ocupped request cart removal	
-	IF byRejectNestsSensors=255 THEN
+        <ST><![CDATA[//	For considering cart in place
+	tonCartIsInPlace(							IN:=bCartPresence,
+												PT:=T#1S);
+
+//	For considering cart has been removed
+	tonCartRemoved(							IN:=NOT bCartPresence,
+												PT:=T#1S);
+
+//	If all places are ocupped request cart removal
+	IF siOccupedNests>=8 THEN
 		bRemovePiecesRequest				:= TRUE;
 //	If cart is removed clear request
-	ELSIF bCartPresence THEN
+	ELSIF tonCartRemoved.Q THEN
 		bRemovePiecesRequest				:= FALSE;
 	END_IF
 
 //	Piece sensor inverse polaritiy refreshing in available positions var
-	IF bCartPresence THEN
+	IF tonCartIsInPlace.Q AND fbCartLock.bIsExtended THEN
 		byAvailableNests.0						:= NOT byRejectNestsSensors.0;
 		byAvailableNests.1						:= NOT byRejectNestsSensors.1;
 		byAvailableNests.2						:= NOT byRejectNestsSensors.2;
@@ -173,7 +228,7 @@ END_CASE]]></ST>
 	END_IF
 
 //	For safety box enter permissive
-	bSafetyBox_okForEnter					:= bCartPresence AND fbCartLock.bIsRetracted;]]></ST>
+	bSafetyBox_okForEnter						:= tonCartIsInPlace.Q AND fbCartLock.bIsExtended;]]></ST>
       </Implementation>
     </Method>
     <Method Name="Manual" Id="{bd5d7f9f-2e54-42b2-b27b-2eaea211983d}">
@@ -199,12 +254,46 @@ END_CASE]]></ST>
       <LineId Id="77" Count="0" />
     </LineIds>
     <LineIds Name="FB_RejectCart.Alarm">
+      <LineId Id="11" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="12" Count="2" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="17" Count="1" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="24" Count="2" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="4" Count="1" />
       <LineId Id="3" Count="0" />
     </LineIds>
     <LineIds Name="FB_RejectCart.Auto">
-      <LineId Id="13" Count="2" />
-      <LineId Id="17" Count="8" />
+      <LineId Id="28" Count="2" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="40" Count="1" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="17" Count="2" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="22" Count="1" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="24" Count="0" />
       <LineId Id="3" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="43" Count="1" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="54" Count="2" />
+      <LineId Id="51" Count="2" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="35" Count="0" />
     </LineIds>
     <LineIds Name="FB_RejectCart.CountNests">
       <LineId Id="2" Count="24" />
@@ -238,6 +327,14 @@ END_CASE]]></ST>
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_RejectCart.IO">
+      <LineId Id="38" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="39" Count="0" />
       <LineId Id="4" Count="0" />
       <LineId Id="6" Count="1" />
       <LineId Id="33" Count="0" />
