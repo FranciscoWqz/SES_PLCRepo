@@ -3,6 +3,9 @@
   <POU Name="FB_RejectCart" Id="{743a376f-4fa0-4fba-821c-e0b7d34bd821}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_RejectCart EXTENDS FB_Machine
 VAR_INPUT
+	// Device identification
+	sLockCylinerID					: STRING;
+	
 	// Safety box permissive for release and remove cart
 	bSafetyBox_permissive			: BOOL;
 	

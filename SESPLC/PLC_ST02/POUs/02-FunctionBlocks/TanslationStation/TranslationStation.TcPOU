@@ -1,0 +1,147 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="TranslationStation" Id="{0291c8f1-c17a-48f2-8a27-4a9afba335cf}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK TranslationStation EXTENDS RACBaseObjects.FB_Machine
+VAR_INPUT
+	sRobotID						: STRING;
+	
+	sRejectCartID					: STRING;
+	sLockCylinerID					: STRING;
+	
+	bSafetyBoxPick_permissive		: BOOL;
+	bPick_OKPieceReady				: BOOL;
+	bPick_NGPieceReady				: BOOL;
+	
+	bSafetyBoxPlace_permisive		: BOOL;
+	bPlace_ReadyToRecieve			: BOOL;
+END_VAR
+VAR_OUTPUT
+	bSafetyBoxPick_outOfZone		: BOOL;
+	bPick_done						: BOOL;
+	
+	bSafetyBoxPlace_outOfZone		: BOOL;
+	bPlace_done						: BOOL;
+END_VAR
+VAR
+	fbRobot							: RACBaseObjects.FB_Robot;
+	fbRejectCart					: RACBaseObjects.FB_RejectCart;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//	Run the standar main for any machine
+SUPER^.MachineMain();
+
+//	Robot instance
+	fbRobot(							sDeviceID:=	sRobotID,
+										bStopExecution:=bStopExecution,
+										bAlarmReset:=bAlarmReset,
+										diStationState:=diStationState,
+										bInit_StartPermissive:=bInit_StartPermissive,
+										bSafetyBoxPick_Permissive:=bSafetyBoxPick_permissive,
+										bSafetyBoxPlace_Permissive:=bSafetyBoxPlace_permisive,
+										bSafetyBoxReject_Permissive:=fbRejectCart.bSafetyBox_okForEnter,
+										bOKMaterialReadyToPick:=bPick_OKPieceReady,
+										bNGMaterialReadyToPick:=bPick_NGPieceReady,
+										bPiceIsGood:=TRUE,
+										bPiceIsNG:=FALSE,
+										bPlace_MaterialRequest:=bPlace_ReadyToRecieve,
+										bReject_MaterialRequest:=FALSE,
+										bSafetyBoxPick_OutOfZone=>bSafetyBoxPick_outOfZone,
+										bSafetyBoxPlace_OutOfZone=>bSafetyBoxPlace_outOfZone,
+										bPick_AllMaterialPicked=>bPick_done,
+										bPlace_Done=>bPlace_Done);
+
+//	Reject cart instance
+	fbRejectCart(						sDeviceID:=	sRejectCartID,
+										bStopExecution:=bStopExecution,
+										bAlarmReset:=bAlarmReset,
+										diStationState:=diStationState,
+										bInit_StartPermissive:=fbRobot.bInit_Finished,
+										sLockCylinerID:=sLockCylinerID,
+										bSafetyBox_permissive:=fbRobot.bSafetyBoxReject_OutOfZone,
+										bPlacePieceOnCartRequest:=);]]></ST>
+    </Implementation>
+    <Method Name="Alarm" Id="{a0149431-3a53-4116-b703-6a2b3876d3e4}">
+      <Declaration><![CDATA[METHOD  Alarm]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[sAlarm									:= CONCAT (STR1:=fbRobot.sAlarm,STR2:=fbRejectCart);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Auto" Id="{3d2d36c2-2271-4596-8139-9c94aa8a513d}">
+      <Declaration><![CDATA[METHOD  Auto]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Init" Id="{e5aa8654-e9ae-485f-bae7-f5867f26408a}">
+      <Declaration><![CDATA[METHOD  Init]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bInit_Finished							:= fbRobot.bInit_Finished and fbRejectCart.bInit_Finished;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="IO" Id="{ea77a980-61c2-4953-b725-fc35207f0848}">
+      <Declaration><![CDATA[METHOD  IO
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Manual" Id="{9aba8f81-8323-4e38-a10e-561672fa27a1}">
+      <Declaration><![CDATA[METHOD  Manual
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Pause" Id="{9a2f165d-2b95-42ac-8a23-f3cef238dfb7}">
+      <Declaration><![CDATA[METHOD  Pause
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Stop" Id="{b20082eb-802c-4229-81f9-92b695973e9f}">
+      <Declaration><![CDATA[METHOD  Stop
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="TranslationStation">
+      <LineId Id="12" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="14" Count="16" />
+      <LineId Id="66" Count="1" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="35" Count="3" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="57" Count="1" />
+    </LineIds>
+    <LineIds Name="TranslationStation.Alarm">
+      <LineId Id="3" Count="0" />
+    </LineIds>
+    <LineIds Name="TranslationStation.Auto">
+      <LineId Id="3" Count="0" />
+    </LineIds>
+    <LineIds Name="TranslationStation.Init">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="TranslationStation.IO">
+      <LineId Id="4" Count="0" />
+    </LineIds>
+    <LineIds Name="TranslationStation.Manual">
+      <LineId Id="4" Count="0" />
+    </LineIds>
+    <LineIds Name="TranslationStation.Pause">
+      <LineId Id="4" Count="0" />
+    </LineIds>
+    <LineIds Name="TranslationStation.Stop">
+      <LineId Id="3" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

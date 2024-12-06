@@ -68,7 +68,7 @@
     <Compile Include="POUs\00_Interfaces\Stations\ST_StationIO.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POUs\01-DevicesFB\Bmanual\FB_Bimanual.TcPOU">
+    <Compile Include="POUs\01-DevicesFB\Bimanual\FB_Bimanual.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="POUs\01-DevicesFB\Conveyor\FB_Conveyor.TcPOU">
@@ -122,12 +122,11 @@
     <Folder Include="POUs\00_Interfaces\Machine" />
     <Folder Include="POUs\00_Interfaces\Stations" />
     <Folder Include="POUs\01-DevicesFB" />
-    <Folder Include="POUs\01-DevicesFB\Bmanual" />
+    <Folder Include="POUs\01-DevicesFB\Bimanual" />
     <Folder Include="POUs\01-DevicesFB\Cylinder" />
     <Folder Include="POUs\01-DevicesFB\LightTower" />
     <Folder Include="POUs\01-DevicesFB\Motor" />
     <Folder Include="POUs\01-DevicesFB\Conveyor" />
-    <Folder Include="POUs\01-DevicesFB\TanslationStation" />
     <Folder Include="POUs\01-DevicesFB\RejectCar" />
     <Folder Include="POUs\01-DevicesFB\Robot" />
     <Folder Include="POUs\01-DevicesFB\Scanner" />

@@ -25,6 +25,9 @@
     <Compile Include="POUs\00-MainPRG\MAIN_ST02.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="POUs\02-FunctionBlocks\TanslationStation\TranslationStation.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="POUs\02-FunctionBlocks\Tapping\EN_TapeInSystemStatus.TcDUT">
       <SubType>Code</SubType>
     </Compile>
@@ -40,6 +43,7 @@
     <Folder Include="GVLs" />
     <Folder Include="POUs\00-MainPRG" />
     <Folder Include="POUs\02-FunctionBlocks" />
+    <Folder Include="POUs\02-FunctionBlocks\TanslationStation" />
     <Folder Include="POUs\02-FunctionBlocks\Tapping" />
     <Folder Include="VISUs" />
     <Folder Include="POUs" />
