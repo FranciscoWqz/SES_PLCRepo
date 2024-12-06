@@ -24,13 +24,10 @@
     <Compile Include="POUs\00-MainPRG\MAIN_ST01.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POUs\01-FunctionBlocks\MaterialAssembly\EndcapAsm\FB_EndcapAsm.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="POUs\01-FunctionBlocks\MaterialAssembly\EndcapAsm\ST_BowlFeeder.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="POUs\01-FunctionBlocks\MaterialAssembly\FB_ControllerAsm.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\01-FunctionBlocks\MaterialAssembly\FB_EndcapAsm.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="POUs\01-FunctionBlocks\MaterialSupply\FB_BatterySupply.TcPOU">
@@ -48,7 +45,6 @@
     <Folder Include="GVLs" />
     <Folder Include="POUs\00-MainPRG" />
     <Folder Include="POUs\01-FunctionBlocks" />
-    <Folder Include="POUs\01-FunctionBlocks\MaterialAssembly\EndcapAsm" />
     <Folder Include="POUs\01-FunctionBlocks\MaterialSupply" />
     <Folder Include="POUs\01-FunctionBlocks\MaterialAssembly" />
     <Folder Include="VISUs" />

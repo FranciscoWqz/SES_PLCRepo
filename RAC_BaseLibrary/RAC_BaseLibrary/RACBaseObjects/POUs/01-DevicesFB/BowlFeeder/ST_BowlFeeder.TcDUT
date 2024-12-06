@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <DUT Name="ST_BowlFeeder" Id="{76fe89ae-df30-484b-ae45-cc759ef538e0}">
+  <DUT Name="ST_BowlFeeder" Id="{2416d31b-1a31-4a5e-9593-0772e50d6712}">
     <Declaration><![CDATA[TYPE ST_BowlFeeder :
 	STRUCT
 		bOut_Vibrate			AT%Q*	: BOOL;
