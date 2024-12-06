@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_Device" Id="{f6faf5f6-9e87-4f01-904e-dc0c3deeaa4b}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK  FB_Device
 VAR_INPUT
@@ -19,7 +19,7 @@ VAR_OUTPUT
 	// Display current active alarms in device, in a CVS file concatenating type string
 	sAlarm								: STRING;
 END_VAR
-VAR 
+VAR_STAT
 	// Var to set timeout value in each step
 	tmStepTimeout						: TIME		:=T#1S;
 	
@@ -70,5 +70,12 @@ END_VAR
 	END_IF]]></ST>
       </Implementation>
     </Method>
+    <LineIds Name="FB_Device">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Device.AlarmCodesHandling">
+      <LineId Id="3" Count="14" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
   </POU>
 </TcPlcObject>
