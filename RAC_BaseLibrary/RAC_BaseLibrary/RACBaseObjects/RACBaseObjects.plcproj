@@ -86,6 +86,9 @@
     <Compile Include="POUs\01-DevicesFB\Motor\FB_Motor.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="POUs\01-DevicesFB\RejectCar\FB_RejectCart.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="POUs\01-DevicesFB\Robot\EN_RobotMessaging.TcDUT">
       <SubType>Code</SubType>
     </Compile>
@@ -124,6 +127,8 @@
     <Folder Include="POUs\01-DevicesFB\LightTower" />
     <Folder Include="POUs\01-DevicesFB\Motor" />
     <Folder Include="POUs\01-DevicesFB\Conveyor" />
+    <Folder Include="POUs\01-DevicesFB\TanslationStation" />
+    <Folder Include="POUs\01-DevicesFB\RejectCar" />
     <Folder Include="POUs\01-DevicesFB\Robot" />
     <Folder Include="POUs\01-DevicesFB\Scanner" />
     <Folder Include="POUs\01-DevicesFB\TrayFeeder" />

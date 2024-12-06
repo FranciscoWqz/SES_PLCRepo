@@ -1,0 +1,265 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_RejectCart" Id="{743a376f-4fa0-4fba-821c-e0b7d34bd821}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_RejectCart EXTENDS FB_Machine
+VAR_INPUT
+	// Safety box permissive for release and remove cart
+	bSafetyBox_permissive			: BOOL;
+	
+	// Reject request
+	bPlacePieceOnCartRequest		: BOOL;
+END_VAR
+VAR_OUTPUT
+	// Safety box enter permissive
+	bSafetyBox_okForEnter			: BOOL;
+	
+	// Request for pieces removal when cart is full
+	bRemovePiecesRequest			: BOOL;
+	
+	// Sensors presence array
+	byAvailableNests				: BYTE;
+END_VAR
+VAR
+	// Occuped nests in reject cart
+	siOccupedNests					: SINT;
+	
+	// Cart is in position sensor
+	bCartPresence					AT %I* : BOOL;
+	// 8 sensor array
+	byRejectNestsSensors			AT %I* : BYTE;
+
+	// Cylinder for locking the cart in place
+	fbCartLock						: FB_Cylinder;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[	CountNests();
+
+//	Run the standar main for any machine
+	SUPER^.MachineMain();
+
+//	Safety permisive conditions for any device
+	fbCartLock(						diStationState:=diStationState,
+									sDeviceID:='',
+									bStopExecution:=bStopExecution,
+									bAlarmReset:=bAlarmReset,
+									bPermisiveExtend:= bCartPresence AND bSafetyBox_permissive,
+									bPermisiveRetract:= bCartPresence AND bSafetyBox_permissive,
+									Timeout:= T#1S);
+	fbCartLock.bExtendRequest		:=FALSE;
+	fbCartLock.bRetractRequest		:=FALSE;]]></ST>
+    </Implementation>
+    <Method Name="Alarm" Id="{a2e3233f-e38e-4263-92eb-523118066f8e}">
+      <Declaration><![CDATA[METHOD  Alarm]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Auto" Id="{ceee8003-41cf-4c72-a85c-d9e2b0f68d8c}">
+      <Declaration><![CDATA[METHOD  Auto]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Check for cart in position and nest availability
+IF bCartPresence AND iIn_RejectNests > 0 THEN
+	fbCartLock.RetractAction();
+//If cart is not detected, unlock it
+ELSIF NOT bCartPresence THEN					
+	fbCartLock.ExtendAction();
+	SetAlarm('Cart not present in reject transfer St01 -> St02');			
+			
+//Else means that is cart, but not detected nest availability
+ELSE
+	fbCartLock.ExtendAction();
+	SetAlarm('Available nests not detected, check sensor alignment or cart replace');
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Action Name="CountNests" Id="{3b2313c9-83b0-41af-9e3b-f1539f266f22}">
+      <Implementation>
+        <ST><![CDATA[//  Counts occuped nests in the cart
+	siOccupedNests					:= 0;
+	IF byRejectNestsSensors.0 THEN
+		siOccupedNests				:= siOccupedNests + 1;
+	END_IF
+	IF byRejectNestsSensors.1 THEN
+		siOccupedNests				:= siOccupedNests + 1;
+	END_IF
+	IF byRejectNestsSensors.2 THEN
+		siOccupedNests				:= siOccupedNests + 1;
+	END_IF
+	IF byRejectNestsSensors.3 THEN
+		siOccupedNests				:= siOccupedNests + 1;
+	END_IF
+	IF byRejectNestsSensors.4 THEN
+		siOccupedNests				:= siOccupedNests + 1;
+	END_IF
+	IF byRejectNestsSensors.5 THEN
+		siOccupedNests				:= siOccupedNests + 1;
+	END_IF
+	IF byRejectNestsSensors.6 THEN
+		siOccupedNests				:= siOccupedNests + 1;
+	END_IF
+	IF byRejectNestsSensors.7 THEN
+		siOccupedNests				:= siOccupedNests + 1;
+	END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Method Name="Init" Id="{fcbb3f26-0058-4481-9c58-3d096317d08f}">
+      <Declaration><![CDATA[METHOD  Init]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//	Keep sequencer in range
+	IF diActualSeqStep<0 OR diActualSeqStep>999 THEN
+		diActualSeqStep				:= 0;
+	END_IF
+
+CASE diActualSeqStep OF
+	0:								//	Wait for the initial permisive and reset values
+		IF  bInit_StartPermissive THEN
+			fbCartLock.bRetractRequest:= FALSE;
+			fbCartLock.bExtendRequest:= FALSE;
+			diActualSeqStep 		:= 10;
+		END_IF
+	10:								// Check cart is in place
+		IF bCartPresence THEN
+			diActualSeqStep 		:= 50;
+		ELSE
+			fbCartLock.bRetractRequest:=TRUE;
+		END_IF
+	50:								// Confirm cart is clamped
+		fbCartLock.bRetractRequest	:= FALSE;
+		fbCartLock.bExtendRequest	:= TRUE;
+		IF fbCartLock.bIsExtended THEN
+			fbCartLock.bExtendRequest:= FALSE;
+			diActualSeqStep			:= 100;
+		END_IF
+	100:							// Check reject nest availability for release cart
+		IF siOccupedNests>=4 THEN
+			diActualSeqStep			:= 110;
+		ELSE
+			diActualSeqStep 		:= 999;
+		END_IF
+	110:							// Unlock cart and wait it's removed
+		bRemovePiecesRequest		:= TRUE;
+		fbCartLock.bRetractRequest:= TRUE;
+		IF fbCartLock.bIsRetracted AND NOT bCartPresence THEN
+			diActualSeqStep			:= 0;
+		END_IF
+	999:							// Init finished
+		bInit_Finished				:= TRUE;
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="IO" Id="{39def025-d6fb-42e4-a8f1-838c4d1768f8}">
+      <Declaration><![CDATA[METHOD  IO]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//	If all places are ocupped request cart removal	
+	IF byRejectNestsSensors=255 THEN
+		bRemovePiecesRequest				:= TRUE;
+//	If cart is removed clear request
+	ELSIF bCartPresence THEN
+		bRemovePiecesRequest				:= FALSE;
+	END_IF
+
+//	Piece sensor inverse polaritiy refreshing in available positions var
+	IF bCartPresence THEN
+		byAvailableNests.0						:= NOT byRejectNestsSensors.0;
+		byAvailableNests.1						:= NOT byRejectNestsSensors.1;
+		byAvailableNests.2						:= NOT byRejectNestsSensors.2;
+		byAvailableNests.3						:= NOT byRejectNestsSensors.3;
+		byAvailableNests.4						:= NOT byRejectNestsSensors.4;
+		byAvailableNests.5						:= NOT byRejectNestsSensors.5;
+		byAvailableNests.6						:= NOT byRejectNestsSensors.6;
+		byAvailableNests.7						:= NOT byRejectNestsSensors.7;
+	ELSE
+		byAvailableNests						:= 0;
+	END_IF
+
+//	For safety box enter permissive
+	bSafetyBox_okForEnter					:= bCartPresence AND fbCartLock.bIsRetracted;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Manual" Id="{bd5d7f9f-2e54-42b2-b27b-2eaea211983d}">
+      <Declaration><![CDATA[METHOD  Manual]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Pause" Id="{1af13883-64d8-4728-bf6f-b440c3dfa3ac}">
+      <Declaration><![CDATA[METHOD  Pause]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Stop" Id="{84642c77-2ff7-4ecd-b4e9-c68a1daa0f7e}">
+      <Declaration><![CDATA[METHOD  Stop]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_RejectCart">
+      <LineId Id="160" Count="13" />
+      <LineId Id="77" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_RejectCart.Alarm">
+      <LineId Id="3" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_RejectCart.Auto">
+      <LineId Id="13" Count="2" />
+      <LineId Id="17" Count="8" />
+      <LineId Id="3" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_RejectCart.CountNests">
+      <LineId Id="2" Count="24" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_RejectCart.Init">
+      <LineId Id="40" Count="0" />
+      <LineId Id="42" Count="2" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="3" Count="0" />
+      <LineId Id="6" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="73" Count="1" />
+      <LineId Id="38" Count="1" />
+      <LineId Id="45" Count="2" />
+      <LineId Id="66" Count="1" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="49" Count="2" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="59" Count="1" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="70" Count="2" />
+      <LineId Id="75" Count="2" />
+      <LineId Id="36" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_RejectCart.IO">
+      <LineId Id="4" Count="0" />
+      <LineId Id="6" Count="1" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="31" Count="1" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="11" Count="7" />
+      <LineId Id="35" Count="2" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="22" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_RejectCart.Manual">
+      <LineId Id="4" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_RejectCart.Pause">
+      <LineId Id="4" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_RejectCart.Stop">
+      <LineId Id="3" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
