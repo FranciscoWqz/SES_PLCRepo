@@ -10,9 +10,10 @@ VAR_INPUT
 	
 END_VAR
 VAR_OUTPUT
-
+	bOut_ProcessDone						:BOOL;
 END_VAR
 VAR
+	
 	b_SensorLoadPos				AT %I*		: BOOL;	
 
 	k50_Left								: RACBaseObjects.FB_Bimanual;
@@ -40,7 +41,7 @@ VAR
 	//Manual control
 	b_MoveLeftMotor							: BOOL;
 	b_MoveRightMotor						: BOOL;
-	
+	bIn_RailReady							: BOOL;
 	
 	
 END_VAR
@@ -85,7 +86,7 @@ CASE diActualSeqStep OF
 		diActualSeqStep:= 1020;
 		
 	1020:						//Confirm motors not moving
-		IF NOT Mtr_CenterLeft.bMotorMoving AND NOT Mtr_CenterRight THEN
+		IF NOT Mtr_CenterLeft.bMotorMoving AND NOT Mtr_CenterRight.bMotorMoving THEN
 			diActualSeqStep:= 1030;
 		END_IF
 		
@@ -138,7 +139,7 @@ CASE diActualSeqStep OF
 		Mtr_CenterLeft.MovementType:= EN_MotionType.absolute;
 		Mtr_CenterRight.MovementType:= EN_MotionType.absolute;
 		IF b_SensorEndcap THEN
-			GVL_Rails.Nests[Constants.LoadPos].endcapAssembled:= TRUE;
+			GVL_Rails.Nests[Constants.LoadPos].endcapAssembled := TRUE;
 			Mtr_CenterRight.lrPosition:= lr_WithEndcapPos;
 		ELSE
 			Mtr_CenterRight.lrPosition:= lr_WithoutEndcapPos;
@@ -146,7 +147,7 @@ CASE diActualSeqStep OF
 		
 		IF b_SensorController THEN
 			
-			GVL_Rails.Nests[Constants.LoadPos].controllerAssembled:= TRUE;
+			GVL_Rails.Nests[Constants.LoadPos].controllerAssembled := TRUE;
 			//Start scanning on the IO task
 			bScanController:= TRUE;
 			Mtr_CenterLeft.lrPosition:= lr_WithControllerPos;

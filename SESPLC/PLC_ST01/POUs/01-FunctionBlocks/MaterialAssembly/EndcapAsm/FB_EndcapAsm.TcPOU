@@ -5,6 +5,9 @@
 VAR_INPUT
 	bSafetyBoxPlace_permissive			: BOOL;
 END_VAR
+VAR_OUTPUT
+	bOutEndcapAsm_Done 					: BOOL;
+END_VAR
 VAR
 	bIsEndcapInFeedPosition		AT %I*		: BOOL;
 	bIsEndcapInAssemblyPos		AT %I*		: BOOL;
@@ -153,9 +156,9 @@ END_IF]]></ST>
     <Method Name="Init" Id="{eede1188-13cb-4e50-b766-b36a8139c9c9}">
       <Declaration><![CDATA[ METHOD Init 
 
-VAR_OUTPUT
-	bOutReadyToRobotPlace: BOOL;
-END_VAR]]></Declaration>
+//VAR_OUTPUT
+//	bOutReadyToRobotPlace: BOOL;
+//END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[CASE diActualSeqStep OF
 	//Initial

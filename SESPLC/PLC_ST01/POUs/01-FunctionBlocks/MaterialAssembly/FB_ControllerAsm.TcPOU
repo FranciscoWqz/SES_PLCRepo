@@ -5,13 +5,15 @@
 
 VAR_INPUT
 	sSerialReceived						: STRING;	
+	bIn_RailReady						: BOOL;
 END_VAR
 
 VAR_OUTPUT					
 	bOut_ControlAsm_Done				: BOOL;
 	bOut_ReadyToRobotPlace				: BOOL;
 	bOut_RobotPermisive					: BOOL;
-		bOutReadyToRobotPlace: BOOL;
+	bOutReadyToRobotPlace				: BOOL;
+	bSafetyBoxPlace_OutOfZone 			: BOOL;
 
 END_VAR
 
@@ -125,9 +127,9 @@ bSafetyBoxPlace_OutOfZone:= Cyl_ClampRail_Top.bIsRetracted AND Cyl_ClampRail_Bot
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Call sub process
-THIS^.Seq_CtrlReceive();		//Receive from robot and flip controller
-THIS^.Seq_CtrlCenter();			//Receive from flipper, align and feed to assembly side
-THIS^.Seq_CtrlAsm();			//Guide controller and assembly on the rail
+THIS^.Seq_CtrlReceive(bIsManual := FALSE);		//Receive from robot and flip controller
+THIS^.Seq_CtrlCenter(bIsManual := FALSE);			//Receive from flipper, align and feed to assembly side
+THIS^.Seq_CtrlAsm(bIsManual := FALSE);			//Guide controller and assembly on the rail
 THIS^.Seq_Auto_Rail();			//Rail clamping]]></ST>
       </Implementation>
     </Method>
@@ -138,8 +140,8 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Top and bottom clamp
-Cyl_ClampRail_Top.bExtendRequest:= TRUE;
-Cyl_ClampRail_Bot.bExtendRequest:= TRUE;
+Cyl_ClampRail_Top.bExtendRequest := TRUE;
+Cyl_ClampRail_Bot.bExtendRequest := TRUE;
 
 IF Cyl_ClampRail_Top.bIsExtended AND Cyl_ClampRail_Bot.bIsExtended THEN
 	//Extend busbar support
@@ -250,7 +252,7 @@ END_VAR]]></Declaration>
 		Cyl_Flipper.bRetractRequest:= TRUE;
 		IF Cyl_Flipper.bIsRetracted THEN			
 			//Turn off vacuum valve without blow
-			Vacuum.Release(Blow:= FALSE);
+			Vacuum.Release(Blow:= FALSE, T#200MS);
 			diActualSeqStep:= 60;
 		END_IF
 	
@@ -741,9 +743,7 @@ IF Cyl_BusbarSupport.bIsRetracted THEN
 		UnclampRail:= TRUE;		
 		RETURN;			
 	END_IF
-END_IF	
-		
-ClampRail:= FALSE;]]></ST>
+END_IF	]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_ControllerAsm">
@@ -799,8 +799,7 @@ ClampRail:= FALSE;]]></ST>
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_ControllerAsm.UnclampRail">
-      <LineId Id="3" Count="13" />
-      <LineId Id="2" Count="0" />
+      <LineId Id="3" Count="12" />
     </LineIds>
   </POU>
 </TcPlcObject>

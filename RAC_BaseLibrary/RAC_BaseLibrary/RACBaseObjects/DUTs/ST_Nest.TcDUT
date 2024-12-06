@@ -10,6 +10,8 @@
 		conveyorPosition		: USINT;
 		okToProcess				: BOOL				:= FALSE;
 		failureMode				: STRING			:= 'N/A';
+		endcapAssembled			: BOOL 				:= FALSE;
+		controllerAssembled		: BOOL				:= FALSE;	
 	END_STRUCT
 END_TYPE
 ]]></Declaration>
