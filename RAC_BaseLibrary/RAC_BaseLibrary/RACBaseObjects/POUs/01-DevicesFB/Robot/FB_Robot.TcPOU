@@ -126,11 +126,11 @@ END_VAR]]></Declaration>
 	// Robot EStop pressed
 	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='SROBOSEC01',sIDToAdd:=sDeviceID,bActive:=(NOT RobotIO.bin_EStop));
 	// Robot Stucked in pick safe box
-	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='WROBOSTU01',sIDToAdd:=sDeviceID,bActive:=((NOT RobotIO.bin_SafetyBoxPick_OutOfZone) AND (RobotIO.bout_SafetyBoxPick_Permissive)));
+	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='WROBOSTU01',sIDToAdd:=sDeviceID,bActive:=((NOT bSafetyBoxPick_OutOfZone) AND (bSafetyBoxPick_Permissive)));
 	// Robot Stucked in place safe box
-	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='WROBOSTU01',sIDToAdd:=sDeviceID,bActive:=((NOT RobotIO.bin_SafetyBoxPlace_OutOfZone) AND (RobotIO.bout_SafetyBoxPlace_Permissive)));
+	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='WROBOSTU01',sIDToAdd:=sDeviceID,bActive:=((NOT bSafetyBoxPlace_OutOfZone) AND (bSafetyBoxPlace_Permissive)));
 	// Robot Stucked in reject safe box
-	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='WROBOSTU01',sIDToAdd:=sDeviceID,bActive:=((NOT RobotIO.bin_SafetyBoxReject_OutOfZone) AND (RobotIO.bout_SafetyBoxReject_Permissive)));
+	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='WROBOSTU01',sIDToAdd:=sDeviceID,bActive:=((NOT bSafetyBoxReject_OutOfZone) AND (bSafetyBoxReject_Permissive)));
 	// Cylinder doesn't reach start of stroke
 	sAsyncAlarmCodes:= AlarmCodesHandling(sConcatCodes:=sAsyncAlarmCodes,sCode:='WCYLISTU0201',sIDToAdd:=sDeviceID,bActive:=(RobotIO.bin_almRetCyl01));
 	// Cylinder doesn't reach end of stroke
