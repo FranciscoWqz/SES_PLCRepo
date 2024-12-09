@@ -25,7 +25,7 @@
     <Compile Include="POUs\00-MainPRG\MAIN_ST02.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POUs\02-FunctionBlocks\TanslationStation\TranslationStation.TcPOU">
+    <Compile Include="POUs\02-FunctionBlocks\TanslationStation\FB_TranslationStation.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="POUs\02-FunctionBlocks\Tapping\EN_TapeInSystemStatus.TcDUT">

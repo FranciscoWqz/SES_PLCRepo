@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <POU Name="TranslationStation" Id="{0291c8f1-c17a-48f2-8a27-4a9afba335cf}" SpecialFunc="None">
-    <Declaration><![CDATA[FUNCTION_BLOCK TranslationStation EXTENDS RACBaseObjects.FB_Machine
+  <POU Name="FB_TranslationStation" Id="{0291c8f1-c17a-48f2-8a27-4a9afba335cf}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_TranslationStation EXTENDS RACBaseObjects.FB_Machine
 VAR_INPUT
 	sRobotID						: STRING;
 	
@@ -63,7 +63,7 @@ SUPER^.MachineMain();
     <Method Name="Alarm" Id="{a0149431-3a53-4116-b703-6a2b3876d3e4}">
       <Declaration><![CDATA[METHOD  Alarm]]></Declaration>
       <Implementation>
-        <ST><![CDATA[sAlarm									:= CONCAT (STR1:=fbRobot.sAlarm,STR2:=fbRejectCart);]]></ST>
+        <ST><![CDATA[sAlarm									:= CONCAT (STR1:=fbRobot.sAlarm,STR2:=fbRejectCart.sAlarm);]]></ST>
       </Implementation>
     </Method>
     <Method Name="Auto" Id="{3d2d36c2-2271-4596-8139-9c94aa8a513d}">
@@ -109,7 +109,7 @@ SUPER^.MachineMain();
         <ST><![CDATA[]]></ST>
       </Implementation>
     </Method>
-    <LineIds Name="TranslationStation">
+    <LineIds Name="FB_TranslationStation">
       <LineId Id="12" Count="0" />
       <LineId Id="9" Count="0" />
       <LineId Id="14" Count="16" />
@@ -122,25 +122,25 @@ SUPER^.MachineMain();
       <LineId Id="59" Count="0" />
       <LineId Id="57" Count="1" />
     </LineIds>
-    <LineIds Name="TranslationStation.Alarm">
+    <LineIds Name="FB_TranslationStation.Alarm">
       <LineId Id="3" Count="0" />
     </LineIds>
-    <LineIds Name="TranslationStation.Auto">
+    <LineIds Name="FB_TranslationStation.Auto">
       <LineId Id="3" Count="0" />
     </LineIds>
-    <LineIds Name="TranslationStation.Init">
+    <LineIds Name="FB_TranslationStation.Init">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="TranslationStation.IO">
+    <LineIds Name="FB_TranslationStation.IO">
       <LineId Id="4" Count="0" />
     </LineIds>
-    <LineIds Name="TranslationStation.Manual">
+    <LineIds Name="FB_TranslationStation.Manual">
       <LineId Id="4" Count="0" />
     </LineIds>
-    <LineIds Name="TranslationStation.Pause">
+    <LineIds Name="FB_TranslationStation.Pause">
       <LineId Id="4" Count="0" />
     </LineIds>
-    <LineIds Name="TranslationStation.Stop">
+    <LineIds Name="FB_TranslationStation.Stop">
       <LineId Id="3" Count="0" />
     </LineIds>
   </POU>

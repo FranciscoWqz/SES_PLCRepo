@@ -2130,7 +2130,7 @@ External Setpoint Generation:
 				</Instance>
 			</Project>
 			<Project GUID="{18BBD500-7124-4BBD-8858-94E7E7E0784A}" Name="PLC_ST02" PrjFilePath="PLC_ST02\PLC_ST02.plcproj" TmcFilePath="PLC_ST02\PLC_ST02.tmc" ReloadTmc="true" AmsPort="852" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502040" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="PLC_ST02\PLC_ST02.tmc" TmcHash="{4432CC42-9C82-D35C-C786-6DDA298B1A74}">
+				<Instance Id="#x08502040" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="PLC_ST02\PLC_ST02.tmc" TmcHash="{0D30B727-9258-C201-8247-57D5EBDB561E}">
 					<Name>PLC_ST02 Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -2169,6 +2169,34 @@ External Setpoint Generation:
 						</Var>
 						<Var>
 							<Name>MAIN_ST02.fbStation02.system.PressureSwitch</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRobot.RobotIO.uiin_ConnectionStatus</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRobot.RobotIO.eipInputs</Name>
+							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.bCartPresence</Name>
+							<Comment><![CDATA[ Cart is in position sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.byRejectNestsSensors</Name>
+							<Comment><![CDATA[ 8 sensor array]]></Comment>
+							<Type>BYTE</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.fbCartLock.bSensorExtended</Name>
+							<Comment><![CDATA[	Clinder extended sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.fbCartLock.bSensorRetracted</Name>
+							<Comment><![CDATA[	Clinder retracted sensor]]></Comment>
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
@@ -2323,9 +2351,55 @@ External Setpoint Generation:
 							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbVacc_RearPlate.VaccumSensor</Name>
 							<Type>BOOL</Type>
 						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRobot.RobotIO.uiin_ConnectionStatus</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRobot.RobotIO.eipInputs</Name>
+							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRejectCart.bCartPresence</Name>
+							<Comment><![CDATA[ Cart is in position sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRejectCart.byRejectNestsSensors</Name>
+							<Comment><![CDATA[ 8 sensor array]]></Comment>
+							<Type>BYTE</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRejectCart.fbCartLock.bSensorExtended</Name>
+							<Comment><![CDATA[	Clinder extended sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRejectCart.fbCartLock.bSensorRetracted</Name>
+							<Comment><![CDATA[	Clinder retracted sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbConveyor.Motor.Motor.NcToPlc</Name>
+							<Type GUID="{25521FAA-EA5F-4C7F-8864-BBCCDACD2E98}" Namespace="MC">NCTOPLC_AXIS_REF</Type>
+						</Var>
 					</Vars>
 					<Vars VarGrpType="2" AreaNo="1">
 						<Name>PlcST02Task Outputs</Name>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRobot.RobotIO.eipOutputs</Name>
+							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.fbCartLock.bValveExtend</Name>
+							<Comment><![CDATA[	Cylinder extend output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.fbCartLock.bValveRetract</Name>
+							<Comment><![CDATA[	Cylinder retract output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
 						<Var>
 							<Name>MAIN_ST02.fbTapeApplicationMachine.fbServo_Translational.Motor.PlcToNc</Name>
 							<Type GUID="{96B75FEB-2D84-43BE-A3EC-D9A681F27D52}" Namespace="MC">PLCTONC_AXIS_REF</Type>
@@ -2493,6 +2567,24 @@ External Setpoint Generation:
 						<Var>
 							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbVacc_RearPlate.BlowValve</Name>
 							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRobot.RobotIO.eipOutputs</Name>
+							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRejectCart.fbCartLock.bValveExtend</Name>
+							<Comment><![CDATA[	Cylinder extend output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRejectCart.fbCartLock.bValveRetract</Name>
+							<Comment><![CDATA[	Cylinder retract output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbConveyor.Motor.Motor.PlcToNc</Name>
+							<Type GUID="{96B75FEB-2D84-43BE-A3EC-D9A681F27D52}" Namespace="MC">PLCTONC_AXIS_REF</Type>
 						</Var>
 					</Vars>
 					<Contexts>
