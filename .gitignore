@@ -47,3 +47,4 @@ LineIDs.dbg.bak
 *.~u
 *.project.~u
 *.suo
+/RAC_BaseLibrary/RAC_BaseLibrary/RACBaseObjects/POUs/01-DevicesFB

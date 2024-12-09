@@ -42,13 +42,6 @@ END_VAR]]></Declaration>
 										bInit_StartPermissive:=TRUE,
 										bSafetyBoxPlace_permissive :=TRUE);
 	
-	fbBatterySupply(					sDeviceID:='',
-										bStopExecution:=fbStation01.bStop,
-										bAlarmReset:=fbStation01.bAlarmReset,
-										diStationState:=fbStation01.diStationState,
-										bInit_StartPermissive:=TRUE,
-										bSafetyBoxPlace_permissive := FALSE,
-										bPlace_MaterialRequest := TRUE);
 										
 	fbControllerSupply(					sDeviceID:='',
 										bStopExecution:=fbStation01.bStop,
@@ -65,12 +58,15 @@ END_VAR]]></Declaration>
 										bInit_StartPermissive:=TRUE,
 										sSerialReceived:=fbControllerSupply.sPieceSN,	
 										bIn_RailReady:=fbConveyor.bOut_MoveDone);
-	
-	
-
-	
-
-	]]></ST>
+										
+	fbBatterySupply(					sDeviceID:='',
+										bStopExecution:=fbStation01.bStop,
+										bAlarmReset:=fbStation01.bAlarmReset,
+										diStationState:=fbStation01.diStationState,
+										bInit_StartPermissive:=TRUE,
+										bSafetyBoxPlace_permissive := FALSE,
+										bPlace_MaterialRequest := TRUE);
+]]></ST>
     </Implementation>
     <LineIds Name="MAIN_ST01">
       <LineId Id="3" Count="0" />
@@ -86,11 +82,6 @@ END_VAR]]></Declaration>
       <LineId Id="73" Count="0" />
       <LineId Id="69" Count="3" />
       <LineId Id="105" Count="0" />
-      <LineId Id="114" Count="0" />
-      <LineId Id="118" Count="0" />
-      <LineId Id="115" Count="2" />
-      <LineId Id="113" Count="0" />
-      <LineId Id="127" Count="0" />
       <LineId Id="129" Count="0" />
       <LineId Id="75" Count="0" />
       <LineId Id="120" Count="5" />
@@ -99,11 +90,11 @@ END_VAR]]></Declaration>
       <LineId Id="98" Count="3" />
       <LineId Id="77" Count="0" />
       <LineId Id="107" Count="0" />
+      <LineId Id="139" Count="0" />
+      <LineId Id="146" Count="0" />
+      <LineId Id="140" Count="5" />
       <LineId Id="106" Count="0" />
       <LineId Id="78" Count="0" />
-      <LineId Id="13" Count="1" />
-      <LineId Id="19" Count="1" />
-      <LineId Id="58" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

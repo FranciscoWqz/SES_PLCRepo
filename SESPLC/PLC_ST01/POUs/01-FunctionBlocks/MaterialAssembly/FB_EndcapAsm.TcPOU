@@ -43,7 +43,7 @@ VAR
 	//Devices
 	
 	//Bowl control structure, validate signals and control system1		
-	bowlControl								: ST_BowlFeeder;	
+	bowlControl								: RACBaseObjects.ST_BowlFeeder;	
 	//Rail side for clamp support top cylinder
 	Cyl_ClampRail_Top						: FB_Cylinder;
 	//Rail side for clamp support bottom cylinder
