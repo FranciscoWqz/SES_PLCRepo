@@ -1447,7 +1447,7 @@ External Setpoint Generation:
 			</ArrayInfo>
 		</DataType>
 	</DataTypes>
-	<Project ProjectGUID="{4B9770AA-D8BA-45A5-A9AE-8227E575C83C}" Target64Bit="true" ShowHideConfigurations="#x6">
+	<Project ProjectGUID="{4B9770AA-D8BA-45A5-A9AE-8227E575C83C}" TargetNetId="192.168.0.166.1.1" Target64Bit="true" ShowHideConfigurations="#x6">
 		<System>
 			<Settings MaxCpus="4" NonWinCpus="3">
 				<Cpu/>
@@ -1470,7 +1470,7 @@ External Setpoint Generation:
 		</System>
 		<Motion>
 			<NC>
-				<SafTask Priority="4" CycleTime="20000" AmsPort="501" IoAtBegin="true" SafTaskInfo="256">
+				<SafTask Priority="4" CycleTime="20000" AmsPort="501" IoAtBegin="true" AmsNetId="169.254.159.191.1.1" SafTaskInfo="256">
 					<Name>NC-Task 1 SAF</Name>
 					<Vars VarGrpType="1" InsertType="1">
 						<Name>Inputs</Name>
@@ -2738,8 +2738,23 @@ External Setpoint Generation:
 			</OwnerB>
 		</OwnerA>
 		<OwnerA Name="TIPC^PLC_ST01^PLC_ST01 Instance">
+			<OwnerB Name="TIID^Device 1 (ECAT EIP Scanner (EL6652))^Robot01_Controller">
+				<Link VarA="PlcST01Task Inputs^MAIN_ST01.fbControllerSupply.fbRobot.RobotIO.eipInputs" VarB="Connection 1 (Input/Output)^Inputs^inputRaw"/>
+				<Link VarA="PlcST01Task Outputs^MAIN_ST01.fbControllerSupply.fbRobot.RobotIO.eipOutputs" VarB="Connection 1 (Input/Output)^Outputs^outputRaw"/>
+			</OwnerB>
 			<OwnerB Name="TIID^Device 1 (ECAT EIP Scanner (EL6652))^Robot02_Battery">
 				<Link VarA="PlcST01Task Inputs^MAIN_ST01.fbBatterySupply.fbRobot.RobotIO.eipInputs" VarB="Connection 2 (Input/Output)^Inputs^inputRaw"/>
+				<Link VarA="PlcST01Task Outputs^MAIN_ST01.fbBatterySupply.fbRobot.RobotIO.eipOutputs" VarB="Connection 2 (Input/Output)^Outputs^outputRaw"/>
+			</OwnerB>
+		</OwnerA>
+		<OwnerA Name="TIPC^PLC_ST02^PLC_ST02 Instance">
+			<OwnerB Name="TIID^Device 1 (ECAT EIP Scanner (EL6652))^Robot03_1-2">
+				<Link VarA="PlcST02Task Inputs^MAIN_ST02.fbTranslationStationIn.fbRobot.RobotIO.eipInputs" VarB="Connection 4 (Input/Output)^Inputs^inputRaw"/>
+				<Link VarA="PlcST02Task Outputs^MAIN_ST02.fbTranslationStationIn.fbRobot.RobotIO.eipOutputs" VarB="Connection 4 (Input/Output)^Outputs^outputRaw"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (ECAT EIP Scanner (EL6652))^Robot04_2-3">
+				<Link VarA="PlcST02Task Inputs^MAIN_ST02.fbTranslationStationOut.fbRobot.RobotIO.eipInputs" VarB="Connection 3 (Input/Output)^Inputs^inputRaw"/>
+				<Link VarA="PlcST02Task Outputs^MAIN_ST02.fbTranslationStationOut.fbRobot.RobotIO.eipOutputs" VarB="Connection 3 (Input/Output)^Outputs^outputRaw"/>
 			</OwnerB>
 		</OwnerA>
 	</Mappings>
