@@ -105,13 +105,20 @@ Cyl_PushControl(bPermisiveExtend:= Cyl_BusbarSupport.bIsExtended AND Cyl_FeedCon
 				bPermisiveRetract:= Cyl_FeedControl.bIsRetracted);
 Cyl_FeedControl(bPermisiveExtend:= Cyl_PushControl.bIsRetracted AND Cyl_Center.bIsRetracted AND Cyl_Flipper.bIsRetracted,
 				bPermisiveRetract:= Cyl_Center.bIsRetracted AND Cyl_Flipper.bIsRetracted);
-
+				
+//Vacuum();
+Vacuum(	bStopExecution:=bStopExecution, 
+		bAlarmReset:=bAlarmReset,
+		Timeout:=T#1S);
+		
 //Robot permisive
 bOut_RobotPermisive:= Cyl_Flipper.bIsRetracted;
 
 //Conveyor permisive
 bSafetyBoxPlace_OutOfZone:= Cyl_ClampRail_Top.bIsRetracted AND Cyl_ClampRail_Bot.bIsRetracted
 						AND Cyl_BusbarSupport.bIsRetracted AND Cyl_PushControl.bIsRetracted;
+
+
 ]]></ST>
     </Implementation>
     <Folder Name="Auxiliar" Id="{4ca4fd16-0eee-4d5b-9f38-0ffef00214eb}" />
@@ -252,7 +259,7 @@ END_VAR]]></Declaration>
 		Cyl_Flipper.bRetractRequest:= TRUE;
 		IF Cyl_Flipper.bIsRetracted THEN			
 			//Turn off vacuum valve without blow
-			Vacuum.Release(Blow:= FALSE, T#200MS);
+			Vacuum.bGrip := FALSE;
 			diActualSeqStep:= 60;
 		END_IF
 	
@@ -679,8 +686,8 @@ END_VAR
 			END_IF							
 		END_IF					
 		
-	40:							//Turn on vacuum, controller already in position			 
-		Vacuum.Pick();
+	40:		
+		Vacuum.bGrip :=	TRUE;
 		IF Vacuum.Vacuum_Ok THEN
 			bReceiverReadyToSend:= TRUE;
 			iStepReceive:= 50;
@@ -697,14 +704,13 @@ END_VAR
 			iStepReceive := 70;
 		END_IF
 		
-	70:							//Release controller									
-		IF Vacuum.Release(Blow:= TRUE, T#200MS) THEN
-			IF NOT Vacuum.Vacuum_Ok THEN	
-				//Update serial
-				bReceiverReadyToSend:= FALSE;
-				sSerialCenter:= sSerialReceived;		
-				iStepReceive := 80;			
-			END_IF
+	70:							//Release controller	
+		Vacuum.bGrip := FALSE; 							
+		IF NOT Vacuum.Vacuum_Ok THEN	//Not used blowOK bc can be missed?
+			//Update serial
+			bReceiverReadyToSend:= FALSE;
+			sSerialCenter:= sSerialReceived;		
+			iStepReceive := 80;			
 		END_IF
 		
 	80:							//Confirm controller in center side
@@ -747,7 +753,15 @@ END_IF	]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_ControllerAsm">
-      <LineId Id="3" Count="23" />
+      <LineId Id="3" Count="16" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="121" Count="1" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="123" Count="0" />
+      <LineId Id="21" Count="5" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="112" Count="0" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_ControllerAsm.Alarm">
@@ -792,7 +806,12 @@ END_IF	]]></ST>
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_ControllerAsm.Seq_CtrlReceive">
-      <LineId Id="3" Count="96" />
+      <LineId Id="3" Count="61" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="66" Count="16" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="84" Count="5" />
+      <LineId Id="91" Count="8" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_ControllerAsm.Stop">
