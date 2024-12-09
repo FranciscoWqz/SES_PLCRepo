@@ -30,15 +30,6 @@ STRUCT
 	bout_Start								:BOOL;
 	bout_Stop								:BOOL;
 	
-	bin_SafetyBoxPick_OutOfZone	 			:BOOL;
-	bin_SafetyBoxPlace_OutOfZone	 		:BOOL;
-	bin_SafetyBoxReject_OutOfZone	 		:BOOL;
-	bout_SafetyBoxPick_Permissive 			:BOOL;
-	bout_SafetyBoxPlace_Permissive 			:BOOL;
-	bout_SafetyBoxReject_Permissive 		:BOOL;
-	
-	bin_Pick_AllMaterialPicked				:BOOL;
-	
 	bin_almRetCyl01							:BOOL;
 	bin_almExtCyl01							:BOOL;
 	bin_almBothSnsrCyl01					:BOOL;

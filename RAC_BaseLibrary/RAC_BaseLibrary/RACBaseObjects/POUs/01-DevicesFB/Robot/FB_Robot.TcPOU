@@ -24,7 +24,7 @@ VAR_INPUT
 	bPlace_MaterialRequest				: BOOL;
 	
 	// Reject material request
-	bReject_MaterialRequest				: BOOL;
+	bReject_MaterialRequest				: ARRAY[0..7] OF BOOL;
 END_VAR
 VAR_OUTPUT	
 	// Robot is out of pick safety zone
@@ -155,7 +155,10 @@ END_VAR]]></Declaration>
       </Implementation>
     </Method>
     <Method Name="Auto" Id="{44520924-c5fa-4245-96b5-70f8482a588f}">
-      <Declaration><![CDATA[METHOD Auto]]></Declaration>
+      <Declaration><![CDATA[METHOD Auto
+VAR
+	indexRejectSpaces						: INT;
+END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[//	Keep sequencer in range
 	IF (diActualSeqStep<0) OR  (diActualSeqStep>999) THEN 
@@ -300,9 +303,11 @@ CASE diActualSeqStep OF
 			tmStepTimeout					:=	T#2S;
 		END_IF
 		
-		IF bReject_MaterialRequest THEN
-			RobotIO.diout_SequenceCmd		:=	EN_RobotMessaging.rejecting;
-		END_IF
+		FOR indexRejectSpaces:=0 TO 7 BY 1 DO
+			IF bReject_MaterialRequest[indexRejectSpaces] THEN
+				RobotIO.diout_SequenceCmd		:=	EN_RobotMessaging.rejecting;
+			END_IF
+		END_FOR;
 		
 		IF (RobotIO.diin_Sequencer=EN_RobotMessaging.rejecting) THEN 
 			ton_StepTimeout.IN				:=	FALSE;
@@ -464,12 +469,7 @@ VAR
 	pReal									: POINTER TO REAL;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[//	FB Direct Inputs
-	RobotIO.bout_SafetyBoxPick_Permissive 	:= bSafetyBoxPick_Permissive;
-	RobotIO.bout_SafetyBoxPlace_Permissive 	:= bSafetyBoxPlace_Permissive;
-	RobotIO.bout_SafetyBoxReject_Permissive := bSafetyBoxReject_Permissive;
-	
-//	Processing protocol raw INPUT data : BITS
+        <ST><![CDATA[//	Processing protocol raw INPUT data : BITS
 	RobotIO.bin_EStop 						:= RobotIO.eipInputs.byteArray[0].0;
 	RobotIO.bin_PPMoved 					:= RobotIO.eipInputs.byteArray[0].1;
 	RobotIO.bin_MotorsOFF 					:= RobotIO.eipInputs.byteArray[0].2;
@@ -481,10 +481,10 @@ END_VAR]]></Declaration>
 	RobotIO.bin_SMBBatery 					:= RobotIO.eipInputs.byteArray[1].0;
 	RobotIO.bin_RobotNotMoving				:= RobotIO.eipInputs.byteArray[1].1;
 	
-	RobotIO.bin_SafetyBoxPick_OutOfZone 	:= RobotIO.eipInputs.byteArray[1].2;
-	RobotIO.bin_SafetyBoxPlace_OutOfZone 	:= RobotIO.eipInputs.byteArray[1].3;
-	RobotIO.bin_SafetyBoxReject_OutOfZone 	:= RobotIO.eipInputs.byteArray[1].4;
-	RobotIO.bin_Pick_AllMaterialPicked		:= RobotIO.eipInputs.byteArray[1].5;
+	bSafetyBoxPick_OutOfZone 				:= RobotIO.eipInputs.byteArray[1].2;
+	bSafetyBoxPlace_OutOfZone 				:= RobotIO.eipInputs.byteArray[1].3;
+	bSafetyBoxReject_OutOfZone 				:= RobotIO.eipInputs.byteArray[1].4;
+	bPick_AllMaterialPicked					:= RobotIO.eipInputs.byteArray[1].5;
 	
 	RobotIO.bin_almRetCyl01 				:= RobotIO.eipInputs.byteArray[1].6;
 	RobotIO.bin_almExtCyl01					:= RobotIO.eipInputs.byteArray[1].7;
@@ -501,23 +501,33 @@ END_VAR]]></Declaration>
 	RobotIO.diin_Sequencer					:= pDint^;
 	
 //	Processing protocol raw OUTPUT data : BITS
-	RobotIO.eipOutputs.byteArray[0].0 	:= RobotIO.bout_ResetEStop;
-	RobotIO.eipOutputs.byteArray[0].1 	:= RobotIO.bout_PPToMain;
-	RobotIO.eipOutputs.byteArray[0].2 	:= RobotIO.bout_MotorsOFF;
-	RobotIO.eipOutputs.byteArray[0].3 	:= RobotIO.bout_MotorsON;
-	RobotIO.eipOutputs.byteArray[0].4 	:= RobotIO.bout_Stop;
-	RobotIO.eipOutputs.byteArray[0].5 	:= RobotIO.bout_Start;
+	RobotIO.eipOutputs.byteArray[0].0 		:= RobotIO.bout_ResetEStop;
+	RobotIO.eipOutputs.byteArray[0].1 		:= RobotIO.bout_PPToMain;
+	RobotIO.eipOutputs.byteArray[0].2 		:= RobotIO.bout_MotorsOFF;
+	RobotIO.eipOutputs.byteArray[0].3 		:= RobotIO.bout_MotorsON;
+	RobotIO.eipOutputs.byteArray[0].4 		:= RobotIO.bout_Stop;
+	RobotIO.eipOutputs.byteArray[0].5 		:= RobotIO.bout_Start;
 	
-	// In initializaion safety box is bypassed for robot can retrieval
+// In initializaion safety box is bypassed for robot can retrieval
 	IF diActualSeqStep=EN_RobotMessaging.waitInitFinihsed OR diActualSeqStep=EN_RobotMessaging.waitRetrievalPerm THEN
-		RobotIO.eipOutputs.byteArray[0].6 		:= TRUE;
-		RobotIO.eipOutputs.byteArray[0].7 		:= TRUE;
-		RobotIO.eipOutputs.byteArray[1].0 		:= TRUE;
+		RobotIO.eipOutputs.byteArray[0].6 	:= TRUE;
+		RobotIO.eipOutputs.byteArray[0].7 	:= TRUE;
+		RobotIO.eipOutputs.byteArray[1].0 	:= TRUE;
 	ELSE
-		RobotIO.eipOutputs.byteArray[0].6 		:= RobotIO.bout_SafetyBoxPick_Permissive;
-		RobotIO.eipOutputs.byteArray[0].7 		:= RobotIO.bout_SafetyBoxPlace_Permissive;
-		RobotIO.eipOutputs.byteArray[1].0 		:= RobotIO.bout_SafetyBoxReject_Permissive;
+		RobotIO.eipOutputs.byteArray[0].6 	:= bSafetyBoxPick_Permissive;
+		RobotIO.eipOutputs.byteArray[0].7 	:= bSafetyBoxPlace_Permissive;
+		RobotIO.eipOutputs.byteArray[1].0 	:= bSafetyBoxReject_Permissive;
 	END_IF
+	
+// 8 bits array for positions in reject cart
+	RobotIO.eipOutputs.byteArray[1].1		:= bReject_MaterialRequest[0];
+	RobotIO.eipOutputs.byteArray[1].2		:= bReject_MaterialRequest[1];
+	RobotIO.eipOutputs.byteArray[1].3		:= bReject_MaterialRequest[2];
+	RobotIO.eipOutputs.byteArray[1].4		:= bReject_MaterialRequest[3];
+	RobotIO.eipOutputs.byteArray[1].5		:= bReject_MaterialRequest[4];
+	RobotIO.eipOutputs.byteArray[1].6		:= bReject_MaterialRequest[5];
+	RobotIO.eipOutputs.byteArray[1].7		:= bReject_MaterialRequest[6];
+	RobotIO.eipOutputs.byteArray[2].0		:= bReject_MaterialRequest[7];
 	
 // Processing protocol raw OUTPUT data : BYTES
 	pDint 									:= ADR(RobotIO.eipOutputs.byteArray[8]);
@@ -525,14 +535,7 @@ END_VAR]]></Declaration>
 	pReal 									:= ADR(RobotIO.eipOutputs.byteArray[12]);
 	pReal^									:= RobotIO.rout_XCompensation;
 	pReal 									:= ADR(RobotIO.eipOutputs.byteArray[16]);
-	pReal^									:= RobotIO.rout_ZCompensation;
-	
-//	FB Direct Outputs
-	bSafetyBoxPick_OutOfZone 				:= RobotIO.bin_SafetyBoxPick_OutOfZone;
-	bSafetyBoxPlace_OutOfZone 				:= RobotIO.bin_SafetyBoxPlace_OutOfZone;
-	bSafetyBoxReject_OutOfZone				:= RobotIO.bin_SafetyBoxReject_OutOfZone;
-	bPick_AllMaterialPicked 				:= RobotIO.bin_Pick_AllMaterialPicked;
-	]]></ST>
+	pReal^									:= RobotIO.rout_ZCompensation;]]></ST>
       </Implementation>
     </Method>
     <Method Name="Manual" Id="{7577e3b1-977f-4dbe-b643-5b6e02b61fae}">
@@ -573,7 +576,11 @@ RobotIO.bout_PPToMain				:=	NOT RobotIO.bin_PPMoved;]]></ST>
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_Robot.Auto">
-      <LineId Id="3" Count="189" />
+      <LineId Id="3" Count="142" />
+      <LineId Id="194" Count="0" />
+      <LineId Id="146" Count="2" />
+      <LineId Id="193" Count="0" />
+      <LineId Id="149" Count="43" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_Robot.Init">
@@ -585,7 +592,11 @@ RobotIO.bout_PPToMain				:=	NOT RobotIO.bin_PPMoved;]]></ST>
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_Robot.IO">
-      <LineId Id="3" Count="67" />
+      <LineId Id="8" Count="48" />
+      <LineId Id="75" Count="4" />
+      <LineId Id="81" Count="3" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="57" Count="6" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_Robot.Manual">

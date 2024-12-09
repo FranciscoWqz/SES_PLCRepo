@@ -20,7 +20,7 @@ VAR_OUTPUT
 	bRemovePiecesRequest			: BOOL;
 	
 	// Sensors presence array
-	byAvailableNests				: BYTE;
+	byAvailableNests				: ARRAY[0..7] OF BOOL;
 END_VAR
 VAR
 	// Timmers for considering cart in place
@@ -35,7 +35,7 @@ VAR
 	// Cart is in position sensor
 	bCartPresence					AT %I* : BOOL;
 	// 8 sensor array
-	byRejectNestsSensors			AT %I* : BYTE;
+	byRejectNestsSensors			AT %I* : ARRAY[0..7] OF BOOL;
 
 	// Cylinder for locking the cart in place
 	fbCartLock						: FB_Cylinder;
@@ -122,36 +122,21 @@ CASE diActualSeqStep OF
 END_CASE]]></ST>
       </Implementation>
     </Method>
-    <Action Name="CountNests" Id="{3b2313c9-83b0-41af-9e3b-f1539f266f22}">
+    <Method Name="CountNests" Id="{8133da23-9cf7-4a1d-8bcc-54b50f8bc5bf}">
+      <Declaration><![CDATA[METHOD CountNests
+VAR
+	indexCountOccuped					: INT;
+END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[//  Counts occuped nests in the cart
 	siOccupedNests					:= 0;
-	IF byRejectNestsSensors.0 THEN
-		siOccupedNests				:= siOccupedNests + 1;
-	END_IF
-	IF byRejectNestsSensors.1 THEN
-		siOccupedNests				:= siOccupedNests + 1;
-	END_IF
-	IF byRejectNestsSensors.2 THEN
-		siOccupedNests				:= siOccupedNests + 1;
-	END_IF
-	IF byRejectNestsSensors.3 THEN
-		siOccupedNests				:= siOccupedNests + 1;
-	END_IF
-	IF byRejectNestsSensors.4 THEN
-		siOccupedNests				:= siOccupedNests + 1;
-	END_IF
-	IF byRejectNestsSensors.5 THEN
-		siOccupedNests				:= siOccupedNests + 1;
-	END_IF
-	IF byRejectNestsSensors.6 THEN
-		siOccupedNests				:= siOccupedNests + 1;
-	END_IF
-	IF byRejectNestsSensors.7 THEN
-		siOccupedNests				:= siOccupedNests + 1;
-	END_IF]]></ST>
+	FOR indexCountOccuped:=0 TO 7 BY 1 DO
+		IF byRejectNestsSensors[indexCountOccuped] THEN
+			siOccupedNests				:= siOccupedNests + 1;
+		END_IF
+	END_FOR;]]></ST>
       </Implementation>
-    </Action>
+    </Method>
     <Method Name="Init" Id="{fcbb3f26-0058-4481-9c58-3d096317d08f}">
       <Declaration><![CDATA[METHOD  Init]]></Declaration>
       <Implementation>
@@ -198,11 +183,14 @@ END_CASE]]></ST>
       </Implementation>
     </Method>
     <Method Name="IO" Id="{39def025-d6fb-42e4-a8f1-838c4d1768f8}">
-      <Declaration><![CDATA[METHOD  IO]]></Declaration>
+      <Declaration><![CDATA[METHOD  IO
+VAR
+	indexIO									: INT;
+END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[//	For considering cart in place
-	tonCartIsInPlace(							IN:=bCartPresence,
-												PT:=T#1S);
+	tonCartIsInPlace(						IN:=bCartPresence,
+											PT:=T#1S);
 
 //	For considering cart has been removed
 	tonCartRemoved(							IN:=NOT bCartPresence,
@@ -218,20 +206,17 @@ END_CASE]]></ST>
 
 //	Piece sensor inverse polaritiy refreshing in available positions var
 	IF tonCartIsInPlace.Q AND fbCartLock.bIsExtended THEN
-		byAvailableNests.0						:= NOT byRejectNestsSensors.0;
-		byAvailableNests.1						:= NOT byRejectNestsSensors.1;
-		byAvailableNests.2						:= NOT byRejectNestsSensors.2;
-		byAvailableNests.3						:= NOT byRejectNestsSensors.3;
-		byAvailableNests.4						:= NOT byRejectNestsSensors.4;
-		byAvailableNests.5						:= NOT byRejectNestsSensors.5;
-		byAvailableNests.6						:= NOT byRejectNestsSensors.6;
-		byAvailableNests.7						:= NOT byRejectNestsSensors.7;
+		FOR indexIO:=0 TO 7 BY 1 DO
+			byAvailableNests[indexIO]		:= NOT byRejectNestsSensors[indexIO];
+		END_FOR;
 	ELSE
-		byAvailableNests						:= 0;
+		FOR indexIO:=0 TO 7 BY 1 DO
+			byAvailableNests[indexIO]		:= FALSE;
+		END_FOR;
 	END_IF
 
 //	For safety box enter permissive
-	bSafetyBox_okForEnter						:= tonCartIsInPlace.Q AND fbCartLock.bIsExtended;]]></ST>
+	bSafetyBox_okForEnter					:= tonCartIsInPlace.Q AND fbCartLock.bIsExtended;]]></ST>
       </Implementation>
     </Method>
     <Method Name="Manual" Id="{bd5d7f9f-2e54-42b2-b27b-2eaea211983d}">
@@ -253,7 +238,7 @@ END_CASE]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_RejectCart">
-      <LineId Id="160" Count="13" />
+      <LineId Id="212" Count="13" />
       <LineId Id="77" Count="0" />
     </LineIds>
     <LineIds Name="FB_RejectCart.Alarm">
@@ -299,8 +284,11 @@ END_CASE]]></ST>
       <LineId Id="35" Count="0" />
     </LineIds>
     <LineIds Name="FB_RejectCart.CountNests">
-      <LineId Id="2" Count="24" />
-      <LineId Id="1" Count="0" />
+      <LineId Id="6" Count="2" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="11" Count="0" />
     </LineIds>
     <LineIds Name="FB_RejectCart.Init">
       <LineId Id="40" Count="0" />
@@ -346,8 +334,12 @@ END_CASE]]></ST>
       <LineId Id="10" Count="0" />
       <LineId Id="19" Count="0" />
       <LineId Id="34" Count="0" />
-      <LineId Id="11" Count="7" />
-      <LineId Id="35" Count="2" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="51" Count="1" />
+      <LineId Id="36" Count="1" />
       <LineId Id="21" Count="0" />
       <LineId Id="20" Count="0" />
       <LineId Id="22" Count="0" />
