@@ -7,9 +7,9 @@ VAR
 	fbConveyor							: RACBaseObjects.FB_Conveyor;
 	fbControllerSupply					: FB_ControllerSupply;
 	fbBatterySupply						: FB_BatterySupply;
-	//EndcapAsm							: FB_EndcapAsm_ST;
-	//RailControl						: FB_RailControl;
-	
+	fbEndcapAsm							: FB_EndcapAsm;
+	fbControllerAsm						: FB_ControllerAsm;
+	fbLoadStation						: FB_LoadStation;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[	fbStation01(bInitFinished:=fbControllerSupply.bInit_Finished AND fbBatterySupply.bInit_Finished AND fbConveyor.bInit_Finished);
@@ -25,9 +25,31 @@ END_VAR]]></Declaration>
 										lrOffsetPos:=0,
 										bIn_IsClamped:=FALSE,
 										bIn_IsUnclamped:=FALSE);
+										
+	fbLoadStation(						sDeviceID:='',
+										bStopExecution:=fbStation01.bStop,
+										bAlarmReset:=fbStation01.bAlarmReset,
+										diStationState:=fbStation01.diStationState,
+										bInit_StartPermissive := TRUE,
+										bDisableScan := TRUE,
+										bIn_MovePermisive := FALSE,
+										bIn_CvyStepDone := FALSE);
 
-//	fbRailControl(						);
-
+	fbEndcapAsm(						sDeviceID:='',
+										bStopExecution:=fbStation01.bStop,
+										bAlarmReset:=fbStation01.bAlarmReset,
+										diStationState:=fbStation01.diStationState,
+										bInit_StartPermissive:=TRUE,
+										bSafetyBoxPlace_permissive :=TRUE);
+	
+	fbBatterySupply(					sDeviceID:='',
+										bStopExecution:=fbStation01.bStop,
+										bAlarmReset:=fbStation01.bAlarmReset,
+										diStationState:=fbStation01.diStationState,
+										bInit_StartPermissive:=TRUE,
+										bSafetyBoxPlace_permissive := FALSE,
+										bPlace_MaterialRequest := TRUE);
+										
 	fbControllerSupply(					sDeviceID:='',
 										bStopExecution:=fbStation01.bStop,
 										bAlarmReset:=fbStation01.bAlarmReset,
@@ -35,24 +57,53 @@ END_VAR]]></Declaration>
 										bInit_StartPermissive:=TRUE,
 										bSafetyBoxPlace_permissive:=FALSE,
 										bPlace_MaterialRequest:=FALSE);
-
-	fbBatterySupply(					sDeviceID:='',
+										
+	fbControllerAsm(					sDeviceID:='',
 										bStopExecution:=fbStation01.bStop,
 										bAlarmReset:=fbStation01.bAlarmReset,
 										diStationState:=fbStation01.diStationState,
-										bInit_StartPermissive:=TRUE);
+										bInit_StartPermissive:=TRUE,
+										sSerialReceived:=fbControllerSupply.sPieceSN,	
+										bIn_RailReady:=fbConveyor.bOut_MoveDone);
+	
+	
 
-//	fbEndcapAsm(						);]]></ST>
+	
+
+	]]></ST>
     </Implementation>
     <LineIds Name="MAIN_ST01">
       <LineId Id="3" Count="0" />
-      <LineId Id="30" Count="4" />
-      <LineId Id="4" Count="0" />
-      <LineId Id="37" Count="1" />
-      <LineId Id="40" Count="3" />
-      <LineId Id="35" Count="0" />
-      <LineId Id="5" Count="15" />
-      <LineId Id="2" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="82" Count="8" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="93" Count="4" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="103" Count="1" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="69" Count="3" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="115" Count="2" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="120" Count="5" />
+      <LineId Id="119" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="98" Count="3" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="13" Count="1" />
+      <LineId Id="19" Count="1" />
+      <LineId Id="58" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

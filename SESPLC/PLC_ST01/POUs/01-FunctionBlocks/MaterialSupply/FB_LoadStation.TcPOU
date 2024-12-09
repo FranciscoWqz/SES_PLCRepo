@@ -1,0 +1,434 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_LoadStation" Id="{824b425e-0c24-4b5c-a7b8-186968253a7d}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_LoadStation EXTENDS RACBaseObjects.FB_Machine
+VAR_INPUT
+	bDisableScan						: BOOL;
+	bIn_MovePermisive					: BOOL;
+	bIn_CvyStepDone						: BOOL;
+	
+	
+END_VAR
+VAR_OUTPUT
+	bOut_ProcessDone						:BOOL;
+END_VAR
+VAR
+	
+	b_SensorLoadPos				AT %I*		: BOOL;	
+
+	k50_Left								: RACBaseObjects.FB_Bimanual;
+	k50_Right								: RACBaseObjects.FB_Bimanual;
+	ScanerReinsertionLoad					: FB_Scanner;
+	bSafeCurtainsFree			AT %I*		: BOOL;
+	tmrCurtainsFree							: TON;
+	b_SensorEndcap				AT %I* 		: BOOL;
+	b_SensorController			AT %I*		: BOOL;
+	
+	b_IG_Sensor_Pass				AT %I*		: BOOL;
+	b_IG_Sensor_Fail				AT %I*		: BOOL;
+	Mtr_CenterLeft							: FB_Motor;
+	Mtr_CenterRight							: FB_Motor;
+	
+	bScanController							: BOOL;
+	bScanComplete							: BOOL;
+	
+	lr_WithEndcapPos							: LREAL;
+	lr_WithoutEndcapPos						: LREAL;
+	
+	lr_WithControllerPos						: LREAL;
+	lr_WithoutControllerPos					: LREAL;
+	
+	//Manual control
+	b_MoveLeftMotor							: BOOL;
+	b_MoveRightMotor						: BOOL;
+	bIn_RailReady							: BOOL;
+	
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//Run the main control directly from the machine base
+SUPER^.MachineMain();
+
+]]></ST>
+    </Implementation>
+    <Method Name="Alarm" Id="{aea6d2ba-7acf-48df-b811-82ddab7d20a2}">
+      <Declaration><![CDATA[{warning 'Add method implementation '}
+METHOD Alarm
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Auto" Id="{1bdaebc5-4408-452b-b55d-62c00d623ab7}">
+      <Declaration><![CDATA[{warning 'Add method implementation '}
+METHOD Auto
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF diActualSeqStep<1000 OR diActualSeqStep> 2000 THEN
+	diActualSeqStep:= 1000;
+END_IF
+
+
+CASE diActualSeqStep OF
+	1000:						//Reset variables
+		bScanController:= FALSE;
+		bScanComplete:= FALSE;
+		bOut_ProcessDone:= FALSE;
+		
+		Mtr_CenterLeft.bExecute:= FALSE;
+		Mtr_CenterRight.bExecute:= FALSE;
+		
+		diActualSeqStep:= 1010;
+	
+		
+	1010:						//Check status
+		diActualSeqStep:= 1020;
+		
+	1020:						//Confirm motors not moving
+		IF NOT Mtr_CenterLeft.bMotorMoving AND NOT Mtr_CenterRight.bMotorMoving THEN
+			diActualSeqStep:= 1030;
+		END_IF
+		
+	1030:						//Update motor params
+		Mtr_CenterLeft.MovementType:= EN_MotionType.absolute;
+		Mtr_CenterRight.MovementType:= EN_MotionType.absolute;
+		
+		Mtr_CenterLeft.lrPosition:= 0;
+		Mtr_CenterRight.lrPosition:= 0;
+		
+		diActualSeqStep:= 1040;
+		
+	1040:						//Retract motors
+		Mtr_CenterLeft.bExecute:= TRUE;
+		Mtr_CenterRight.bExecute:= TRUE;
+		
+		IF Mtr_CenterLeft.bDone AND Mtr_CenterRight.bDone THEN
+			Mtr_CenterLeft.bExecute := FALSE;
+			Mtr_CenterRight.bExecute:= FALSE;
+			diActualSeqStep:= 1050;
+		END_IF	
+	
+	1050:						//Wait for the conveyor step
+		IF bIn_CvyStepDone THEN
+			diActualSeqStep:= 1060;
+		END_IF
+		
+	1060:						//Check for the rail loaded
+		IF b_SensorLoadPos AND bSafeCurtainsFree THEN
+			diActualSeqStep:= 1070;
+		END_IF
+		
+	1070:						//Validate banana effect/ IG sensor
+	
+		//Que haremos, esperar que se retire y se cargue otra?
+		IF b_IG_Sensor_Pass THEN
+			diActualSeqStep:= 1090;
+		ELSIF b_IG_Sensor_Fail THEN
+			diActualSeqStep:= 1080;
+			sAlarm:= 'RailBanana, remove';
+		END_IF
+		
+	1080:						//Rail on fail, wait until remove to return  to new load
+		IF NOT b_SensorLoadPos THEN			
+			diActualSeqStep:=1060;
+		END_IF
+	
+	1090:						//Check reinsertion conditions
+	
+		Mtr_CenterLeft.MovementType:= EN_MotionType.absolute;
+		Mtr_CenterRight.MovementType:= EN_MotionType.absolute;
+		IF b_SensorEndcap THEN
+			GVL_Rails.Nests[Constants.LoadPos].endcapAssembled := TRUE;
+			Mtr_CenterRight.lrPosition:= lr_WithEndcapPos;
+		ELSE
+			Mtr_CenterRight.lrPosition:= lr_WithoutEndcapPos;
+		END_IF
+		
+		IF b_SensorController THEN
+			
+			GVL_Rails.Nests[Constants.LoadPos].controllerAssembled := TRUE;
+			//Start scanning on the IO task
+			bScanController:= TRUE;
+			Mtr_CenterLeft.lrPosition:= lr_WithControllerPos;
+			
+		ELSE
+			Mtr_CenterLeft.lrPosition:= lr_WithoutControllerPos;
+		END_IF
+		
+		diActualSeqStep:= 1100;
+
+	1100:						//Move motors to center pos
+		Mtr_CenterLeft.bExecute:= TRUE;
+		Mtr_CenterRight.bExecute:= TRUE;
+
+		IF Mtr_CenterLeft.bDone AND Mtr_CenterRight.bDone THEN			
+			diActualSeqStep:= 1110;
+		END_IF		
+	
+	1110:						//Confirm motors done false
+		Mtr_CenterLeft.bExecute:= FALSE;
+		Mtr_CenterRight.bExecute:= FALSE;
+		IF NOT Mtr_CenterLeft.bDone AND NOT Mtr_CenterRight.bDone THEN
+			diActualSeqStep:= 1120;
+		END_IF
+		
+	1120:						//Wait 50 milis to confirm align
+		Mtr_CenterLeft.lrPosition:= 0;
+		Mtr_CenterRight.lrPosition:= 0;
+		ton_StepTimeout(IN:= TRUE, PT:= T#50MS);
+		
+		IF ton_StepTimeout.Q THEN
+			diActualSeqStep:= 1130;
+		END_IF
+		
+	1130:						//Move motors to retract position	
+	
+		Mtr_CenterLeft.bExecute:= TRUE;
+		Mtr_CenterRight.bExecute:= TRUE;
+		
+		IF Mtr_CenterLeft.bDone AND Mtr_CenterRight.bDone THEN
+			diActualSeqStep:= 1140;
+		END_IF
+		
+	1140:						//Check if there is a controller, wait for the scanned code
+		IF b_SensorController  THEN
+			IF bScanComplete THEN
+				IF ScanerReinsertionLoad.sCode <> 'ERROR' THEN
+					diActualSeqStep:= 1150;
+				ELSE
+					sAlarm:= 'Cant read the controller code, replace rail';
+					
+					diActualSeqStep:= 1080;		//Remove rail					
+				END_IF
+			END_IF
+		ELSE
+			diActualSeqStep:= 1150;			
+		END_IF
+		
+	1150:						//Set the process done and wait for not rail ready
+		bOut_ProcessDone:= TRUE;
+		IF NOT bIn_RailReady THEN
+			bOut_ProcessDone:= FALSE;
+			diActualSeqStep:= 1160;
+		END_IF
+	
+	1160:						//Return sequence
+		diActualSeqStep:= 1000;
+	
+
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="fn_ReinsertionScanController" Id="{b734d40f-1bc9-43f7-b8ed-bded96639ce5}">
+      <Declaration><![CDATA[METHOD fn_ReinsertionScanController : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Scanner disabled
+IF ScanerReinsertionLoad.bDisable THEN
+	GVL_Rails.Nests[Constants.LoadPos].controllerSerial:= 'ScanDisabled';
+	GVL_Rails.Nests[Constants.LoadPos].okToProcess:= TRUE;
+	fn_ReinsertionScanController:= TRUE;
+	RETURN;
+END_IF
+
+//Get code
+ScanerReinsertionLoad.bIn_Trigger:= TRUE;
+IF ScanerReinsertionLoad.bCompleted  THEN
+	ScanerReinsertionLoad.bIn_Trigger:= FALSE;
+	
+	GVL_Rails.Nests[Constants.LoadPos].controllerSerial:=ScanerReinsertionLoad.sCode;
+	
+	//If scan fails
+	IF ScanerReinsertionLoad.sCode = 'ERROR' THEN
+		GVL_Rails.Nests[Constants.LoadPos].okToProcess:= FALSE;
+	END_IF
+	
+	fn_ReinsertionScanController:= TRUE;
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Init" Id="{f60364fe-164a-491b-93d9-9df07ed35622}">
+      <Declaration><![CDATA[{warning 'Add method implementation '}
+METHOD Init
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Run timer for the timeouts
+ton_StepTimeout();
+
+CASE  diActualSeqStep OF
+	0:						//Reset variables
+		diActualSeqStep:= 10;
+		
+	10:						//Wait for initial move permisive
+		IF Mtr_CenterLeft.bInit_StartPermissive AND Mtr_CenterRight.bInit_StartPermissive THEN
+			diActualSeqStep:= 20;
+		END_IF
+		
+	20:						//Check for the initial done reset
+		IF NOT Mtr_CenterLeft.bInit_Finished AND NOT Mtr_CenterRight.bInit_Finished THEN
+			diActualSeqStep:= 30;
+		END_IF
+		
+		
+	30:						//Motors home
+		Mtr_CenterLeft.Init();
+		Mtr_CenterRight.Init();
+		ton_StepTimeout.IN:= TRUE;		
+		//Wait for the initial finish
+		IF Mtr_CenterLeft.bInit_Finished  AND Mtr_CenterRight.bInit_Finished THEN
+			sAlarm:= '';
+			ton_StepTimeout.IN:= FALSE;
+			diActualSeqStep:= 40;
+		
+		//If timeoutm send the alarm
+		ELSIF ton_StepTimeout.Q THEN
+			IF NOT Mtr_CenterLeft.bInit_Finished THEN
+				sAlarm:= 'Motor left didnt reach home position';
+			ELSIF NOT Mtr_CenterRight.bInit_Finished THEN
+				sAlarm:= 'Motor right didnt reach home position';
+			END_IF
+		END_IF
+		
+	40:						//Validate the scanner connection
+		ton_StepTimeout.IN:= TRUE;
+		IF ScanerReinsertionLoad.bConnected OR ScanerReinsertionLoad.bDisable THEN
+			ton_StepTimeout.IN:= FALSE;
+			diActualSeqStep:= 50;
+		ELSIF ton_StepTimeout.Q THEN
+			sAlarm:= 'Scanner not connected';
+		END_IF
+	
+	50:						//Validate sensors
+		//NOTE, validate for reset or how to confirm outputs
+		diActualSeqStep:= 60;
+		
+	60:						//Spare
+		diActualSeqStep:= 70;
+		
+	70:						//Send the initial finish
+		bInit_Finished:= TRUE;
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="IO" Id="{1695a13e-c2d0-41a1-b520-e8fc1a7faa1b}">
+      <Declaration><![CDATA[{warning 'Add method implementation '}
+METHOD IO
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Declare devices and add safety conditions
+Mtr_CenterLeft(diStationState:= THIS^.diStationState,
+				bInit_StartPermissive:= THIS^.bInit_StartPermissive and bSafeCurtainsFree,
+				sDeviceID:= 'Mtr2',
+				bStopExecution:= THIS^.bStopExecution,
+				bAlarmReset:= THIS^.bAlarmReset,
+				bMovePermissive:= THIS^.bIn_MovePermisive AND bSafeCurtainsFree);
+				
+Mtr_CenterRight(diStationState:= THIS^.diStationState,
+				bInit_StartPermissive:= THIS^.bInit_StartPermissive AND bSafeCurtainsFree,
+				sDeviceID:= 'Mtr2',
+				bStopExecution:= THIS^.bStopExecution,
+				bAlarmReset:= THIS^.bAlarmReset,
+				bMovePermissive:= THIS^.bIn_MovePermisive AND bSafeCurtainsFree);
+				
+				
+
+ScanerReinsertionLoad(bDisable:= bDisableScan, bAlarmReset:= bAlarmReset);
+
+IF bScanController THEN
+	IF THIS^.fn_ReinsertionScanController() THEN
+		bScanController:=FALSE;
+		bScanComplete:= TRUE;
+	END_IF	
+
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Manual" Id="{f3a5b003-cc01-41a8-a188-46fa6c3c486c}">
+      <Declaration><![CDATA[{warning 'Add method implementation '}
+METHOD Manual
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Move motor left
+IF b_MoveLeftMotor THEN
+	Mtr_CenterLeft.bExecute:= TRUE;
+	
+	IF Mtr_CenterLeft.bDone THEN
+		Mtr_CenterLeft.bExecute:= FALSE;
+		b_MoveLeftMotor:= FALSE;
+	END_IF
+ELSE
+	Mtr_CenterLeft.bExecute:= FALSE;	
+END_IF
+
+//Move motor right
+IF b_MoveRightMotor THEN
+	Mtr_CenterRight.bExecute:= TRUE;
+	
+	IF Mtr_CenterRight.bDone THEN
+		Mtr_CenterRight.bExecute:= FALSE;
+		b_MoveRightMotor:= FALSE;
+	END_IF
+ELSE
+	Mtr_CenterRight.bExecute:= FALSE;	
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Pause" Id="{57a6087e-ce6e-4919-8a84-537f02347671}">
+      <Declaration><![CDATA[{warning 'Add method implementation '}
+METHOD Pause
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Stop" Id="{1c8c6111-23cf-4da4-9add-6cce846397c0}">
+      <Declaration><![CDATA[{warning 'Add method implementation '}
+METHOD Stop
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_LoadStation">
+      <LineId Id="3" Count="2" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_LoadStation.Alarm">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_LoadStation.Auto">
+      <LineId Id="3" Count="152" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_LoadStation.fn_ReinsertionScanController">
+      <LineId Id="3" Count="22" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_LoadStation.Init">
+      <LineId Id="3" Count="55" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_LoadStation.IO">
+      <LineId Id="3" Count="24" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_LoadStation.Manual">
+      <LineId Id="3" Count="21" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_LoadStation.Pause">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_LoadStation.Stop">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
