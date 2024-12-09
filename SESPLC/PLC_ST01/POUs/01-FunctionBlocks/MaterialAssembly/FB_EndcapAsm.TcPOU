@@ -1,0 +1,561 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_EndcapAsm" Id="{10c1f8e8-7399-4ddc-bd20-4ff28e8cf9c0}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK INTERNAL FB_EndcapAsm EXTENDS RACBaseObjects.FB_Machine
+VAR_INPUT
+	bSafetyBoxPlace_permissive			: BOOL;
+END_VAR
+VAR_OUTPUT
+	bOutEndcapAsm_Done 					: BOOL;
+END_VAR
+VAR
+	bIsEndcapInFeedPosition		AT %I*		: BOOL;
+	bIsEndcapInAssemblyPos		AT %I*		: BOOL;
+	bFirstPositionSensor 		AT %I*		: BOOL;		
+				
+	//Is rail in position and clamped
+	bRailReadyToAssembly					: BOOL;
+	//Assembly side is ready to receive
+	bAsmReadyToReceive						: BOOL;
+	//Feed side with endcap ready
+	bFeedReadyToSend						: BOOL;
+	//The endcap is assembled on the rail
+	bEndcapInRailDone						: BOOL;
+	
+	//Local process control
+	bRemoveBottomSupport					: BOOL;
+	bEndcapAssembled						: BOOL;
+	bIsClampedOk							: BOOL;
+	bIsReleased								: BOOL;
+	bIsBottomClampRelease					: BOOL;								
+	bEndcapPasses							: BOOL;		
+	
+	//Control steps for sub routines
+	iStepAsm								: USINT;
+	iStepFeed								: USINT;
+	iStepRail								: USINT;
+	
+	//Timer to confirm endcap in position
+	tmrPosition								: TON;
+	tmrBowl									: TP;
+	time_EC_DelayPosition					: TIME		:= T#500MS;
+		
+	//Devices
+	
+	//Bowl control structure, validate signals and control system1		
+	bowlControl								: RACBaseObjects.ST_BowlFeeder;	
+	//Rail side for clamp support top cylinder
+	Cyl_ClampRail_Top						: FB_Cylinder;
+	//Rail side for clamp support bottom cylinder
+	Cyl_ClampRail_Bot						: FB_Cylinder;		
+	//Send endcap from bowl rail to assembly align
+	Cyl_FeedEndcap							: FB_Cylinder;	
+	//Push endcap for assembly with the rail 
+	Cyl_PushEndcap							: FB_Cylinder;	
+	//Endcap feeding guide during alignment process
+	Cyl_SupportEndcap_Top					: FB_Cylinder;
+	//Bottom alignment guide and pin button release 
+	Cyl_SupportEndcap_Bot					: FB_Cylinder;
+
+	bOut_ProcessComplete					: BOOL;
+	bOut_ProcessOnFail						: BOOL;
+	bOut_ReadyToReceive						: BOOL;
+	bIn_UnitReady							: BOOL;
+	bIn_UnitOnFail							: BOOL;
+	
+	//Manual operations
+	bIn_Manual_ClampRail				: BOOL;
+	bIn_Manual_UnclampRail				: BOOL;	
+	bIn_ManualRun						: BOOL;		
+	
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[SUPER^.MachineMain();
+
+//Run FB and assign safety permisives
+
+
+Cyl_ClampRail_Top();
+
+Cyl_ClampRail_Bot();
+
+//Set the permisive output directly from the cylinder sensors
+bSafetyBoxPlace_Permissive := (Cyl_ClampRail_Top.bIsRetracted AND
+							Cyl_ClampRail_Bot.bIsRetracted AND
+							Cyl_PushEndcap.bIsRetracted);
+]]></ST>
+    </Implementation>
+    <Folder Name="Auxiliar" Id="{efd4c4d4-1373-4553-98fa-73d98e66a2a9}" />
+    <Method Name="Alarm" Id="{d1e64a99-890f-4f4a-b619-4db152e73e33}">
+      <Declaration><![CDATA[METHOD Alarm
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Auto" Id="{e69c2588-e375-4cdc-9e2a-6a344a5e0f85}">
+      <Declaration><![CDATA[METHOD Auto
+
+VAR
+	Seq_Endcap: INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Call sub process
+THIS^.Seq_EndcapFeed(bIsManual := TRUE);			//Feed endcap from bowl to assembly process
+THIS^.Seq_EndcapAsm(bIsManual := TRUE);			//Endcap assembly process
+THIS^.Seq_Auto_Rail();			//Clamp rail
+THIS^.Seq_Auto_BowlFeeder();	//Bowl feeder control]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ClampRail" Id="{919459f4-a502-4a5e-836c-2fea8a1a1abf}" FolderPath="Auxiliar\">
+      <Declaration><![CDATA[METHOD ClampRail : BOOL
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Top and bottom clamp
+Cyl_ClampRail_Top.bExtendRequest:= TRUE;
+Cyl_ClampRail_Bot.bExtendRequest:= TRUE;
+
+ClampRail:=  Cyl_ClampRail_Top.bIsExtended AND Cyl_ClampRail_Bot.bIsExtended;	
+	]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="fn_CancelCylinderMoves" Id="{4e44777b-a0d3-4888-a05f-80a2e0a9942b}" FolderPath="Auxiliar\">
+      <Declaration><![CDATA[METHOD fn_CancelCylinderMoves
+VAR
+	r_trig					: R_TRIG;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[r_trig(CLK:= TRUE);
+//Stop moves only once
+IF r_trig.Q THEN
+				
+	Cyl_ClampRail_Bot.bExtendRequest:= FALSE;
+	Cyl_ClampRail_Bot.bRetractRequest:= FALSE;
+	
+	Cyl_ClampRail_Top.bExtendRequest:= FALSE;
+	Cyl_ClampRail_Top.bRetractRequest:= FALSE;
+	
+	Cyl_FeedEndcap.bExtendRequest:= FALSE;
+	Cyl_FeedEndcap.bRetractRequest:= FALSE;
+	
+	Cyl_PushEndcap.bExtendRequest:= FALSE;
+	Cyl_PushEndcap.bRetractRequest:= FALSE;
+	
+	Cyl_SupportEndcap_Bot.bExtendRequest:= FALSE;
+	Cyl_SupportEndcap_Bot.bRetractRequest:= FALSE;
+	
+	Cyl_SupportEndcap_Top.bExtendRequest:= FALSE;
+	Cyl_SupportEndcap_Top.bRetractRequest:= FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Init" Id="{eede1188-13cb-4e50-b766-b36a8139c9c9}">
+      <Declaration><![CDATA[ METHOD Init 
+
+//VAR_OUTPUT
+//	bOutReadyToRobotPlace: BOOL;
+//END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE diActualSeqStep OF
+	//Initial
+		
+	0:						//Reset variables		
+		bInit_Finished := FALSE;
+	     bOutEndcapAsm_Done:= FALSE;		
+		diActualSeqStep:= 10;	
+		
+	10:						//Retract rail support				
+		//Retract controller guide support
+		Cyl_SupportEndcap_Top.bRetractRequest := TRUE;
+		Cyl_SupportEndcap_Bot.bRetractRequest := TRUE;
+							
+		IF THIS^.UnclampRail() AND Cyl_SupportEndcap_Top.bIsRetracted AND Cyl_SupportEndcap_Bot.bIsRetracted THEN
+			diActualSeqStep := 20;			
+		END_IF
+	
+	20:						//Retract feed endcap cyl.		
+		Cyl_FeedEndcap.bRetractRequest := TRUE;
+		IF Cyl_FeedEndcap.bIsRetracted THEN 
+			diActualSeqStep := 30;
+		END_IF
+		
+	30:						//Retract push endcap to rail			
+		Cyl_PushEndcap.bRetractRequest:= TRUE;
+		IF Cyl_PushEndcap.bIsRetracted THEN
+			diActualSeqStep:= 40;
+		END_IF
+
+	40:						//Initial done				 
+		bInit_Finished:= TRUE;
+		RETURN;
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="IO" Id="{0a8c78d9-9285-4ef6-ab3a-508dd3265e60}">
+      <Declaration><![CDATA[METHOD IO
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Manual" Id="{2906a423-2bac-4eb7-9512-4dddc2993d89}">
+      <Declaration><![CDATA[METHOD Manual
+
+VAR
+	r_trigReset					: R_TRIG;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+IF bIn_ManualRun THEN
+	//Reset just once
+	r_trigReset(CLK:= TRUE);
+	IF r_trigReset.Q THEN
+		iStepAsm:= 0;
+		iStepFeed:= 0;				
+	END_IF
+	
+	//Run sequences
+	THIS^.Seq_EndcapAsm(bIsManual:= TRUE);		
+	THIS^.Seq_EndcapAsm(bIsManual:= TRUE);		
+END_IF
+
+
+//Clamp rail
+ IF bIn_Manual_ClampRail THEN
+	 IF THIS^.ClampRail() THEN
+		 bIn_Manual_ClampRail:= FALSE;
+	 END_IF
+ END_IF
+ 
+ //Unclamp rail
+ IF bIn_Manual_UnclampRail THEN
+	 IF THIS^.UnclampRail() THEN
+		 bIn_Manual_UnclampRail:= FALSE;
+	 END_IF
+ END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Pause" Id="{aada2ea7-7899-4490-83d5-504f7b72eb96}">
+      <Declaration><![CDATA[METHOD Pause
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[fn_CancelCylinderMoves();]]></ST>
+      </Implementation>
+    </Method>
+    <Action Name="Seq_Auto_BowlFeeder" Id="{2e70006e-3e79-47cc-9af7-5c8172398b76}" FolderPath="Auxiliar\">
+      <Implementation>
+        <ST><![CDATA[
+//Bowl control
+tmrbowl(PT:= T#500MS);
+IF NOT bIsEndcapInFeedPosition OR tmrBowl.Q THEN
+	bowlControl.bOut_Vibrate := TRUE;
+	tmrBowl.IN:= TRUE;	
+ELSE	
+	tmrBowl.IN:= FALSE;
+	bowlControl.bOut_Vibrate:= FALSE;
+END_IF
+
+//Alarm
+IF bowlControl.bIn_NoMaterial THEN
+	sAlarm:= 'Bowl feeder no material, please recharge';
+	
+ELSIF bowlControl.bIn_LowLevelMaterial THEN 
+	sAlarm:='Bowl feeder low level material';
+		
+ELSE 
+	sAlarm:= '';
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Seq_Auto_Rail" Id="{8e23f637-b4b1-4f50-a12e-e1b8ec4a1ca3}" FolderPath="Auxiliar\">
+      <Implementation>
+        <ST><![CDATA[CASE iStepRail OF
+	
+	0:						//Reset variables				
+		bOut_ProcessComplete:= FALSE;
+		bOut_ProcessOnFail:= FALSE;
+		bOut_ReadyToReceive:= FALSE;
+		bRailReadyToAssembly:= FALSE;	
+		iStepRail:= 10;
+				
+	10:						//Check status			
+		iStepRail:= 20;
+		
+	20: 					//Retract clamps of rail
+		IF THIS^.UnclampRail() THEN
+			iStepRail := 30;
+		END_IF	
+		
+	30:						//Wait for new rail and ok to process			
+//		IF bIn_RailReady THEN
+			IF RACBaseObjects.GVL_Rails.Nests[RACBaseObjects.Constants.EndcapAsmPos].okToProcess AND NOT bIn_UnitOnFail THEN
+				iStepRail:= 40;			
+			ELSIF bIn_UnitOnFail OR NOT RACBaseObjects.GVL_Rails.Nests[RACBaseObjects.Constants.EndcapAsmPos].okToProcess  THEN				
+				iStepRail:= 60;				
+			END_IF			 
+//		END_IF
+		
+	40:						//Clamp rail		
+		IF THIS^.ClampRail() THEN			
+			iStepRail := 50;
+		END_IF	
+		
+	50:						//Ready to controller assembly
+		bRailReadyToAssembly:= TRUE;
+		IF bEndcapInRailDone THEN
+			bRailReadyToAssembly:= FALSE;
+			iStepRail:= 60;
+		END_IF
+		
+ 	60: 					//Retract clamps
+		IF THIS^.UnclampRail() THEN
+			iStepRail:= 70;
+		END_IF
+		
+	70:						//Send rail assembly done and wait until not rail in position
+	   	bOut_ProcessComplete := TRUE;
+		
+		IF NOT bIn_UnitReady AND NOT bIn_UnitOnFail THEN
+			bOut_ProcessComplete := FALSE;
+			iStepRail:=80;
+		END_IF
+
+	80:						//Return to start
+		iStepRail:= 0;
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Method Name="Seq_EndcapAsm" Id="{fa51a54b-949d-4b2f-9783-1715a99559f0}" FolderPath="Auxiliar\">
+      <Declaration><![CDATA[METHOD PRIVATE Seq_EndcapAsm : BOOL
+VAR_INPUT
+	bIsManual			:BOOL 		:= FALSE;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE iStepAsm OF
+
+	0:						//Reset variables
+		bOut_ProcessComplete:= FALSE;
+		bOut_ProcessOnFail:= FALSE;
+		bOut_ReadyToReceive:= FALSE;
+		bAsmReadyToReceive:= FALSE;
+		
+		iStepAsm:= 10;
+
+	10:						//Check status
+		iStepAsm:=20;
+		
+	20:						//Retract push cylinder
+		Cyl_PushEndcap.bRetractRequest := TRUE;
+		IF Cyl_PushEndcap.bIsRetracted THEN
+			iStepAsm:= 30;
+		END_IF
+
+	30:						//Extend Endcap guides
+		Cyl_SupportEndcap_Top.bExtendRequest := TRUE;
+		Cyl_SupportEndcap_Bot.bExtendRequest := TRUE;
+		
+		IF Cyl_SupportEndcap_Top.bIsExtended AND Cyl_SupportEndcap_Bot.bIsExtended THEN
+			iStepAsm:= 40;
+		END_IF
+
+	40:						//Send ready to receive and wait for endcap
+		bAsmReadyToReceive:= TRUE;
+		IF bIsEndcapInAssemblyPos THEN
+			bAsmReadyToReceive:= FALSE;
+			iStepAsm:= 50;
+		END_IF
+		
+	50:						//Confirm feed side doesn't be ready
+		IF NOT bFeedReadyToSend THEN
+			iStepAsm:= 60;
+		END_IF
+
+	60:						//Wait for rail ready to assembly
+		IF bRailReadyToAssembly THEN
+			iStepAsm:= 70;
+		END_IF
+		
+	70:						//Retract bottom support
+		Cyl_SupportEndcap_Bot.bRetractRequest:= TRUE;
+		IF Cyl_SupportEndcap_Bot.bIsRetracted THEN
+			Cyl_SupportEndcap_Bot.bRetractRequest:= FALSE;
+			iStepAsm:= 80;
+		END_IF
+		
+	80:						//Push endcap into the rail
+		Cyl_PushEndcap.bExtendRequest:= TRUE;
+		IF Cyl_PushEndcap.bIsExtended THEN
+			iStepAsm:= 90;
+		END_IF
+		
+	90:						//Retract top guide
+		Cyl_SupportEndcap_Top.bRetractRequest:= TRUE;
+		IF Cyl_SupportEndcap_Top.bIsRetracted THEN			
+			iStepAsm:= 100;
+		END_IF
+	
+	100:						//Retract push
+		Cyl_PushEndcap.bRetractRequest:= TRUE;
+		IF Cyl_PushEndcap.bIsRetracted THEN
+			iStepAsm:= 110;
+		END_IF
+	
+	110:						//Send the assembly done
+		bEndcapInRailDone:= TRUE;
+		IF NOT bRailReadyToAssembly THEN
+			iStepAsm:= 120;		
+		END_IF
+	
+	120:						//Return to start
+		iStepAsm:= 0;
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Seq_EndcapFeed" Id="{5d2961a3-573e-44d9-8e18-d697c3ca96bc}" FolderPath="Auxiliar\">
+      <Declaration><![CDATA[METHOD PRIVATE Seq_EndcapFeed : BOOL
+VAR_INPUT
+	bIsManual				:BOOL 		:= FALSE;	
+END_VAR
+
+VAR
+	
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE iStepFeed OF
+
+	0:						//Reset variables		
+		iStepFeed:= 10;
+
+	10:						//Check status
+		iStepFeed:= 20;
+		
+	20:						//Retract feed cylinder
+		Cyl_FeedEndcap.bRetractRequest:= TRUE;
+		IF Cyl_FeedEndcap.bIsRetracted THEN			
+			iStepFeed:= 30;
+		END_IF
+	
+	30:						//Wait for endcap in position
+		IF bIsEndcapInFeedPosition THEN
+			iStepFeed:= 40;
+		END_IF
+
+	40:						//Check Assembly position is ready to receive
+		bFeedReadyToSend := TRUE;
+		IF bAsmReadyToReceive THEN
+			iStepFeed:= 50;
+		END_IF
+		
+	50:						//Extend Endcap feed cylinder
+		Cyl_FeedEndcap.bExtendRequest:= TRUE;
+		IF Cyl_FeedEndcap.bIsExtended THEN
+			Cyl_FeedEndcap.bExtendRequest:= FALSE;
+			iStepFeed:= 60;
+		END_IF		
+
+	60:						//Confirm endcap in the next position
+		IF NOT bAsmReadyToReceive THEN		
+			iStepFeed:= 70;
+		END_IF
+		
+	70:						//Retract feed cylinder
+		Cyl_FeedEndcap.bRetractRequest:= TRUE;
+		IF Cyl_FeedEndcap.bIsRetracted THEN
+			bFeedReadyToSend:= FALSE;			
+			iStepFeed:= 80;
+		END_IF
+			
+	80:						//Return to start
+		iStepFeed:= 0;
+
+
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Stop" Id="{b399d3ec-a529-40e4-9f77-d18e8e28ce66}">
+      <Declaration><![CDATA[METHOD Stop
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[fn_CancelCylinderMoves();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="UnclampRail" Id="{c5c0e36a-9a2a-43e0-8d1a-79e13ad318c6}" FolderPath="Auxiliar\">
+      <Declaration><![CDATA[METHOD UnclampRail : BOOL
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[		
+//Top and bottom unclamp
+Cyl_ClampRail_Top.bRetractRequest:= TRUE;
+Cyl_ClampRail_Bot.bRetractRequest:= TRUE;
+
+UnclampRail:= Cyl_ClampRail_Top.bIsRetracted AND Cyl_ClampRail_Bot.bIsRetracted;	
+	]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_EndcapAsm">
+      <LineId Id="3" Count="12" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EndcapAsm.Alarm">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EndcapAsm.Auto">
+      <LineId Id="3" Count="3" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EndcapAsm.ClampRail">
+      <LineId Id="3" Count="4" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EndcapAsm.fn_CancelCylinderMoves">
+      <LineId Id="3" Count="20" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EndcapAsm.Init">
+      <LineId Id="3" Count="32" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EndcapAsm.IO">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EndcapAsm.Manual">
+      <LineId Id="3" Count="26" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EndcapAsm.Pause">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EndcapAsm.Seq_Auto_BowlFeeder">
+      <LineId Id="2" Count="19" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EndcapAsm.Seq_Auto_Rail">
+      <LineId Id="2" Count="53" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EndcapAsm.Seq_EndcapAsm">
+      <LineId Id="3" Count="77" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EndcapAsm.Seq_EndcapFeed">
+      <LineId Id="3" Count="47" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EndcapAsm.Stop">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EndcapAsm.UnclampRail">
+      <LineId Id="3" Count="5" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

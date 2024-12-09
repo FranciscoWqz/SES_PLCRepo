@@ -8,11 +8,19 @@ VAR_GLOBAL CONSTANT
 	
 	LoadPos							: USINT		:= 1;
 	NestScanPos						: USINT		:= 2;
+	EndcapAsmPos					: USINT		:= 3;
 	ControllerScanPos				: USINT		:= 4;	
 	BatteryConnectPos		 		: USINT		:= 5;
+	ControllerAsmPos				: USINT		:= 6;
 	DisplayScanPos		 			: USINT		:= 18;	
 	BatteryDisconnectPos			: USINT		:= 20;
 	TappingPos						: USINT		:= 23;
+	
+//	St01_LoadPos					: USINT		:= 1; // From quiles branch 
+//	St01_EndcapAsmPos				: USINT		:= 3;
+//	St01_ControllerAsmPos				: USINT		:= 4;
+//	St01_BatteryAsmPos				: USINT		:= 5;
+//	St01_UnloadPos					: USINT		:= 9;
 						
 END_VAR]]></Declaration>
   </GVL>

@@ -1,0 +1,805 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_ControllerAsm" Id="{177cf0e1-0486-4db4-8f2b-bbd30fdfa55f}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK INTERNAL FB_ControllerAsm EXTENDS RACBaseObjects.FB_Machine
+
+VAR_INPUT
+	sSerialReceived						: STRING;	
+	bIn_RailReady						: BOOL;
+END_VAR
+
+VAR_OUTPUT					
+	bOut_ControlAsm_Done				: BOOL;
+	bOut_ReadyToRobotPlace				: BOOL;
+	bOut_RobotPermisive					: BOOL;
+	bOutReadyToRobotPlace				: BOOL;
+	bSafetyBoxPlace_OutOfZone 			: BOOL;
+
+END_VAR
+
+VAR		
+	
+	sSerialCenter						: STRING;
+	sSerialAsm							: STRING;
+	
+	bInSensorBeforeFlipPos		AT %I*	: BOOL;
+	bInSensorAfterFlipPos		AT %I*	: BOOL;
+	bInSensorAlignedPos		 	AT %I*	: BOOL;
+	bInMiddlePositionSensor 	AT %I*	: BOOL;	
+
+	bRemoveBottomSupport				: BOOL;		
+	bControllerInRailDone				: BOOL;	
+	
+	//Hanshake between subsequences							
+	bReceiverReadyToSend				: BOOL;
+	bCenterReadyToReceive				: BOOL;
+	bCenterReadyToSend					: BOOL;
+	bAsmReadyToReceive					: BOOL;	
+	
+	bRailReadyToAssembly				: BOOL;
+	
+	//Rail side vars	
+	bIsClampedOk						: BOOL;
+	bIsReleased							: BOOL;
+	bIsBottomClampRelease				: BOOL;
+	
+	//Control steps 
+	iStepAsm							: USINT;
+	iStepCenter							: USINT;	
+	iStepReceive						: USINT;
+	iStepRail							: USINT;	
+	
+	//Remove noise timers
+	tmrFlip								: TON;	
+	tmrAsm								: TON;
+	tmrCenter							: TON;
+	
+	tControlDelayPosition				: TIME		:= T#500MS;		
+				
+	//Devices	
+	
+	//Rail side for clamp support top cylinder
+	Cyl_ClampRail_Top					: FB_Cylinder;
+	//Rail side for clamp support bottom cylinder
+	Cyl_ClampRail_Bot					: FB_Cylinder;
+	//Rail side Busbar align support
+	Cyl_BusbarSupport					: FB_Cylinder;	
+	//Send controller from nest to assembly align
+	Cyl_FeedControl						: FB_Cylinder;	
+	//Push controller for assembly to the rail 
+	Cyl_PushControl						: FB_Cylinder;
+	//Flipper from robot place to nest
+	Cyl_Flipper							: FB_Cylinder;
+	//Controller guide during feed alignment process
+	Cyl_SupportControl_Top				: FB_Cylinder;
+	//Bottom alignment guide and pin button release 
+	Cyl_SupportControl_Bot				: FB_Cylinder;				
+	//Centering controller after flip
+	Cyl_Center: FB_Cylinder;
+	//Vacuum control
+	Vacuum								: FB_Vacuum;
+	
+	//Manual operations
+	bIn_Manual_ClampRail				: BOOL;
+	bIn_Manual_UnclampRail				: BOOL;	
+	bIn_ManualRun						: BOOL;		
+					
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//Run the main controller 
+SUPER^.MachineMain();
+
+//Run devices with their safety conditions
+Cyl_ClampRail_Top(bPermisiveExtend:= Cyl_BusbarSupport.bIsRetracted);
+Cyl_ClampRail_Bot(bPermisiveExtend:= Cyl_BusbarSupport.bIsRetracted);
+Cyl_BusbarSupport(bPermisiveExtend:= Cyl_ClampRail_Top.bIsExtended AND Cyl_ClampRail_Bot.bIsExtended);
+
+Cyl_SupportControl_Top(bPermisiveExtend:= Cyl_PushControl.bIsRetracted AND Cyl_FeedControl.bIsRetracted);
+Cyl_SupportControl_Bot(bPermisiveExtend:= Cyl_PushControl.bIsRetracted AND Cyl_FeedControl.bIsRetracted);
+Cyl_Center(bPermisiveExtend:= Cyl_Flipper.bIsRetracted and Cyl_FeedControl.bIsRetracted);
+
+Cyl_Flipper(bPermisiveExtend:= Cyl_Center.bIsRetracted);
+Cyl_PushControl(bPermisiveExtend:= Cyl_BusbarSupport.bIsExtended AND Cyl_FeedControl.bIsRetracted,
+				bPermisiveRetract:= Cyl_FeedControl.bIsRetracted);
+Cyl_FeedControl(bPermisiveExtend:= Cyl_PushControl.bIsRetracted AND Cyl_Center.bIsRetracted AND Cyl_Flipper.bIsRetracted,
+				bPermisiveRetract:= Cyl_Center.bIsRetracted AND Cyl_Flipper.bIsRetracted);
+
+//Robot permisive
+bOut_RobotPermisive:= Cyl_Flipper.bIsRetracted;
+
+//Conveyor permisive
+bSafetyBoxPlace_OutOfZone:= Cyl_ClampRail_Top.bIsRetracted AND Cyl_ClampRail_Bot.bIsRetracted
+						AND Cyl_BusbarSupport.bIsRetracted AND Cyl_PushControl.bIsRetracted;
+]]></ST>
+    </Implementation>
+    <Folder Name="Auxiliar" Id="{4ca4fd16-0eee-4d5b-9f38-0ffef00214eb}" />
+    <Method Name="Alarm" Id="{671e12f8-7598-4f6d-84da-1462e7717bc3}">
+      <Declaration><![CDATA[METHOD Alarm
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Auto" Id="{a8bd59a6-a3ac-4cb2-add4-d2e3db16e4f6}">
+      <Declaration><![CDATA[METHOD Auto
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Call sub process
+THIS^.Seq_CtrlReceive(bIsManual := FALSE);		//Receive from robot and flip controller
+THIS^.Seq_CtrlCenter(bIsManual := FALSE);			//Receive from flipper, align and feed to assembly side
+THIS^.Seq_CtrlAsm(bIsManual := FALSE);			//Guide controller and assembly on the rail
+THIS^.Seq_Auto_Rail();			//Rail clamping]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ClampRail" Id="{06050f79-dd5d-41d7-87ec-e612c0edd29a}" FolderPath="Auxiliar\">
+      <Declaration><![CDATA[METHOD ClampRail : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Top and bottom clamp
+Cyl_ClampRail_Top.bExtendRequest := TRUE;
+Cyl_ClampRail_Bot.bExtendRequest := TRUE;
+
+IF Cyl_ClampRail_Top.bIsExtended AND Cyl_ClampRail_Bot.bIsExtended THEN
+	//Extend busbar support
+	Cyl_BusbarSupport.bExtendRequest:= TRUE;
+	IF Cyl_BusbarSupport.bIsExtended THEN
+		ClampRail:= TRUE;		
+		RETURN;			
+	END_IF
+END_IF	
+		
+ClampRail:= FALSE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="fn_CancelCylinderMoves" Id="{92e64091-27fd-422b-9d7b-3926ced80035}" FolderPath="Auxiliar\">
+      <Declaration><![CDATA[METHOD fn_CancelCylinderMoves
+VAR
+	r_trig					: R_TRIG;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[r_trig(CLK:= TRUE);
+//Stop moves only once
+IF r_trig.Q THEN
+	Cyl_BusbarSupport.bExtendRequest:= FALSE;
+	Cyl_BusbarSupport.bRetractRequest:= FALSE;
+	
+	Cyl_Center.bRetractRequest:= FALSE;
+	Cyl_Center.bExtendRequest:= FALSE;
+	
+	Cyl_ClampRail_Bot.bExtendRequest:= FALSE;
+	Cyl_ClampRail_Bot.bRetractRequest:= FALSE;
+	
+	Cyl_ClampRail_Top.bExtendRequest:= FALSE;
+	Cyl_ClampRail_Top.bRetractRequest:= FALSE;
+	
+	Cyl_FeedControl.bExtendRequest:= FALSE;
+	Cyl_FeedControl.bRetractRequest:= FALSE;
+	
+	Cyl_Flipper.bExtendRequest:= FALSE;
+	Cyl_Flipper.bRetractRequest:= FALSE;
+	
+	Cyl_PushControl.bExtendRequest:= FALSE;
+	Cyl_PushControl.bRetractRequest:= FALSE;
+	
+	Cyl_SupportControl_Bot.bExtendRequest:= FALSE;
+	Cyl_SupportControl_Bot.bRetractRequest:= FALSE;
+	
+	Cyl_SupportControl_Top.bExtendRequest:= FALSE;
+	Cyl_SupportControl_Top.bRetractRequest:= FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Init" Id="{c4f431c7-72b3-43ce-9c4f-e710583308c9}">
+      <Declaration><![CDATA[METHOD Init
+
+VAR
+	bOutControlAsm_Done: BOOL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE diActualSeqStep OF
+	//Initial
+	
+	0:		//Reset variables
+		bInit_Finished := FALSE;
+		bOutControlAsm_Done	:= FALSE;
+		bOut_ReadyToRobotPlace  := FALSE;		
+		diActualSeqStep:= 10;	
+	
+	10:		//Retract bus bar support
+		Cyl_BusbarSupport.bRetractRequest := TRUE;
+		IF Cyl_BusbarSupport.bIsRetracted THEN			
+			diActualSeqStep := 20;
+		END_IF
+	
+	20:		//Retract rail support
+		Cyl_ClampRail_Top.bRetractRequest:= TRUE;
+		Cyl_ClampRail_Bot.bRetractRequest := TRUE;
+	
+			//Retract controller guide support
+		Cyl_SupportControl_Top.bRetractRequest:= TRUE;
+		Cyl_SupportControl_Bot.bRetractRequest:= TRUE;
+		
+			//Retract centering controller
+		Cyl_Center.bRetractRequest:= TRUE;
+		
+		IF Cyl_ClampRail_Top.bIsRetracted AND Cyl_ClampRail_Bot.bIsRetracted
+			AND Cyl_SupportControl_Top.bIsRetracted AND Cyl_SupportControl_Bot.bIsRetracted
+			AND Cyl_Center.bIsRetracted THEN
+			
+			diActualSeqStep := 30;			
+		END_IF
+	
+	30:		//Retract feed controller cyl.
+		Cyl_FeedControl.bRetractRequest:= TRUE;
+		IF Cyl_FeedControl.bIsRetracted THEN 			
+			diActualSeqStep := 40;
+		END_IF
+		
+	40:		//Retract push controller to rail
+	
+		Cyl_PushControl.bRetractRequest:= TRUE;
+		IF Cyl_PushControl.bIsRetracted THEN			
+			diActualSeqStep:= 50;
+		END_IF
+	
+	50:		//Retract flipper
+	
+		Cyl_Flipper.bRetractRequest:= TRUE;
+		IF Cyl_Flipper.bIsRetracted THEN			
+			//Turn off vacuum valve without blow
+			Vacuum.Release(Blow:= FALSE, T#200MS);
+			diActualSeqStep:= 60;
+		END_IF
+	
+	60:		//Initial Done 
+		bInit_Finished:= TRUE;
+		diActualSeqStep:= 100;
+		RETURN;
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="IO" Id="{fe173b15-cbf2-4e52-9f3e-dcc1840f3305}">
+      <Declaration><![CDATA[METHOD IO
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Manual" Id="{d669a475-f559-4184-8d39-fa560ce9e5e6}">
+      <Declaration><![CDATA[METHOD Manual
+
+VAR 
+	r_trigReset							: R_TRIG;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+IF bIn_ManualRun THEN
+	//Reset just once
+	r_trigReset(CLK:= TRUE);
+	IF r_trigReset.Q THEN
+		iStepAsm:= 0;
+		iStepCenter:= 0;		
+		iStepReceive:= 0;
+	END_IF
+	
+	//Run sequences
+	THIS^.Seq_CtrlReceive(bIsManual:= TRUE);	
+	THIS^.Seq_CtrlCenter(bIsManual:= TRUE);		
+	THIS^.Seq_CtrlAsm(bIsManual:= TRUE);		
+END_IF
+
+
+//Clamp rail
+ IF bIn_Manual_ClampRail THEN
+	 IF THIS^.ClampRail() THEN
+		 bIn_Manual_ClampRail:= FALSE;
+	 END_IF
+ END_IF
+ 
+ //Unclamp rail
+ IF bIn_Manual_UnclampRail THEN
+	 IF THIS^.UnclampRail() THEN
+		 bIn_Manual_UnclampRail:= FALSE;
+	 END_IF
+ END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Pause" Id="{f6f0da85-074a-458b-82e1-2c22f6ae08f4}">
+      <Declaration><![CDATA[METHOD Pause
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[fn_CancelCylinderMoves();]]></ST>
+      </Implementation>
+    </Method>
+    <Action Name="Seq_Auto_Rail" Id="{5d76d1ce-57eb-46ea-b63d-d252de35d85c}" FolderPath="Auxiliar\">
+      <Implementation>
+        <ST><![CDATA[CASE iStepRail OF
+	
+	0:						//Reset variables
+		bOut_ControlAsm_Done:= FALSE;
+		bRailReadyToAssembly:= FALSE;	
+		iStepRail:= 10;
+				
+	10:						//Check status			
+		iStepRail:= 20;
+	
+	20:						//Retract busbar support
+		Cyl_BusbarSupport.bRetractRequest:= TRUE;
+		IF Cyl_BusbarSupport.bIsRetracted THEN
+			iStepRail:= 30;
+		END_IF
+	
+	30:						//Retract rail clamps 
+		Cyl_ClampRail_Top.bRetractRequest:= TRUE;
+		Cyl_ClampRail_Bot.bRetractRequest:= TRUE;
+
+		IF Cyl_ClampRail_Top.bIsRetracted AND Cyl_ClampRail_Bot.bIsRetracted THEN
+			iStepRail := 40;
+		END_IF	
+		
+	40:						//Wait for new rail in position and ok to process
+		IF   bIn_RailReady AND  GVL_Rails.Nests[Constants.ControllerAsmPos].okToProcess THEN
+			iStepRail:= 50;
+		END_IF
+		
+	50:						//Clamp rail	
+		IF 	THIS^.ClampRail() THEN
+			
+			iStepRail := 60;
+		END_IF
+
+//Ready to controller assembly
+	60:
+		bRailReadyToAssembly:= TRUE;
+		IF bControllerInRailDone THEN
+			bRailReadyToAssembly:= FALSE;
+			iStepRail:= 70;
+		END_IF
+		
+//Retract busbar
+	70:
+		IF THIS^.UnclampRail() THEN
+			iStepRail:= 80;
+		END_IF
+ 
+//Send rail assembly done and wait until not rail in position
+	80:
+		  bOut_ControlAsm_Done:= TRUE;
+		
+		IF NOT bIn_RailReady THEN
+			bOut_ControlAsm_Done:= FALSE;
+			iStepRail:= 90;
+		END_IF
+
+//Return to start
+	90:
+		iStepRail:= 0;
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Method Name="Seq_CtrlAsm" Id="{470ad5af-5b48-4beb-bdc3-07181d54d153}" FolderPath="Auxiliar\">
+      <Declaration><![CDATA[METHOD PRIVATE Seq_CtrlAsm
+VAR_INPUT
+	bIsManual				: BOOL			:= FALSE;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE iStepAsm OF
+
+	0:							//Reset variables		
+		bAsmReadyToReceive:= FALSE;			
+		bControllerInRailDone:= FALSE;
+		tmrAsm.IN:= FALSE;
+		iStepAsm:= 10;
+				
+	10:							//Check status
+		IF bInSensorAlignedPos THEN	//Controller in rail aligned pos
+			//Avoid noise with the timer
+			tmrAsm(IN:= TRUE, pt:= T#200MS);
+			
+			IF tmrAsm.Q THEN
+				iStepAsm:= 40;
+			END_IF				
+					
+		ELSE	//Nothing detected
+			tmrAsm.IN:= FALSE;		
+			iStepAsm:= 20;
+		END_IF
+
+	20:							//Confirm push cylinder retracted
+		Cyl_PushControl.bRetractRequest:= TRUE;
+		IF Cyl_PushControl.bIsRetracted THEN
+			Cyl_PushControl.bRetractRequest:=FALSE;
+			iStepAsm:= 30;
+		END_IF
+		
+	30:							//Extend controller guide cylinders
+		Cyl_SupportControl_Top.bExtendRequest:= TRUE;
+		Cyl_SupportControl_Bot.bExtendRequest:= TRUE;
+				
+		IF Cyl_SupportControl_Top.bIsExtended AND Cyl_SupportControl_Bot.bIsExtended THEN						
+			iStepAsm:= 40;									
+		END_IF
+
+	40:							//Wait for controller in position
+		bAsmReadyToReceive:= TRUE;
+		IF bInSensorAlignedPos AND NOT bCenterReadyToSend THEN			
+			bAsmReadyToReceive:= FALSE;
+			iStepAsm:= 50;			
+		END_IF
+		 
+	50:							//Retract controller bottom support cylinder
+		Cyl_SupportControl_Bot.bRetractRequest:= TRUE;
+			IF Cyl_SupportControl_Bot.bIsRetracted THEN			
+			 	iStepAsm:= 60;
+		 	END_IF
+
+	60:							//Wait for rail ready to assembly and clamped
+		IF bRailReadyToAssembly OR bIn_ManualRun THEN
+			istepAsm:= 70;
+		END_IF
+		
+	70: 						//Push controller to the rail
+		Cyl_PushControl.bExtendRequest:= TRUE;
+		IF Cyl_PushControl.bIsExtended THEN
+			Cyl_PushControl.bExtendRequest:= FALSE;
+			istepAsm:= 80;
+		END_IF
+		
+	80:							//If not in manual, update the serial on the gvl rail list 
+		IF NOT bIn_ManualRun THEN
+			GVL_Rails.Nests[Constants.ControllerAsmPos].controllerSerial:= sSerialAsm;
+		END_IF
+		iStepAsm:= 90;		
+		
+	90:							//Remove top controller guide and bottom rail support
+		Cyl_SupportControl_Top.bRetractRequest:= TRUE;
+		Cyl_ClampRail_Bot.bRetractRequest:= TRUE;
+		tmrAsm(IN:= FALSE);
+		
+		IF Cyl_SupportControl_Top.bIsRetracted AND Cyl_ClampRail_Bot.bIsRetracted THEN			
+			iStepAsm:= 100;			
+		END_IF
+		
+	100:							//Confirm full controller assembly
+		Cyl_PushControl.bExtendRequest:= TRUE;
+		IF Cyl_PushControl.bIsExtended THEN
+			
+			tmrAsm(IN:= TRUE, pt:= T#100MS);
+			IF tmrAsm.Q THEN				
+				istepAsm:= 110;
+			END_IF			
+		END_IF
+
+	110:							//Retract assembly side cylinders
+		Cyl_PushControl.bRetractRequest:= TRUE;
+		Cyl_SupportControl_Top.bRetractRequest:= TRUE;
+		Cyl_SupportControl_Bot.bRetractRequest:= TRUE;
+		
+		IF Cyl_PushControl.bIsRetracted AND Cyl_SupportControl_Top.bIsRetracted AND Cyl_SupportControl_Bot.bIsRetracted THEN
+			bControllerInRailDone:= TRUE;
+			iStepAsm:= 120;			
+		END_IF
+		
+	120:							//Wait until the rail is not in position
+		IF NOT bRailReadyToAssembly OR bIn_ManualRun THEN
+			iStepAsm:= 130;
+		END_IF
+
+	130:							//Return to start
+		iStepAsm:= 0;
+
+END_CASE		
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Seq_CtrlCenter" Id="{5e25f7a0-60e7-43ab-a0b1-9acf91c13077}" FolderPath="Auxiliar\">
+      <Declaration><![CDATA[METHOD PRIVATE Seq_CtrlCenter
+VAR_INPUT
+	bIsManual				: BOOL			:= FALSE;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE iStepCenter OF
+
+	0:							//Reset variables		
+		bCenterReadyToReceive:= FALSE;
+		bCenterReadyToSend:= FALSE;
+		tmrCenter.IN:= FALSE;
+		iStepCenter:= 10;
+				
+	10:							//Check status
+		IF bInSensorAfterFlipPos   THEN	//Controller in flipped/centering position
+			//Avoid noise with the timer
+			tmrCenter(IN:= TRUE, pt:= T#300MS);
+			
+			IF tmrCenter.Q THEN
+				iStepCenter:= 40;
+			END_IF				
+					
+		ELSE	//Nothing detected
+			tmrCenter.IN:= FALSE;		
+			iStepCenter:= 20;
+		END_IF
+	
+	20:							//Confirm feed  cylinder retracted
+		Cyl_FeedControl.bRetractRequest:= TRUE;
+		IF Cyl_FeedControl.bIsRetracted THEN
+			iStepCenter:= 30;
+		END_IF
+		
+	30:							//Retract centering cylinder
+		Cyl_Center.bRetractRequest:= TRUE;
+		IF Cyl_Center.bIsRetracted THEN
+			iStepCenter:= 40;
+		END_IF
+				
+	40:							//Wait for controller in centering position 		
+		bCenterReadyToReceive:= TRUE;
+		IF bInSensorAfterFlipPos  THEN
+			tmrAsm(IN:= TRUE, pt:= T#100MS);
+
+			IF tmrAsm.Q THEN
+				bCenterReadyToReceive:= FALSE;
+				iStepCenter:= 50;
+			END_IF						
+		END_IF
+
+	50:							//Confirm nothing to send
+		IF NOT bReceiverReadyToSend THEN
+			iStepCenter:= 60;
+		END_IF
+
+	60:							//Center controller
+		 Cyl_Center.bExtendRequest:= TRUE;
+		 IF Cyl_Center.bIsExtended THEN
+			 	iStepCenter:= 70;
+		 END_IF
+
+	70:							//Centering cylinder retract
+		Cyl_Center.bRetractRequest:= TRUE;
+			IF Cyl_Center.bIsRetracted THEN
+			 	iStepCenter:= 80;
+		 	END_IF
+
+	80:							//Wait for assembly to rail side ready to receive
+		IF bAsmReadyToReceive THEN
+			iStepCenter:= 90;
+		END_IF
+		
+	90:							//Feed the controller to assembly side
+		Cyl_FeedControl.bExtendRequest:= TRUE;
+		IF Cyl_FeedControl.bIsExtended THEN
+			//Update serial from the center position to the assembly
+			sSerialAsm:= sSerialCenter;
+			iStepCenter:= 100;
+		END_IF
+		
+	100:						//Confirm controller in assembly position
+		IF bInSensorAlignedPos THEN
+			iStepCenter := 110;
+		END_IF
+		
+	110:						//Retract feed cylinder
+		Cyl_FeedControl.bRetractRequest:= TRUE;
+		IF Cyl_FeedControl.bIsRetracted THEN
+			iStepCenter:= 120;
+		END_IF
+			
+	120:						//Wait for the ready to receive off
+		bCenterReadyToSend:= FALSE;
+		IF NOT bAsmReadyToReceive THEN
+			iStepCenter:= 130;			
+		END_IF
+
+	130:						//Return to start
+		iStepCenter:= 0;
+
+END_CASE		
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Seq_CtrlReceive" Id="{647d67c8-3b8a-4cc5-ba07-862d7109cc97}" FolderPath="Auxiliar\">
+      <Declaration><![CDATA[METHOD PRIVATE Seq_CtrlReceive
+VAR_INPUT
+	bIsManual				: BOOL		:= FALSE;
+END_VAR
+
+VAR
+	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE iStepReceive OF
+
+	0:							//Reset variables
+		bOut_ReadyToRobotPlace:= FALSE;
+		bReceiverReadyToSend:= FALSE;
+		tmrFlip.IN:= FALSE;
+		iStepReceive:= 10;
+				
+	10:							//Check status
+	
+		IF bInSensorBeforeFlipPos THEN	//Controller before flipped position
+			//Avoid noise with the timer
+			tmrFlip(IN:= TRUE, pt:= T#300MS);
+			
+			IF tmrFlip.Q THEN
+				iStepReceive:= 40;
+			END_IF				
+		ELSIF bInSensorAfterFlipPos AND Vacuum.Vacuum_Ok THEN	//Controller in tool			
+			//Avoid noise with the timer
+			tmrFlip(IN:= TRUE, pt:= T#300MS);
+			
+			IF tmrFlip.Q THEN
+				iStepReceive:= 60;
+			END_IF
+	
+		ELSE	//Nothing detected		
+			iStepReceive:= 20;
+		END_IF
+		
+	20:							//Retract flipper to robot position	 
+		
+		Cyl_Flipper.bRetractRequest:= TRUE;
+		IF Cyl_Flipper.bIsRetracted THEN
+			iStepReceive:= 30;
+		END_IF
+
+	30:							//Send ready signal and wait for the new controller
+		//Manual oper		 
+		IF bIsManual THEN
+			IF  bInSensorBeforeFlipPos THEN
+				tmrFlip(IN:= TRUE, pt:= T#1S);
+				IF tmrFlip.Q THEN	
+					iStepReceive:= 40;
+				END_IF
+			ELSE
+				tmrFlip(IN:= FALSE);
+			END_IF
+			
+		//Automatic oper
+		ELSE
+			bOut_ReadyToRobotPlace:= TRUE;
+			
+			IF  bInSensorBeforeFlipPos THEN
+				tmrFlip(IN:= TRUE, pt:= T#200MS);
+				IF tmrFlip.Q THEN
+					bOut_ReadyToRobotPlace:= FALSE;
+					iStepReceive:= 40;	
+				END_IF												
+			END_IF							
+		END_IF					
+		
+	40:							//Turn on vacuum, controller already in position			 
+		Vacuum.Pick();
+		IF Vacuum.Vacuum_Ok THEN
+			bReceiverReadyToSend:= TRUE;
+			iStepReceive:= 50;
+		END_IF
+
+	50:							//Confirm centering side ready to receive						
+		IF bCenterReadyToReceive THEN			
+				iStepReceive := 60;			
+		END_IF
+				
+	60:							//Flip controller	
+		Cyl_Flipper.bExtendRequest:= TRUE;
+		IF Cyl_Flipper.bIsExtended THEN
+			iStepReceive := 70;
+		END_IF
+		
+	70:							//Release controller									
+		IF Vacuum.Release(Blow:= TRUE, T#200MS) THEN
+			IF NOT Vacuum.Vacuum_Ok THEN	
+				//Update serial
+				bReceiverReadyToSend:= FALSE;
+				sSerialCenter:= sSerialReceived;		
+				iStepReceive := 80;			
+			END_IF
+		END_IF
+		
+	80:							//Confirm controller in center side
+		IF NOT bCenterReadyToReceive THEN
+			iStepReceive:= 90;
+		END_IF
+						
+	90:							//Return to start	
+		iStepReceive := 0;
+				
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Stop" Id="{0cd138d2-d4c1-488a-9182-ad183b522528}">
+      <Declaration><![CDATA[METHOD Stop
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[fn_CancelCylinderMoves();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="UnclampRail" Id="{b8a93145-6bed-46c0-ac43-a60c19b8643c}" FolderPath="Auxiliar\">
+      <Declaration><![CDATA[METHOD UnclampRail : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Retract busbar support first
+Cyl_BusbarSupport.bRetractRequest:= TRUE;
+IF Cyl_BusbarSupport.bIsRetracted THEN
+		
+	//Top and bottom unclamp
+	Cyl_ClampRail_Top.bRetractRequest:= TRUE;
+	Cyl_ClampRail_Bot.bRetractRequest:= TRUE;
+	IF Cyl_ClampRail_Top.bIsRetracted AND Cyl_ClampRail_Bot.bIsRetracted THEN	
+
+		UnclampRail:= TRUE;		
+		RETURN;			
+	END_IF
+END_IF	]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_ControllerAsm">
+      <LineId Id="3" Count="23" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ControllerAsm.Alarm">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ControllerAsm.Auto">
+      <LineId Id="3" Count="3" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ControllerAsm.ClampRail">
+      <LineId Id="3" Count="12" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ControllerAsm.fn_CancelCylinderMoves">
+      <LineId Id="3" Count="28" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ControllerAsm.Init">
+      <LineId Id="3" Count="59" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ControllerAsm.IO">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ControllerAsm.Manual">
+      <LineId Id="3" Count="28" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ControllerAsm.Pause">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ControllerAsm.Seq_Auto_Rail">
+      <LineId Id="2" Count="61" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ControllerAsm.Seq_CtrlAsm">
+      <LineId Id="3" Count="106" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ControllerAsm.Seq_CtrlCenter">
+      <LineId Id="3" Count="95" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ControllerAsm.Seq_CtrlReceive">
+      <LineId Id="3" Count="96" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ControllerAsm.Stop">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ControllerAsm.UnclampRail">
+      <LineId Id="3" Count="12" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
