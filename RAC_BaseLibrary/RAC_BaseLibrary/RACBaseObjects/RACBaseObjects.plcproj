@@ -71,6 +71,9 @@
     <Compile Include="POUs\01-DevicesFB\Bimanual\FB_Bimanual.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="POUs\01-DevicesFB\BowlFeeder\ST_BowlFeeder.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="POUs\01-DevicesFB\Conveyor\FB_Conveyor.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -127,6 +130,7 @@
     <Folder Include="POUs\01-DevicesFB\LightTower" />
     <Folder Include="POUs\01-DevicesFB\Motor" />
     <Folder Include="POUs\01-DevicesFB\Conveyor" />
+    <Folder Include="POUs\01-DevicesFB\BowlFeeder" />
     <Folder Include="POUs\01-DevicesFB\RejectCar" />
     <Folder Include="POUs\01-DevicesFB\Robot" />
     <Folder Include="POUs\01-DevicesFB\Scanner" />
