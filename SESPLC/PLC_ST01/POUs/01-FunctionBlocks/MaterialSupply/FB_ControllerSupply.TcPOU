@@ -32,6 +32,9 @@ VAR
 	bPieceIsGood						: BOOL;
 	// NG esponse from Acuram MES consultimng
 	bPieceIsNG							: BOOL;
+	
+	// Auxiliar bool array for reject places inputs
+	bAvailableNests						: ARRAY[0..7] OF BOOL;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[SUPER^.MachineMain();
@@ -58,7 +61,7 @@ END_VAR]]></Declaration>
 										bPiceIsGood:=bPieceIsGood,
 										bPiceIsNG:=bPieceIsNG,
 										bPlace_MaterialRequest:=bPlace_MaterialRequest,
-										bReject_MaterialRequest:=bReject_MaterialRequest,
+										bReject_MaterialRequest:=bAvailableNests,
 										bSafetyBoxPlace_OutOfZone=>bSafetyBoxPlace_OutOfZone,
 										bSafetyBoxReject_OutOfZone=>bSafetyBoxReject_OutOfZone,
 										bPlace_Done=>bPlace_Done,
@@ -107,11 +110,17 @@ sAlarm:= CONCAT(STR1:=sAlarm,STR2:=fbScanner.sAlarm);]]></ST>
       </Implementation>
     </Method>
     <Method Name="IO" Id="{a10ed0ea-8d37-4f0b-8a5e-d5a742ef1fe1}">
-      <Declaration><![CDATA[{warning 'Add method implementation '}
-METHOD IO
-]]></Declaration>
+      <Declaration><![CDATA[METHOD IO]]></Declaration>
       <Implementation>
-        <ST><![CDATA[]]></ST>
+        <ST><![CDATA[//	For robot available places inputs
+	bAvailableNests[0]					:= bReject_MaterialRequest;
+	bAvailableNests[1]					:= FALSE;
+	bAvailableNests[2]					:= FALSE;
+	bAvailableNests[3]					:= FALSE;
+	bAvailableNests[4]					:= FALSE;
+	bAvailableNests[5]					:= FALSE;
+	bAvailableNests[6]					:= FALSE;
+	bAvailableNests[7]					:= FALSE;]]></ST>
       </Implementation>
     </Method>
     <Method Name="Manual" Id="{debd2cdf-578d-49db-a8a4-16eef76ad1f0}">
@@ -155,6 +164,8 @@ METHOD Stop
     </LineIds>
     <LineIds Name="FB_ControllerSupply.IO">
       <LineId Id="2" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="5" Count="6" />
     </LineIds>
     <LineIds Name="FB_ControllerSupply.Manual">
       <LineId Id="2" Count="0" />

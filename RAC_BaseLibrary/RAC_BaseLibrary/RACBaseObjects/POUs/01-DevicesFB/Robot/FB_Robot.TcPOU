@@ -339,10 +339,11 @@ CASE diActualSeqStep OF
 		
 		bReject_Done						:=	TRUE;
 		
-		IF (NOT bReject_MaterialRequest) THEN 
-			RobotIO.diout_SequenceCmd		:=	EN_RobotMessaging.rejectFinished;
-		END_IF
-		
+		FOR indexRejectSpaces:=0 TO 7 BY 1 DO
+			IF bReject_MaterialRequest[indexRejectSpaces] THEN
+				RobotIO.diout_SequenceCmd		:=	EN_RobotMessaging.rejectFinished;
+			END_IF
+		END_FOR;
 		
 		IF (RobotIO.diin_Sequencer<>EN_RobotMessaging.rejectFinished) THEN 
 			ton_StepTimeout.IN				:=	FALSE;
@@ -580,7 +581,10 @@ RobotIO.bout_PPToMain				:=	NOT RobotIO.bin_PPMoved;]]></ST>
       <LineId Id="194" Count="0" />
       <LineId Id="146" Count="2" />
       <LineId Id="193" Count="0" />
-      <LineId Id="149" Count="43" />
+      <LineId Id="149" Count="30" />
+      <LineId Id="200" Count="3" />
+      <LineId Id="199" Count="0" />
+      <LineId Id="184" Count="8" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_Robot.Init">

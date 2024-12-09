@@ -44,7 +44,7 @@ SUPER^.MachineMain();
 										bPiceIsGood:=TRUE,
 										bPiceIsNG:=FALSE,
 										bPlace_MaterialRequest:=bPlace_ReadyToRecieve,
-										bReject_MaterialRequest:=FALSE,
+										bReject_MaterialRequest:=fbRejectCart.byAvailableNests,
 										bSafetyBoxPick_OutOfZone=>bSafetyBoxPick_outOfZone,
 										bSafetyBoxPlace_OutOfZone=>bSafetyBoxPlace_outOfZone,
 										bPick_AllMaterialPicked=>bPick_done,
