@@ -1446,6 +1446,15 @@ External Setpoint Generation:
 				<Elements>128</Elements>
 			</ArrayInfo>
 		</DataType>
+		<DataType>
+			<Name GUID="{481A0C15-D2DB-59F6-F498-C30AA9C1998C}" IecBaseType="true" AutoDeleteType="true">ARRAY [0..7] OF BOOL</Name>
+			<BitSize>64</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000030}">BOOL</BaseType>
+			<ArrayInfo>
+				<LBound>0</LBound>
+				<Elements>8</Elements>
+			</ArrayInfo>
+		</DataType>
 	</DataTypes>
 	<Project ProjectGUID="{4B9770AA-D8BA-45A5-A9AE-8227E575C83C}" TargetNetId="192.168.0.166.1.1" Target64Bit="true" ShowHideConfigurations="#x6">
 		<System>
@@ -1470,7 +1479,7 @@ External Setpoint Generation:
 		</System>
 		<Motion>
 			<NC>
-				<SafTask Priority="4" CycleTime="20000" AmsPort="501" IoAtBegin="true" AmsNetId="169.254.159.191.1.1" SafTaskInfo="256">
+				<SafTask Priority="4" CycleTime="20000" AmsPort="501" IoAtBegin="true" SafTaskInfo="256">
 					<Name>NC-Task 1 SAF</Name>
 					<Vars VarGrpType="1" InsertType="1">
 						<Name>Inputs</Name>
@@ -1906,7 +1915,7 @@ External Setpoint Generation:
 		</Motion>
 		<Plc>
 			<Project GUID="{4D5621D0-6B94-459B-B4CC-290DF5B1AA61}" Name="PLC_ST01" PrjFilePath="PLC_ST01\PLC_ST01.plcproj" TmcFilePath="PLC_ST01\PLC_ST01.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="PLC_ST01\PLC_ST01.tmc" TmcHash="{B33E2E0E-ACFF-97DC-8762-A7263C33CC8D}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="PLC_ST01\PLC_ST01.tmc" TmcHash="{C38668CB-FBF6-1978-3845-199D970AABDD}">
 					<Name>PLC_ST01 Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -2053,6 +2062,270 @@ External Setpoint Generation:
 							<Name>MAIN_ST01.fbBatterySupply.fbScanner.iResultDataSize</Name>
 							<Type>UINT</Type>
 						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.bIsEndcapInFeedPosition</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.bIsEndcapInAssemblyPos</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.bFirstPositionSensor</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.bowlControl.bIn_NoMaterial</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.bowlControl.bIn_LowLevelMaterial</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.bowlControl.bIn_UnitInPosition</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_ClampRail_Top.bSensorExtended</Name>
+							<Comment><![CDATA[	Clinder extended sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_ClampRail_Top.bSensorRetracted</Name>
+							<Comment><![CDATA[	Clinder retracted sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_ClampRail_Bot.bSensorExtended</Name>
+							<Comment><![CDATA[	Clinder extended sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_ClampRail_Bot.bSensorRetracted</Name>
+							<Comment><![CDATA[	Clinder retracted sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_FeedEndcap.bSensorExtended</Name>
+							<Comment><![CDATA[	Clinder extended sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_FeedEndcap.bSensorRetracted</Name>
+							<Comment><![CDATA[	Clinder retracted sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_PushEndcap.bSensorExtended</Name>
+							<Comment><![CDATA[	Clinder extended sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_PushEndcap.bSensorRetracted</Name>
+							<Comment><![CDATA[	Clinder retracted sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_SupportEndcap_Top.bSensorExtended</Name>
+							<Comment><![CDATA[	Clinder extended sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_SupportEndcap_Top.bSensorRetracted</Name>
+							<Comment><![CDATA[	Clinder retracted sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_SupportEndcap_Bot.bSensorExtended</Name>
+							<Comment><![CDATA[	Clinder extended sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_SupportEndcap_Bot.bSensorRetracted</Name>
+							<Comment><![CDATA[	Clinder retracted sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.bInSensorBeforeFlipPos</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.bInSensorAfterFlipPos</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.bInSensorAlignedPos</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.bInMiddlePositionSensor</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_ClampRail_Top.bSensorExtended</Name>
+							<Comment><![CDATA[	Clinder extended sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_ClampRail_Top.bSensorRetracted</Name>
+							<Comment><![CDATA[	Clinder retracted sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_ClampRail_Bot.bSensorExtended</Name>
+							<Comment><![CDATA[	Clinder extended sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_ClampRail_Bot.bSensorRetracted</Name>
+							<Comment><![CDATA[	Clinder retracted sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_BusbarSupport.bSensorExtended</Name>
+							<Comment><![CDATA[	Clinder extended sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_BusbarSupport.bSensorRetracted</Name>
+							<Comment><![CDATA[	Clinder retracted sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_FeedControl.bSensorExtended</Name>
+							<Comment><![CDATA[	Clinder extended sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_FeedControl.bSensorRetracted</Name>
+							<Comment><![CDATA[	Clinder retracted sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_PushControl.bSensorExtended</Name>
+							<Comment><![CDATA[	Clinder extended sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_PushControl.bSensorRetracted</Name>
+							<Comment><![CDATA[	Clinder retracted sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_Flipper.bSensorExtended</Name>
+							<Comment><![CDATA[	Clinder extended sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_Flipper.bSensorRetracted</Name>
+							<Comment><![CDATA[	Clinder retracted sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_SupportControl_Top.bSensorExtended</Name>
+							<Comment><![CDATA[	Clinder extended sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_SupportControl_Top.bSensorRetracted</Name>
+							<Comment><![CDATA[	Clinder retracted sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_SupportControl_Bot.bSensorExtended</Name>
+							<Comment><![CDATA[	Clinder extended sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_SupportControl_Bot.bSensorRetracted</Name>
+							<Comment><![CDATA[	Clinder retracted sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_Center.bSensorExtended</Name>
+							<Comment><![CDATA[	Clinder extended sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_Center.bSensorRetracted</Name>
+							<Comment><![CDATA[	Clinder retracted sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Vacuum.VaccumSensor</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.b_SensorLoadPos</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.k50_Left.Sensor</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.k50_Right.Sensor</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.ScanerReinsertionLoad.bInReadFailure</Name>
+							<Comment><![CDATA[From scanner]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.ScanerReinsertionLoad.bInBusy</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.ScanerReinsertionLoad.bInReady</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.ScanerReinsertionLoad.bInReadComplete</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.ScanerReinsertionLoad.iCommStatus</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.ScanerReinsertionLoad.ResultData</Name>
+							<Comment><![CDATA[Check the array lenght (this is 127 array, from keyence sr2000)]]></Comment>
+							<Type GUID="{53AB2BCA-C5AB-B7CE-D17C-430953A42679}">ARRAY [0..127] OF BYTE</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.ScanerReinsertionLoad.iResultDataSize</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.bSafeCurtainsFree</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.b_SensorEndcap</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.b_SensorController</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.b_IG_Sensor_Pass</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.b_IG_Sensor_Fail</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.Mtr_CenterLeft.Motor.NcToPlc</Name>
+							<Type GUID="{25521FAA-EA5F-4C7F-8864-BBCCDACD2E98}" Namespace="MC">NCTOPLC_AXIS_REF</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.Mtr_CenterRight.Motor.NcToPlc</Name>
+							<Type GUID="{25521FAA-EA5F-4C7F-8864-BBCCDACD2E98}" Namespace="MC">NCTOPLC_AXIS_REF</Type>
+						</Var>
 					</Vars>
 					<Vars VarGrpType="2" AreaNo="1">
 						<Name>PlcST01Task Outputs</Name>
@@ -2112,6 +2385,225 @@ External Setpoint Generation:
 							<Name>MAIN_ST01.fbBatterySupply.fbScanner.bOutReadClear</Name>
 							<Type>BOOL</Type>
 						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.bowlControl.bOut_Vibrate</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.bowlControl.bOut_BlowAlign</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_ClampRail_Top.bValveExtend</Name>
+							<Comment><![CDATA[	Cylinder extend output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_ClampRail_Top.bValveRetract</Name>
+							<Comment><![CDATA[	Cylinder retract output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_ClampRail_Bot.bValveExtend</Name>
+							<Comment><![CDATA[	Cylinder extend output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_ClampRail_Bot.bValveRetract</Name>
+							<Comment><![CDATA[	Cylinder retract output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_FeedEndcap.bValveExtend</Name>
+							<Comment><![CDATA[	Cylinder extend output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_FeedEndcap.bValveRetract</Name>
+							<Comment><![CDATA[	Cylinder retract output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_PushEndcap.bValveExtend</Name>
+							<Comment><![CDATA[	Cylinder extend output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_PushEndcap.bValveRetract</Name>
+							<Comment><![CDATA[	Cylinder retract output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_SupportEndcap_Top.bValveExtend</Name>
+							<Comment><![CDATA[	Cylinder extend output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_SupportEndcap_Top.bValveRetract</Name>
+							<Comment><![CDATA[	Cylinder retract output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_SupportEndcap_Bot.bValveExtend</Name>
+							<Comment><![CDATA[	Cylinder extend output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_SupportEndcap_Bot.bValveRetract</Name>
+							<Comment><![CDATA[	Cylinder retract output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_ClampRail_Top.bValveExtend</Name>
+							<Comment><![CDATA[	Cylinder extend output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_ClampRail_Top.bValveRetract</Name>
+							<Comment><![CDATA[	Cylinder retract output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_ClampRail_Bot.bValveExtend</Name>
+							<Comment><![CDATA[	Cylinder extend output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_ClampRail_Bot.bValveRetract</Name>
+							<Comment><![CDATA[	Cylinder retract output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_BusbarSupport.bValveExtend</Name>
+							<Comment><![CDATA[	Cylinder extend output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_BusbarSupport.bValveRetract</Name>
+							<Comment><![CDATA[	Cylinder retract output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_FeedControl.bValveExtend</Name>
+							<Comment><![CDATA[	Cylinder extend output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_FeedControl.bValveRetract</Name>
+							<Comment><![CDATA[	Cylinder retract output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_PushControl.bValveExtend</Name>
+							<Comment><![CDATA[	Cylinder extend output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_PushControl.bValveRetract</Name>
+							<Comment><![CDATA[	Cylinder retract output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_Flipper.bValveExtend</Name>
+							<Comment><![CDATA[	Cylinder extend output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_Flipper.bValveRetract</Name>
+							<Comment><![CDATA[	Cylinder retract output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_SupportControl_Top.bValveExtend</Name>
+							<Comment><![CDATA[	Cylinder extend output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_SupportControl_Top.bValveRetract</Name>
+							<Comment><![CDATA[	Cylinder retract output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_SupportControl_Bot.bValveExtend</Name>
+							<Comment><![CDATA[	Cylinder extend output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_SupportControl_Bot.bValveRetract</Name>
+							<Comment><![CDATA[	Cylinder retract output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_Center.bValveExtend</Name>
+							<Comment><![CDATA[	Cylinder extend output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_Center.bValveRetract</Name>
+							<Comment><![CDATA[	Cylinder retract output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Vacuum.VacuumValve</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Vacuum.BlowValve</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.k50_Left.Green</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.k50_Left.Ambar</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.k50_Left.Red</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.k50_Left.Blink</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.k50_Right.Green</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.k50_Right.Ambar</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.k50_Right.Red</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.k50_Right.Blink</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.ScanerReinsertionLoad.bOutReadRequest</Name>
+							<Comment><![CDATA[To scanner]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.ScanerReinsertionLoad.bOutErrorClear</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.ScanerReinsertionLoad.bOutReadClear</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.Mtr_CenterLeft.Motor.PlcToNc</Name>
+							<Type GUID="{96B75FEB-2D84-43BE-A3EC-D9A681F27D52}" Namespace="MC">PLCTONC_AXIS_REF</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.Mtr_CenterRight.Motor.PlcToNc</Name>
+							<Type GUID="{96B75FEB-2D84-43BE-A3EC-D9A681F27D52}" Namespace="MC">PLCTONC_AXIS_REF</Type>
+						</Var>
 					</Vars>
 					<Contexts>
 						<Context>
@@ -2130,7 +2622,7 @@ External Setpoint Generation:
 				</Instance>
 			</Project>
 			<Project GUID="{18BBD500-7124-4BBD-8858-94E7E7E0784A}" Name="PLC_ST02" PrjFilePath="PLC_ST02\PLC_ST02.plcproj" TmcFilePath="PLC_ST02\PLC_ST02.tmc" ReloadTmc="true" AmsPort="852" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502040" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="PLC_ST02\PLC_ST02.tmc" TmcHash="{0D30B727-9258-C201-8247-57D5EBDB561E}">
+				<Instance Id="#x08502040" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="PLC_ST02\PLC_ST02.tmc" TmcHash="{E7D668B1-6B39-53CD-A3F0-B8914338D5D0}">
 					<Name>PLC_ST02 Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -2187,7 +2679,7 @@ External Setpoint Generation:
 						<Var>
 							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.byRejectNestsSensors</Name>
 							<Comment><![CDATA[ 8 sensor array]]></Comment>
-							<Type>BYTE</Type>
+							<Type GUID="{481A0C15-D2DB-59F6-F498-C30AA9C1998C}">ARRAY [0..7] OF BOOL</Type>
 						</Var>
 						<Var>
 							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.fbCartLock.bSensorExtended</Name>
@@ -2198,6 +2690,10 @@ External Setpoint Generation:
 							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.fbCartLock.bSensorRetracted</Name>
 							<Comment><![CDATA[	Clinder retracted sensor]]></Comment>
 							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbConveyor.Motor.Motor.NcToPlc</Name>
+							<Type GUID="{25521FAA-EA5F-4C7F-8864-BBCCDACD2E98}" Namespace="MC">NCTOPLC_AXIS_REF</Type>
 						</Var>
 						<Var>
 							<Name>MAIN_ST02.fbTapeApplicationMachine.fbServo_Translational.Motor.NcToPlc</Name>
@@ -2367,7 +2863,7 @@ External Setpoint Generation:
 						<Var>
 							<Name>MAIN_ST02.fbTranslationStationOut.fbRejectCart.byRejectNestsSensors</Name>
 							<Comment><![CDATA[ 8 sensor array]]></Comment>
-							<Type>BYTE</Type>
+							<Type GUID="{481A0C15-D2DB-59F6-F498-C30AA9C1998C}">ARRAY [0..7] OF BOOL</Type>
 						</Var>
 						<Var>
 							<Name>MAIN_ST02.fbTranslationStationOut.fbRejectCart.fbCartLock.bSensorExtended</Name>
@@ -2378,10 +2874,6 @@ External Setpoint Generation:
 							<Name>MAIN_ST02.fbTranslationStationOut.fbRejectCart.fbCartLock.bSensorRetracted</Name>
 							<Comment><![CDATA[	Clinder retracted sensor]]></Comment>
 							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbConveyor.Motor.Motor.NcToPlc</Name>
-							<Type GUID="{25521FAA-EA5F-4C7F-8864-BBCCDACD2E98}" Namespace="MC">NCTOPLC_AXIS_REF</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="2" AreaNo="1">
@@ -2399,6 +2891,10 @@ External Setpoint Generation:
 							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.fbCartLock.bValveRetract</Name>
 							<Comment><![CDATA[	Cylinder retract output]]></Comment>
 							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbConveyor.Motor.Motor.PlcToNc</Name>
+							<Type GUID="{96B75FEB-2D84-43BE-A3EC-D9A681F27D52}" Namespace="MC">PLCTONC_AXIS_REF</Type>
 						</Var>
 						<Var>
 							<Name>MAIN_ST02.fbTapeApplicationMachine.fbServo_Translational.Motor.PlcToNc</Name>
@@ -2582,10 +3078,6 @@ External Setpoint Generation:
 							<Comment><![CDATA[	Cylinder retract output]]></Comment>
 							<Type>BOOL</Type>
 						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbConveyor.Motor.Motor.PlcToNc</Name>
-							<Type GUID="{96B75FEB-2D84-43BE-A3EC-D9A681F27D52}" Namespace="MC">PLCTONC_AXIS_REF</Type>
-						</Var>
 					</Vars>
 					<Contexts>
 						<Context>
@@ -2671,6 +3163,7 @@ External Setpoint Generation:
 	<Mappings>
 		<MappingInfo Identifier="{00000000-2001-0850-0020-500820000403}" Id="#x02030020"/>
 		<MappingInfo Identifier="{00000000-0030-0304-1000-040330000403}" Id="#x02030010"/>
+		<MappingInfo Identifier="{08502041-0020-0304-4020-500820000403}" Id="#x02030030" Watchdog="04000000040000000400000004000000"/>
 		<OwnerA Name="TINC^NC-Task 1 SAF^Axes^Axis 1">
 			<OwnerB Name="TIID^Device 1 (EtherCAT)^Drive 37 (MDDLT55BF)">
 				<Link VarA="Drive^Inputs^In^nDataIn1" VarB="Transmit PDO mapping 1^Following error actual value"/>
