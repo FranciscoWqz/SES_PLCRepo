@@ -47,6 +47,8 @@ VAR
 	// Structure for IO Mapping
 	RobotIO								: ST_RobotIO;
 	
+	// Input: HMI setting for dry cycle
+	bDryCycleON							: BOOL;
 	// Input: HMI Permissive to init with manually jogged robot
 	bRetrievalPermissive				: BOOL;
 	// Input: HMI Permissive to retry pick when retries exceeded
@@ -530,6 +532,9 @@ END_VAR]]></Declaration>
 	RobotIO.eipOutputs.byteArray[1].7		:= bReject_MaterialRequest[6];
 	RobotIO.eipOutputs.byteArray[2].0		:= bReject_MaterialRequest[7];
 	
+//	Dry cycle activation bit
+	RobotIO.eipOutputs.byteArray[2].1		:= bDryCycleON;
+	
 // Processing protocol raw OUTPUT data : BYTES
 	pDint 									:= ADR(RobotIO.eipOutputs.byteArray[8]);
 	pdint^									:= RobotIO.diout_SequenceCmd;
@@ -600,6 +605,7 @@ RobotIO.bout_PPToMain				:=	NOT RobotIO.bin_PPMoved;]]></ST>
       <LineId Id="75" Count="4" />
       <LineId Id="81" Count="3" />
       <LineId Id="80" Count="0" />
+      <LineId Id="89" Count="2" />
       <LineId Id="57" Count="6" />
       <LineId Id="2" Count="0" />
     </LineIds>
