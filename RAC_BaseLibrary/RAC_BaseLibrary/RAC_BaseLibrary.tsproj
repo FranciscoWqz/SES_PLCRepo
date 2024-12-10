@@ -10,7 +10,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{2C257504-FCB3-43D9-8216-20B75A57B6E7}" Name="RACBaseObjects" PrjFilePath="RACBaseObjects\RACBaseObjects.plcproj" TmcFilePath="RACBaseObjects\RACBaseObjects.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="RACBaseObjects\RACBaseObjects.tmc" TmcHash="{30450864-33BF-B40C-2692-218BC0AF94DA}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="RACBaseObjects\RACBaseObjects.tmc" TmcHash="{4ED76B66-95D9-95A7-FF28-7B7D8ECABF3F}">
 					<Name>RACBaseObjects Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Contexts>
