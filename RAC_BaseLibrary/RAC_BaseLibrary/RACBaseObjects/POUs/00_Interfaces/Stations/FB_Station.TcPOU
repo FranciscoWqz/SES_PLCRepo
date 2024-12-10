@@ -1,10 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_Station" Id="{b1f4bc39-0056-4dd5-b97d-7e260e33bca2}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_Station
 VAR_INPUT
 	// Whole Station Init finished
 	bInitFinished						: BOOL;
+	
+	// All E-Stop buttons
+	EmergencyStop 						: BOOL;
+	// From safety project
+	SafetyReady 						: BOOL;
+	// All door sensors
+	Interlock 							: BOOL;
 END_VAR
 VAR_OUTPUT
 	// Station Actual Status 
@@ -17,8 +24,19 @@ VAR_OUTPUT
 	 bAlarmReset						: BOOL;
 END_VAR
 VAR
-	// Buttons, Safety Onputs and User Interface Bits
-	system 								: ST_StationIO;
+	bStopButton 			AT %I* 		: BOOL;
+	bStartButton 			AT %I* 		: BOOL;
+	bResetButton			AT %I* 		: BOOL;
+
+	bStopInterface 						: BOOL;
+	bPauseInterface 					: BOOL;
+	bInitStartInterface					: BOOL;
+	bAutoStartInterface 				: BOOL;
+	bResetInterface						: BOOL;
+	OpUser 								: BOOL;
+
+	AutoModeSelector 		AT %I* 		: BOOL;
+	PressureSwitch 			AT %I* 		: BOOL;
 	
 	// Delay for stoppping machine with button 
 	ton_stopMachineDelay 				: TON;
@@ -55,38 +73,38 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[//	Condition for operate machine safely in any mode
-	bSafeOperationCondition					:=	system.SafetyReady AND system.Interlock AND system.PressureSwitch;
+	bSafeOperationCondition					:=	SafetyReady AND Interlock AND PressureSwitch;
 
 //	Condition for operation in Auto Mode
-	bAutoAvailable							:=	bSafeOperationCondition AND system.AutoModeSelector;
+	bAutoAvailable							:=	bSafeOperationCondition AND AutoModeSelector;
 
 //	Condition for operation in Maintenance Mode
-	bManualAvailable						:=	bSafeOperationCondition AND system.OpUser AND (NOT system.AutoModeSelector);
+	bManualAvailable						:=	bSafeOperationCondition AND OpUser AND (NOT AutoModeSelector);
 	
 //	Stopping machine with button delay
-	ton_stopMachineDelay(IN:=system.bStopButton,PT:=T#3S);
+	ton_stopMachineDelay(IN:=bStopButton,PT:=T#3S);
 	
 //	Starting machine with button delay
-	ton_startInitStartButtonDelay(IN:=system.bStartButton,PT:=T#2S);
+	ton_startInitStartButtonDelay(IN:=bStartButton,PT:=T#2S);
 	
 //	For controlling reset general output
-	bAlarmReset								:=	system.bResetButton OR system.bResetInterface;
+	bAlarmReset								:=	bResetButton OR bResetInterface;
  
 //	For controlling stop general output
-	bStop									:=	system.bStopButton OR system.bStopInterface;
+	bStop									:=	bStopButton OR bStopInterface;
 
 //	For Stopping the machine
 	CASE diStationState OF
 		EN_StationStatus.initializing :		// Initializing
-			IF (NOT bAutoAvailable) OR system.bPauseInterface OR system.bStopInterface OR system.bStopButton THEN	
+			IF (NOT bAutoAvailable) OR bPauseInterface OR bStopInterface OR bStopButton THEN	
 				diStationState				:=EN_StationStatus.stopped;
 			END_IF;
 		EN_StationStatus.idle :				//	Idle
-			IF (NOT bAutoAvailable) OR (NOT bInitFinished) OR system.bStopInterface OR ton_stopMachineDelay.Q  THEN
+			IF (NOT bAutoAvailable) OR (NOT bInitFinished) OR bStopInterface OR ton_stopMachineDelay.Q  THEN
 				diStationState				:=EN_StationStatus.stopped;
 			END_IF;
 		EN_StationStatus.running:			// Running
-			IF (NOT bAutoAvailable) OR (NOT bInitFinished) OR system.bStopInterface THEN
+			IF (NOT bAutoAvailable) OR (NOT bInitFinished) OR bStopInterface THEN
 				diStationState				:=EN_StationStatus.stopped;
 			END_IF;
 		EN_StationStatus.maintenance:		// Maintenance
@@ -94,7 +112,7 @@ END_VAR]]></Declaration>
 				diStationState				:=EN_StationStatus.stopped;
 			END_IF;
 		EN_StationStatus.eStopped:			// E Stopped
-			IF system.EmergencyStop THEN
+			IF NOT EmergencyStop THEN
 				diStationState				:=EN_StationStatus.stopped;
 			END_IF;
 	END_CASE;
@@ -103,11 +121,11 @@ END_VAR]]></Declaration>
 	IF bAutoAvailable THEN
 		CASE diStationState OF
 			EN_StationStatus.stopped:		//	Stopped
-				IF system.bInitStartInterface OR ton_startInitStartButtonDelay.Q THEN
+				IF bInitStartInterface OR ton_startInitStartButtonDelay.Q THEN
 					diStationState			:=EN_StationStatus.initializing;
 				END_IF;
 			EN_StationStatus.idle:			//	Idle
-				IF system.bAutoStartInterface OR ton_startInitStartButtonDelay.Q THEN
+				IF bAutoStartInterface OR ton_startInitStartButtonDelay.Q THEN
 					diStationState			:=EN_StationStatus.running;
 				END_IF;
 		END_CASE;
@@ -120,7 +138,7 @@ END_VAR]]></Declaration>
 				diStationState				:=EN_StationStatus.idle;
 			END_IF;
 		EN_StationStatus.running:			// Running
-			IF system.bStopButton OR system.bPauseInterface THEN
+			IF bStopButton OR bPauseInterface THEN
 				diStationState				:=EN_StationStatus.idle;
 			END_IF;
 	END_CASE;
@@ -131,10 +149,21 @@ END_VAR]]></Declaration>
 	END_IF;
 
 //	For setting machine in E Stopped mode
-	IF (NOT system.EmergencyStop) AND (diStationState<>EN_StationStatus.eStopped) THEN
+	IF (EmergencyStop) AND (diStationState<>EN_StationStatus.eStopped) THEN
 		diStationState						:=EN_StationStatus.eStopped;
 	END_IF;]]></ST>
       </Implementation>
     </Method>
+    <LineIds Name="FB_Station">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Station.Alarm">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Station.StatusControl">
+      <LineId Id="3" Count="78" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
   </POU>
 </TcPlcObject>

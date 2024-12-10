@@ -65,9 +65,6 @@
     <Compile Include="POUs\00_Interfaces\Stations\FB_Station.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POUs\00_Interfaces\Stations\ST_StationIO.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="POUs\01-DevicesFB\Bimanual\FB_Bimanual.TcPOU">
       <SubType>Code</SubType>
     </Compile>
