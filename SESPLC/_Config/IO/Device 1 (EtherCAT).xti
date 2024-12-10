@@ -1975,82 +1975,82 @@
 					<SyncMan>010f01004400010003000000000000000100010f44090000</SyncMan>
 					<Fmmu>0000000000000000000f00020100000001000000000000000000000000000000</Fmmu>
 					<Pdo Name="Channel 1" Index="#x1600" InOut="1" Flags="#x0011" SyncMan="0">
-						<Entry Name="Output" Index="#x7000" Sub="#x01">
+						<Entry Name="ST01_startButtonLight" Index="#x7000" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 2" Index="#x1601" InOut="1" Flags="#x0011" SyncMan="0">
-						<Entry Name="Output" Index="#x7010" Sub="#x01">
+						<Entry Name="ST01_LightTowerGreen" Index="#x7010" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 3" Index="#x1602" InOut="1" Flags="#x0011" SyncMan="0">
-						<Entry Name="Output" Index="#x7020" Sub="#x01">
+						<Entry Name="ST01_LightTowerYellow" Index="#x7020" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 4" Index="#x1603" InOut="1" Flags="#x0011" SyncMan="0">
-						<Entry Name="Output" Index="#x7030" Sub="#x01">
+						<Entry Name="ST01_LightTowerRed" Index="#x7030" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 5" Index="#x1604" InOut="1" Flags="#x0011" SyncMan="0">
-						<Entry Name="Output" Index="#x7040" Sub="#x01">
+						<Entry Name="ST01_LightTowerBuzzer" Index="#x7040" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 6" Index="#x1605" InOut="1" Flags="#x0011" SyncMan="0">
-						<Entry Name="Output" Index="#x7050" Sub="#x01">
+						<Entry Name="ST01_InteriorLight" Index="#x7050" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 7" Index="#x1606" InOut="1" Flags="#x0011" SyncMan="0">
-						<Entry Name="Output" Index="#x7060" Sub="#x01">
+						<Entry Name="ST01_Spare" Index="#x7060" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 8" Index="#x1607" InOut="1" Flags="#x0011" SyncMan="0">
-						<Entry Name="Output" Index="#x7070" Sub="#x01">
+						<Entry Name="ST01_Spare" Index="#x7070" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 9" Index="#x1608" InOut="1" Flags="#x0011" SyncMan="1">
-						<Entry Name="Output" Index="#x7080" Sub="#x01">
+						<Entry Name="ST01_Load_LockCyl_EXT" Index="#x7080" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 10" Index="#x1609" InOut="1" Flags="#x0011" SyncMan="1">
-						<Entry Name="Output" Index="#x7090" Sub="#x01">
+						<Entry Name="ST01_Load_LockCyl_RET" Index="#x7090" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 11" Index="#x160a" InOut="1" Flags="#x0011" SyncMan="1">
-						<Entry Name="Output" Index="#x70a0" Sub="#x01">
+						<Entry Name="ST01_Deliver_LockCyl_EXT" Index="#x70a0" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 12" Index="#x160b" InOut="1" Flags="#x0011" SyncMan="1">
-						<Entry Name="Output" Index="#x70b0" Sub="#x01">
+						<Entry Name="ST01_Deliver_LockCyl_RET" Index="#x70b0" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 13" Index="#x160c" InOut="1" Flags="#x0011" SyncMan="1">
-						<Entry Name="Output" Index="#x70c0" Sub="#x01">
+						<Entry Name="ST01_CtlrAsm_FilipCyl_EXT" Index="#x70c0" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 14" Index="#x160d" InOut="1" Flags="#x0011" SyncMan="1">
-						<Entry Name="Output" Index="#x70d0" Sub="#x01">
+						<Entry Name="ST01_CtlrAsm_FilipCyl_RET" Index="#x70d0" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 15" Index="#x160e" InOut="1" Flags="#x0011" SyncMan="1">
-						<Entry Name="Output" Index="#x70e0" Sub="#x01">
+						<Entry Name="ST01_CtlrAsm_AlignCyl_EXT" Index="#x70e0" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 16" Index="#x160f" InOut="1" Flags="#x0011" SyncMan="1">
-						<Entry Name="Output" Index="#x70f0" Sub="#x01">
+						<Entry Name="ST01_CtlrAsm_AlignCyl_RET" Index="#x70f0" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
@@ -2064,82 +2064,82 @@
 					<SyncMan>010f01004400010003000000000000000100010f44090000</SyncMan>
 					<Fmmu>0000000000000000000f00020100000001000000000000000000000000000000</Fmmu>
 					<Pdo Name="Channel 1" Index="#x1600" InOut="1" Flags="#x0011" SyncMan="0">
-						<Entry Name="Output" Index="#x7000" Sub="#x01">
+						<Entry Name="ctlrFdr_start" Index="#x7000" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 2" Index="#x1601" InOut="1" Flags="#x0011" SyncMan="0">
-						<Entry Name="Output" Index="#x7010" Sub="#x01">
+						<Entry Name="ctlrFdr_stop" Index="#x7010" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 3" Index="#x1602" InOut="1" Flags="#x0011" SyncMan="0">
-						<Entry Name="Output" Index="#x7020" Sub="#x01">
+						<Entry Name="ctlrFdr_safeHeigh" Index="#x7020" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 4" Index="#x1603" InOut="1" Flags="#x0011" SyncMan="0">
-						<Entry Name="Output" Index="#x7030" Sub="#x01">
+						<Entry Name="ctlrFdr_mtrlReq" Index="#x7030" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 5" Index="#x1604" InOut="1" Flags="#x0011" SyncMan="0">
-						<Entry Name="Output" Index="#x7040" Sub="#x01">
+						<Entry Name="ctlrFdr_err" Index="#x7040" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 6" Index="#x1605" InOut="1" Flags="#x0011" SyncMan="0">
-						<Entry Name="Output" Index="#x7050" Sub="#x01">
+						<Entry Name="btryFdr_start" Index="#x7050" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 7" Index="#x1606" InOut="1" Flags="#x0011" SyncMan="0">
-						<Entry Name="Output" Index="#x7060" Sub="#x01">
+						<Entry Name="btryFdr_stop" Index="#x7060" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 8" Index="#x1607" InOut="1" Flags="#x0011" SyncMan="0">
-						<Entry Name="Output" Index="#x7070" Sub="#x01">
+						<Entry Name="btryFdr_safeHeigh" Index="#x7070" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 9" Index="#x1608" InOut="1" Flags="#x0011" SyncMan="1">
-						<Entry Name="Output" Index="#x7080" Sub="#x01">
+						<Entry Name="btryFdr_mtrlReq" Index="#x7080" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 10" Index="#x1609" InOut="1" Flags="#x0011" SyncMan="1">
-						<Entry Name="Output" Index="#x7090" Sub="#x01">
+						<Entry Name="btryFdr_err" Index="#x7090" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 11" Index="#x160a" InOut="1" Flags="#x0011" SyncMan="1">
-						<Entry Name="Output" Index="#x70a0" Sub="#x01">
+						<Entry Name="BwlFdr_Start" Index="#x70a0" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 12" Index="#x160b" InOut="1" Flags="#x0011" SyncMan="1">
-						<Entry Name="Output" Index="#x70b0" Sub="#x01">
+						<Entry Name="BwlFdr_DirectShock1Act" Index="#x70b0" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 13" Index="#x160c" InOut="1" Flags="#x0011" SyncMan="1">
-						<Entry Name="Output" Index="#x70c0" Sub="#x01">
+						<Entry Name="BwlFdr_DirectShock2Act" Index="#x70c0" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 14" Index="#x160d" InOut="1" Flags="#x0011" SyncMan="1">
-						<Entry Name="Output" Index="#x70d0" Sub="#x01">
+						<Entry Name="BwlFdr_BlowStart" Index="#x70d0" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 15" Index="#x160e" InOut="1" Flags="#x0011" SyncMan="1">
-						<Entry Name="Output" Index="#x70e0" Sub="#x01">
+						<Entry Name="Spare" Index="#x70e0" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="Channel 16" Index="#x160f" InOut="1" Flags="#x0011" SyncMan="1">
-						<Entry Name="Output" Index="#x70f0" Sub="#x01">
+						<Entry Name="Spare" Index="#x70f0" Sub="#x01">
 							<Type>BIT</Type>
 						</Entry>
 					</Pdo>
@@ -2796,8 +2796,8 @@ Bit1: Value bigger/equal Limit2]]></Comment>
 				<EtherCAT SlaveType="5" AdsServerAddress="c0a8000602010000" FixedAdsServerNetId="true" PdiType="#x0008" ExecIo="true" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x19fc3052" RevisionNo="#x00120000" InfoDataAddr="true" InfoDataNetId="true" OwnAddrExtern="true" RepeatSupport="true" TimeoutStateChange1="10000" TimeoutStateChange3="20000" TimeoutMailbox2="2000" GenerateOwnNetId="true" InitializeOwnNetId="true" CheckRevisionNoType="3" PortPhys="51" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL6652 EtherNet/IP Scanner (Master)" Desc="EL6652" PortABoxInfo="#x01000023">
 					<SyncMan>001000042600010001000000400000040004001026010000</SyncMan>
 					<SyncMan>001400042200010002000000400000040004001422010000</SyncMan>
-					<SyncMan>0018aa006400010003000000000000000000001864010000</SyncMan>
-					<SyncMan>0024aa002000010004000000000000000000002420010000</SyncMan>
+					<SyncMan>0018ae006400010003000000000000000000001864010000</SyncMan>
+					<SyncMan>0024ae002000010004000000000000000000002420010000</SyncMan>
 					<Fmmu>0000000000000000001800020100000001000000000000000000000000000000</Fmmu>
 					<Fmmu>0000000000000000002400010100000002000000000000000000000000000000</Fmmu>
 					<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
@@ -2888,6 +2888,26 @@ Bit1: Value bigger/equal Limit2]]></Comment>
 						</Entry>
 						<Entry Flags="#x00000100">
 							<Type GUID="{18071995-0000-0000-0000-002000000050}">ARRAY [0..9] OF BYTE</Type>
+						</Entry>
+					</Pdo>
+					<Pdo Name="NX1P2_ControllerTFPLC_In" Index="#x1a04" Flags="#x0001" SyncMan="3">
+						<Entry Name="NX1P2_ControllerTFPLC_State" Index="#x6040" Sub="#x01" Flags="#x00000100">
+							<Type>UINT</Type>
+						</Entry>
+					</Pdo>
+					<Pdo Name="NX1P2_ControllerTFPLC_Out" Index="#x1604" InOut="1" Flags="#x0001" SyncMan="2">
+						<Entry Name="NX1P2_ControllerTFPLC_Ctrl" Index="#x7040" Sub="#x01" Flags="#x00000100">
+							<Type>UINT</Type>
+						</Entry>
+					</Pdo>
+					<Pdo Name="NX1P2_BatteryTrayFeederPLC_In" Index="#x1a05" Flags="#x0001" SyncMan="3">
+						<Entry Name="NX1P2_BatteryTrayFeederPLC_State" Index="#x6050" Sub="#x01" Flags="#x00000100">
+							<Type>UINT</Type>
+						</Entry>
+					</Pdo>
+					<Pdo Name="NX1P2_BatteryTrayFeederPLC_Out" Index="#x1605" InOut="1" Flags="#x0001" SyncMan="2">
+						<Entry Name="NX1P2_BatteryTrayFeederPLC_Ctrl" Index="#x7050" Sub="#x01" Flags="#x00000100">
+							<Type>UINT</Type>
 						</Entry>
 					</Pdo>
 					<Pdo Name="ECatState" Index="#x1bff" Flags="#x0001" SyncMan="3">
