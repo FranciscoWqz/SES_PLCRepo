@@ -1915,7 +1915,7 @@ External Setpoint Generation:
 		</Motion>
 		<Plc>
 			<Project GUID="{4D5621D0-6B94-459B-B4CC-290DF5B1AA61}" Name="PLC_ST01" PrjFilePath="PLC_ST01\PLC_ST01.plcproj" TmcFilePath="PLC_ST01\PLC_ST01.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="PLC_ST01\PLC_ST01.tmc" TmcHash="{C38668CB-FBF6-1978-3845-199D970AABDD}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="PLC_ST01\PLC_ST01.tmc" TmcHash="{4A8009E9-85F8-D69C-0C6B-066079D18C22}">
 					<Name>PLC_ST01 Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -2325,6 +2325,15 @@ External Setpoint Generation:
 						<Var>
 							<Name>MAIN_ST01.fbLoadStation.Mtr_CenterRight.Motor.NcToPlc</Name>
 							<Type GUID="{25521FAA-EA5F-4C7F-8864-BBCCDACD2E98}" Namespace="MC">NCTOPLC_AXIS_REF</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.bEStopLoad</Name>
+							<Comment><![CDATA[ Estop declaration]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.bEStopUserInterface</Name>
+							<Type>BOOL</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="2" AreaNo="1">
@@ -3162,6 +3171,7 @@ External Setpoint Generation:
 	</Project>
 	<Mappings>
 		<MappingInfo Identifier="{00000000-2001-0850-0020-500820000403}" Id="#x02030020"/>
+		<MappingInfo Identifier="{00000000-2001-0850-0020-500851000403}" Id="#x02030040"/>
 		<MappingInfo Identifier="{00000000-0030-0304-1000-040330000403}" Id="#x02030010"/>
 		<MappingInfo Identifier="{08502041-0020-0304-4020-500820000403}" Id="#x02030030" Watchdog="04000000040000000400000004000000"/>
 		<OwnerA Name="TINC^NC-Task 1 SAF^Axes^Axis 1">
@@ -3239,8 +3249,19 @@ External Setpoint Generation:
 				<Link VarA="PlcST01Task Inputs^MAIN_ST01.fbBatterySupply.fbRobot.RobotIO.eipInputs" VarB="Connection 2 (Input/Output)^Inputs^inputRaw"/>
 				<Link VarA="PlcST01Task Outputs^MAIN_ST01.fbBatterySupply.fbRobot.RobotIO.eipOutputs" VarB="Connection 2 (Input/Output)^Outputs^outputRaw"/>
 			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1100)^Term 16 (EL1809)">
+				<Link VarA="PlcST01Task Inputs^MAIN_ST01.fbStation01.system.AutoModeSelector" VarB="Channel 5^ST01_KeySwitchAuto"/>
+				<Link VarA="PlcST01Task Inputs^MAIN_ST01.fbStation01.system.PressureSwitch" VarB="Channel 1^ST01_PressureSwitch"/>
+				<Link VarA="PlcST01Task Inputs^MAIN_ST01.fbStation01.system.bResetButton" VarB="Channel 4^ST01_Reset"/>
+				<Link VarA="PlcST01Task Inputs^MAIN_ST01.fbStation01.system.bStartButton" VarB="Channel 2^ST01_StartButton"/>
+				<Link VarA="PlcST01Task Inputs^MAIN_ST01.fbStation01.system.bStopButton" VarB="Channel 3^ST01_StopButton"/>
+			</OwnerB>
 		</OwnerA>
 		<OwnerA Name="TIPC^PLC_ST02^PLC_ST02 Instance">
+			<OwnerB Name="TIID^Device 1 (ECAT EIP Scanner (EL6652))^Robot03_1-2">
+				<Link VarA="PlcST02Task Inputs^MAIN_ST02.fbTranslationStationIn.fbRobot.RobotIO.eipInputs" VarB="Connection 4 (Input/Output)^Inputs^inputRaw"/>
+				<Link VarA="PlcST02Task Outputs^MAIN_ST02.fbTranslationStationIn.fbRobot.RobotIO.eipOutputs" VarB="Connection 4 (Input/Output)^Outputs^outputRaw"/>
+			</OwnerB>
 			<OwnerB Name="TIID^Device 1 (ECAT EIP Scanner (EL6652))^Robot04_2-3">
 				<Link VarA="PlcST02Task Inputs^MAIN_ST02.fbTranslationStationOut.fbRobot.RobotIO.eipInputs" VarB="Connection 3 (Input/Output)^Inputs^inputRaw"/>
 				<Link VarA="PlcST02Task Outputs^MAIN_ST02.fbTranslationStationOut.fbRobot.RobotIO.eipOutputs" VarB="Connection 3 (Input/Output)^Outputs^outputRaw"/>

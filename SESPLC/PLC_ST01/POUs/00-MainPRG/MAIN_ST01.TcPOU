@@ -10,9 +10,18 @@ VAR
 	fbEndcapAsm							: FB_EndcapAsm;
 	fbControllerAsm						: FB_ControllerAsm;
 	fbLoadStation						: FB_LoadStation;
+	
+	// Estop declaration
+	bEStopLoad							AT%I*	: BOOL;
+	bEStopUserInterface					AT%I*	: BOOL;
+	
+	// Door no contact declaration
+	
+	// Interlock inputs declaration
+	
 END_VAR]]></Declaration>
     <Implementation>
-      <ST><![CDATA[	fbStation01(bInitFinished:=fbControllerSupply.bInit_Finished AND fbBatterySupply.bInit_Finished AND fbConveyor.bInit_Finished);
+      <ST><![CDATA[	fbStation01(						bInitFinished:=fbControllerSupply.bInit_Finished AND fbBatterySupply.bInit_Finished AND fbConveyor.bInit_Finished);
 
 	fbConveyor(							sDeviceID:='',
 										bStopExecution:=fbStation01.bStop,
@@ -25,7 +34,7 @@ END_VAR]]></Declaration>
 										lrOffsetPos:=0,
 										bIn_IsClamped:=FALSE,
 										bIn_IsUnclamped:=FALSE);
-										
+
 	fbLoadStation(						sDeviceID:='',
 										bStopExecution:=fbStation01.bStop,
 										bAlarmReset:=fbStation01.bAlarmReset,
@@ -70,7 +79,7 @@ END_VAR]]></Declaration>
     </Implementation>
     <LineIds Name="MAIN_ST01">
       <LineId Id="3" Count="0" />
-      <LineId Id="92" Count="0" />
+      <LineId Id="161" Count="0" />
       <LineId Id="91" Count="0" />
       <LineId Id="82" Count="8" />
       <LineId Id="68" Count="0" />
