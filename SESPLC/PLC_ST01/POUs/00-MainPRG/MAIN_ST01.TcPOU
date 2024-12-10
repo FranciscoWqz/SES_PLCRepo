@@ -11,6 +11,10 @@ VAR
 	fbControllerAsm						: FB_ControllerAsm;
 	fbLoadStation						: FB_LoadStation;
 	
+	// Input from ST02
+	ST02_initFinished					AT%I* : BOOL;
+	ST02_mtrlReq						AT%I* : BOOL;
+	
 	// Estop declaration
 	bEStopLoad							AT%I*	: BOOL;
 	bEStopUserInterface					AT%I*	: BOOL;
@@ -21,13 +25,16 @@ VAR
 	
 END_VAR]]></Declaration>
     <Implementation>
-      <ST><![CDATA[	fbStation01(						bInitFinished:=fbControllerSupply.bInit_Finished AND fbBatterySupply.bInit_Finished AND fbConveyor.bInit_Finished);
+      <ST><![CDATA[	fbStation01(						bInitFinished:=fbControllerSupply.bInit_Finished AND fbBatterySupply.bInit_Finished AND fbConveyor.bInit_Finished,
+										EmergencyStop:=bEStopLoad OR bEStopUserInterface,
+										safetyReady:=TRUE,
+										Interlock:=TRUE);
 
 	fbConveyor(							sDeviceID:='',
 										bStopExecution:=fbStation01.bStop,
 										bAlarmReset:=fbStation01.bAlarmReset,
 										diStationState:=fbStation01.diStationState,
-										bInit_StartPermissive:=TRUE,
+										bInit_StartPermissive:=fbLoadStation.bInit_Finished AND fbEndcapAsm.bInit_Finished AND fbControllerAsm.bInit_Finished AND fbBatterySupply.bInit_Finished AND ST02_initFinished,
 										bIn_SafeToMove:=FALSE,
 										bIn_AllProcessComplete:=FALSE,
 										lrDistance:=0,
@@ -79,6 +86,7 @@ END_VAR]]></Declaration>
     </Implementation>
     <LineIds Name="MAIN_ST01">
       <LineId Id="3" Count="0" />
+      <LineId Id="180" Count="2" />
       <LineId Id="161" Count="0" />
       <LineId Id="91" Count="0" />
       <LineId Id="82" Count="8" />

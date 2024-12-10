@@ -61,7 +61,7 @@ END_VAR]]></Declaration>
 VAR_INPUT
 END_VAR
 
-VAR
+VAR_STAT
 	// Safe operation condition in any mode
 	bSafeOperationCondition			: BOOL;
 	

@@ -1424,6 +1424,15 @@ External Setpoint Generation:
 			</Relations>
 		</DataType>
 		<DataType>
+			<Name GUID="{53AB2BCA-C5AB-B7CE-D17C-430953A42679}" IecBaseType="true" AutoDeleteType="true">ARRAY [0..127] OF BYTE</Name>
+			<BitSize>1024</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000001}">BYTE</BaseType>
+			<ArrayInfo>
+				<LBound>0</LBound>
+				<Elements>128</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
 			<Name GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects" AutoDeleteType="true">ST_RAC_EIP</Name>
 			<BitSize>320</BitSize>
 			<SubItem>
@@ -1436,15 +1445,6 @@ External Setpoint Generation:
 				<BitSize>320</BitSize>
 				<BitOffs>0</BitOffs>
 			</SubItem>
-		</DataType>
-		<DataType>
-			<Name GUID="{53AB2BCA-C5AB-B7CE-D17C-430953A42679}" IecBaseType="true" AutoDeleteType="true">ARRAY [0..127] OF BYTE</Name>
-			<BitSize>1024</BitSize>
-			<BaseType GUID="{18071995-0000-0000-0000-000000000001}">BYTE</BaseType>
-			<ArrayInfo>
-				<LBound>0</LBound>
-				<Elements>128</Elements>
-			</ArrayInfo>
 		</DataType>
 		<DataType>
 			<Name GUID="{481A0C15-D2DB-59F6-F498-C30AA9C1998C}" IecBaseType="true" AutoDeleteType="true">ARRAY [0..7] OF BOOL</Name>
@@ -1915,152 +1915,32 @@ External Setpoint Generation:
 		</Motion>
 		<Plc>
 			<Project GUID="{4D5621D0-6B94-459B-B4CC-290DF5B1AA61}" Name="PLC_ST01" PrjFilePath="PLC_ST01\PLC_ST01.plcproj" TmcFilePath="PLC_ST01\PLC_ST01.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="PLC_ST01\PLC_ST01.tmc" TmcHash="{4A8009E9-85F8-D69C-0C6B-066079D18C22}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="PLC_ST01\PLC_ST01.tmc" TmcHash="{0C368AC9-C585-853A-B773-077E27B55E7C}">
 					<Name>PLC_ST01 Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
 						<Name>PlcST01Task Inputs</Name>
 						<Var>
-							<Name>MAIN_ST01.fbStation01.system.bResetButton</Name>
+							<Name>MAIN_ST01.bEStopLoad</Name>
+							<Comment><![CDATA[ Estop declaration]]></Comment>
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
-							<Name>MAIN_ST01.fbStation01.system.bStopButton</Name>
+							<Name>MAIN_ST01.bEStopUserInterface</Name>
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
-							<Name>MAIN_ST01.fbStation01.system.bStartButton</Name>
+							<Name>MAIN_ST01.ST02_initFinished</Name>
+							<Comment><![CDATA[ Input from ST02]]></Comment>
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
-							<Name>MAIN_ST01.fbStation01.system.EmergencyStop</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbStation01.system.SafetyReady</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbStation01.system.AutoModeSelector</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbStation01.system.Interlock</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbStation01.system.OpUser</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbStation01.system.PressureSwitch</Name>
+							<Name>MAIN_ST01.ST02_mtrlReq</Name>
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
 							<Name>MAIN_ST01.fbConveyor.Motor.Motor.NcToPlc</Name>
 							<Type GUID="{25521FAA-EA5F-4C7F-8864-BBCCDACD2E98}" Namespace="MC">NCTOPLC_AXIS_REF</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbTrayFeeder.TrayFeederIO.uiin_ConnectionStatus</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbTrayFeeder.TrayFeederIO.eipInputs</Name>
-							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbRobot.RobotIO.uiin_ConnectionStatus</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbRobot.RobotIO.eipInputs</Name>
-							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbScanner.bInReadFailure</Name>
-							<Comment><![CDATA[From scanner]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbScanner.bInBusy</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbScanner.bInReady</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbScanner.bInReadComplete</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbScanner.iCommStatus</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbScanner.ResultData</Name>
-							<Comment><![CDATA[Check the array lenght (this is 127 array, from keyence sr2000)]]></Comment>
-							<Type GUID="{53AB2BCA-C5AB-B7CE-D17C-430953A42679}">ARRAY [0..127] OF BYTE</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbScanner.iResultDataSize</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.bSafetyBoxReject_permissive</Name>
-							<Comment><![CDATA[ Reject on belt in tray feeder safery box permissive]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.bReject_MaterialRequest</Name>
-							<Comment><![CDATA[ Reject on belt in tray feeder material request]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbTrayFeeder.TrayFeederIO.uiin_ConnectionStatus</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbTrayFeeder.TrayFeederIO.eipInputs</Name>
-							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbRobot.RobotIO.uiin_ConnectionStatus</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbRobot.RobotIO.eipInputs</Name>
-							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbScanner.bInReadFailure</Name>
-							<Comment><![CDATA[From scanner]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbScanner.bInBusy</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbScanner.bInReady</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbScanner.bInReadComplete</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbScanner.iCommStatus</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbScanner.ResultData</Name>
-							<Comment><![CDATA[Check the array lenght (this is 127 array, from keyence sr2000)]]></Comment>
-							<Type GUID="{53AB2BCA-C5AB-B7CE-D17C-430953A42679}">ARRAY [0..127] OF BYTE</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbScanner.iResultDataSize</Name>
-							<Type>UINT</Type>
 						</Var>
 						<Var>
 							<Name>MAIN_ST01.fbEndcapAsm.bIsEndcapInFeedPosition</Name>
@@ -2327,13 +2207,126 @@ External Setpoint Generation:
 							<Type GUID="{25521FAA-EA5F-4C7F-8864-BBCCDACD2E98}" Namespace="MC">NCTOPLC_AXIS_REF</Type>
 						</Var>
 						<Var>
-							<Name>MAIN_ST01.bEStopLoad</Name>
-							<Comment><![CDATA[ Estop declaration]]></Comment>
+							<Name>MAIN_ST01.fbStation01.bStopButton</Name>
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
-							<Name>MAIN_ST01.bEStopUserInterface</Name>
+							<Name>MAIN_ST01.fbStation01.bStartButton</Name>
 							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbStation01.bResetButton</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbStation01.AutoModeSelector</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbStation01.PressureSwitch</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbTrayFeeder.TrayFeederIO.uiin_ConnectionStatus</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbTrayFeeder.TrayFeederIO.eipInputs</Name>
+							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbRobot.RobotIO.uiin_ConnectionStatus</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbRobot.RobotIO.eipInputs</Name>
+							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbScanner.bInReadFailure</Name>
+							<Comment><![CDATA[From scanner]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbScanner.bInBusy</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbScanner.bInReady</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbScanner.bInReadComplete</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbScanner.iCommStatus</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbScanner.ResultData</Name>
+							<Comment><![CDATA[Check the array lenght (this is 127 array, from keyence sr2000)]]></Comment>
+							<Type GUID="{53AB2BCA-C5AB-B7CE-D17C-430953A42679}">ARRAY [0..127] OF BYTE</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbScanner.iResultDataSize</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.bSafetyBoxReject_permissive</Name>
+							<Comment><![CDATA[ Reject on belt in tray feeder safery box permissive]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.bReject_MaterialRequest</Name>
+							<Comment><![CDATA[ Reject on belt in tray feeder material request]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbTrayFeeder.TrayFeederIO.uiin_ConnectionStatus</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbTrayFeeder.TrayFeederIO.eipInputs</Name>
+							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbRobot.RobotIO.uiin_ConnectionStatus</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbRobot.RobotIO.eipInputs</Name>
+							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbScanner.bInReadFailure</Name>
+							<Comment><![CDATA[From scanner]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbScanner.bInBusy</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbScanner.bInReady</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbScanner.bInReadComplete</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbScanner.iCommStatus</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbScanner.ResultData</Name>
+							<Comment><![CDATA[Check the array lenght (this is 127 array, from keyence sr2000)]]></Comment>
+							<Type GUID="{53AB2BCA-C5AB-B7CE-D17C-430953A42679}">ARRAY [0..127] OF BYTE</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbScanner.iResultDataSize</Name>
+							<Type>UINT</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="2" AreaNo="1">
@@ -2341,58 +2334,6 @@ External Setpoint Generation:
 						<Var>
 							<Name>MAIN_ST01.fbConveyor.Motor.Motor.PlcToNc</Name>
 							<Type GUID="{96B75FEB-2D84-43BE-A3EC-D9A681F27D52}" Namespace="MC">PLCTONC_AXIS_REF</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbTrayFeeder.TrayFeederIO.eipOutputs</Name>
-							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbRobot.RobotIO.eipOutputs</Name>
-							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbScanner.bOutReadRequest</Name>
-							<Comment><![CDATA[To scanner]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbScanner.bOutErrorClear</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbScanner.bOutReadClear</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.bSafetyBoxReject_OutOfZone</Name>
-							<Comment><![CDATA[ Reject on belt in tray feeder out of safery box]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.bReject_Done</Name>
-							<Comment><![CDATA[ Reject on belt in tray feeder reject done]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbTrayFeeder.TrayFeederIO.eipOutputs</Name>
-							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbRobot.RobotIO.eipOutputs</Name>
-							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbScanner.bOutReadRequest</Name>
-							<Comment><![CDATA[To scanner]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbScanner.bOutErrorClear</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbScanner.bOutReadClear</Name>
-							<Type>BOOL</Type>
 						</Var>
 						<Var>
 							<Name>MAIN_ST01.fbEndcapAsm.bowlControl.bOut_Vibrate</Name>
@@ -2613,6 +2554,58 @@ External Setpoint Generation:
 							<Name>MAIN_ST01.fbLoadStation.Mtr_CenterRight.Motor.PlcToNc</Name>
 							<Type GUID="{96B75FEB-2D84-43BE-A3EC-D9A681F27D52}" Namespace="MC">PLCTONC_AXIS_REF</Type>
 						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbTrayFeeder.TrayFeederIO.eipOutputs</Name>
+							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbRobot.RobotIO.eipOutputs</Name>
+							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbScanner.bOutReadRequest</Name>
+							<Comment><![CDATA[To scanner]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbScanner.bOutErrorClear</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbScanner.bOutReadClear</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.bSafetyBoxReject_OutOfZone</Name>
+							<Comment><![CDATA[ Reject on belt in tray feeder out of safery box]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.bReject_Done</Name>
+							<Comment><![CDATA[ Reject on belt in tray feeder reject done]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbTrayFeeder.TrayFeederIO.eipOutputs</Name>
+							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbRobot.RobotIO.eipOutputs</Name>
+							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbScanner.bOutReadRequest</Name>
+							<Comment><![CDATA[To scanner]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbScanner.bOutErrorClear</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbScanner.bOutReadClear</Name>
+							<Type>BOOL</Type>
+						</Var>
 					</Vars>
 					<Contexts>
 						<Context>
@@ -2631,75 +2624,11 @@ External Setpoint Generation:
 				</Instance>
 			</Project>
 			<Project GUID="{18BBD500-7124-4BBD-8858-94E7E7E0784A}" Name="PLC_ST02" PrjFilePath="PLC_ST02\PLC_ST02.plcproj" TmcFilePath="PLC_ST02\PLC_ST02.tmc" ReloadTmc="true" AmsPort="852" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502040" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="PLC_ST02\PLC_ST02.tmc" TmcHash="{E7D668B1-6B39-53CD-A3F0-B8914338D5D0}">
+				<Instance Id="#x08502040" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="PLC_ST02\PLC_ST02.tmc" TmcHash="{FF7F4A15-4689-9AF7-E31E-C37135CD993A}">
 					<Name>PLC_ST02 Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
 						<Name>PlcST02Task Inputs</Name>
-						<Var>
-							<Name>MAIN_ST02.fbStation02.system.bResetButton</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbStation02.system.bStopButton</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbStation02.system.bStartButton</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbStation02.system.EmergencyStop</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbStation02.system.SafetyReady</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbStation02.system.AutoModeSelector</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbStation02.system.Interlock</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbStation02.system.OpUser</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbStation02.system.PressureSwitch</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbTranslationStationIn.fbRobot.RobotIO.uiin_ConnectionStatus</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbTranslationStationIn.fbRobot.RobotIO.eipInputs</Name>
-							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.bCartPresence</Name>
-							<Comment><![CDATA[ Cart is in position sensor]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.byRejectNestsSensors</Name>
-							<Comment><![CDATA[ 8 sensor array]]></Comment>
-							<Type GUID="{481A0C15-D2DB-59F6-F498-C30AA9C1998C}">ARRAY [0..7] OF BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.fbCartLock.bSensorExtended</Name>
-							<Comment><![CDATA[	Clinder extended sensor]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.fbCartLock.bSensorRetracted</Name>
-							<Comment><![CDATA[	Clinder retracted sensor]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
 						<Var>
 							<Name>MAIN_ST02.fbConveyor.Motor.Motor.NcToPlc</Name>
 							<Type GUID="{25521FAA-EA5F-4C7F-8864-BBCCDACD2E98}" Namespace="MC">NCTOPLC_AXIS_REF</Type>
@@ -2857,6 +2786,54 @@ External Setpoint Generation:
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
+							<Name>MAIN_ST02.fbStation02.bStopButton</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbStation02.bStartButton</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbStation02.bResetButton</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbStation02.AutoModeSelector</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbStation02.PressureSwitch</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRobot.RobotIO.uiin_ConnectionStatus</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRobot.RobotIO.eipInputs</Name>
+							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.bCartPresence</Name>
+							<Comment><![CDATA[ Cart is in position sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.byRejectNestsSensors</Name>
+							<Comment><![CDATA[ 8 sensor array]]></Comment>
+							<Type GUID="{481A0C15-D2DB-59F6-F498-C30AA9C1998C}">ARRAY [0..7] OF BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.fbCartLock.bSensorExtended</Name>
+							<Comment><![CDATA[	Clinder extended sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.fbCartLock.bSensorRetracted</Name>
+							<Comment><![CDATA[	Clinder retracted sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
 							<Name>MAIN_ST02.fbTranslationStationOut.fbRobot.RobotIO.uiin_ConnectionStatus</Name>
 							<Type>UINT</Type>
 						</Var>
@@ -2887,20 +2864,6 @@ External Setpoint Generation:
 					</Vars>
 					<Vars VarGrpType="2" AreaNo="1">
 						<Name>PlcST02Task Outputs</Name>
-						<Var>
-							<Name>MAIN_ST02.fbTranslationStationIn.fbRobot.RobotIO.eipOutputs</Name>
-							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.fbCartLock.bValveExtend</Name>
-							<Comment><![CDATA[	Cylinder extend output]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.fbCartLock.bValveRetract</Name>
-							<Comment><![CDATA[	Cylinder retract output]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
 						<Var>
 							<Name>MAIN_ST02.fbConveyor.Motor.Motor.PlcToNc</Name>
 							<Type GUID="{96B75FEB-2D84-43BE-A3EC-D9A681F27D52}" Namespace="MC">PLCTONC_AXIS_REF</Type>
@@ -3074,6 +3037,20 @@ External Setpoint Generation:
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRobot.RobotIO.eipOutputs</Name>
+							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.fbCartLock.bValveExtend</Name>
+							<Comment><![CDATA[	Cylinder extend output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.fbCartLock.bValveRetract</Name>
+							<Comment><![CDATA[	Cylinder retract output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
 							<Name>MAIN_ST02.fbTranslationStationOut.fbRobot.RobotIO.eipOutputs</Name>
 							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
 						</Var>
@@ -3105,45 +3082,29 @@ External Setpoint Generation:
 				</Instance>
 			</Project>
 			<Project GUID="{E071D962-D5E5-489D-9CB3-FF5BD882663B}" Name="PLC_ST03" PrjFilePath="PLC_ST03\PLC_ST03.plcproj" TmcFilePath="PLC_ST03\PLC_ST03.tmc" ReloadTmc="true" AmsPort="853" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502080" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="PLC_ST03\PLC_ST03.tmc" TmcHash="{81E73AF3-0B0E-E2C0-4329-BB8F27236274}">
+				<Instance Id="#x08502080" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="PLC_ST03\PLC_ST03.tmc" TmcHash="{17D972AD-8118-48E9-8E52-BFB32C4B7685}">
 					<Name>PLC_ST03 Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
 						<Name>PlcST03Task Inputs</Name>
 						<Var>
-							<Name>MAIN_ST03.fbStation03.system.bResetButton</Name>
+							<Name>MAIN_ST03.fbStation03.bStopButton</Name>
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
-							<Name>MAIN_ST03.fbStation03.system.bStopButton</Name>
+							<Name>MAIN_ST03.fbStation03.bStartButton</Name>
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
-							<Name>MAIN_ST03.fbStation03.system.bStartButton</Name>
+							<Name>MAIN_ST03.fbStation03.bResetButton</Name>
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
-							<Name>MAIN_ST03.fbStation03.system.EmergencyStop</Name>
+							<Name>MAIN_ST03.fbStation03.AutoModeSelector</Name>
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
-							<Name>MAIN_ST03.fbStation03.system.SafetyReady</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST03.fbStation03.system.AutoModeSelector</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST03.fbStation03.system.Interlock</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST03.fbStation03.system.OpUser</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST03.fbStation03.system.PressureSwitch</Name>
+							<Name>MAIN_ST03.fbStation03.PressureSwitch</Name>
 							<Type>BOOL</Type>
 						</Var>
 					</Vars>
@@ -3250,11 +3211,13 @@ External Setpoint Generation:
 				<Link VarA="PlcST01Task Outputs^MAIN_ST01.fbBatterySupply.fbRobot.RobotIO.eipOutputs" VarB="Connection 2 (Input/Output)^Outputs^outputRaw"/>
 			</OwnerB>
 			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1100)^Term 16 (EL1809)">
-				<Link VarA="PlcST01Task Inputs^MAIN_ST01.fbStation01.system.AutoModeSelector" VarB="Channel 5^ST01_KeySwitchAuto"/>
-				<Link VarA="PlcST01Task Inputs^MAIN_ST01.fbStation01.system.PressureSwitch" VarB="Channel 1^ST01_PressureSwitch"/>
-				<Link VarA="PlcST01Task Inputs^MAIN_ST01.fbStation01.system.bResetButton" VarB="Channel 4^ST01_Reset"/>
-				<Link VarA="PlcST01Task Inputs^MAIN_ST01.fbStation01.system.bStartButton" VarB="Channel 2^ST01_StartButton"/>
-				<Link VarA="PlcST01Task Inputs^MAIN_ST01.fbStation01.system.bStopButton" VarB="Channel 3^ST01_StopButton"/>
+				<Link VarA="PlcST01Task Inputs^MAIN_ST01.bEStopLoad" VarB="Channel 6^ST01_EStop1"/>
+				<Link VarA="PlcST01Task Inputs^MAIN_ST01.bEStopUserInterface" VarB="Channel 7^ST01_Estop2"/>
+				<Link VarA="PlcST01Task Inputs^MAIN_ST01.fbStation01.AutoModeSelector" VarB="Channel 5^ST01_KeySwitchAuto"/>
+				<Link VarA="PlcST01Task Inputs^MAIN_ST01.fbStation01.PressureSwitch" VarB="Channel 1^ST01_PressureSwitch"/>
+				<Link VarA="PlcST01Task Inputs^MAIN_ST01.fbStation01.bResetButton" VarB="Channel 4^ST01_Reset"/>
+				<Link VarA="PlcST01Task Inputs^MAIN_ST01.fbStation01.bStartButton" VarB="Channel 2^ST01_StartButton"/>
+				<Link VarA="PlcST01Task Inputs^MAIN_ST01.fbStation01.bStopButton" VarB="Channel 3^ST01_StopButton"/>
 			</OwnerB>
 		</OwnerA>
 		<OwnerA Name="TIPC^PLC_ST02^PLC_ST02 Instance">
