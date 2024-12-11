@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <DUT Name="EN_TrayFeederMessaging" Id="{0f8b0073-a2d8-463c-968c-eb611f66abb7}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 {attribute 'strict'}
@@ -9,6 +9,10 @@ TYPE EN_TrayFeederMessaging :
 	waitInitStart			:=0,
 	initFinished			:=999,
 	
+	autoStart				:=1000,
+	readyToScan				:=1400,
+	readyToPick				:=1500,
+	pickFinished			:=1590,
 	autoProcessFinished		:=1999
 )DINT := waitInitStart;
 END_TYPE

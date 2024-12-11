@@ -133,18 +133,10 @@ END_CASE]]></ST>
 
 CASE diActualSeqStep OF
 	EN_TrayFeederMessaging.waitInitStart:				//	When init start bit permissive, set init start output and wait feeder confirm init started
-		TrayFeederIO.bout_Init_startPermissive		:=	bInit_StartPermissive;
-		IF bInit_StartPermissive THEN
-			TrayFeederIO.bout_Init_startPermissive	:=	FALSE;
-			
+		IF NOT ST_TrayFeederIO.bin_initFinished AND ST_TrayFeederIO.bin_SafetyBoxPlace_OutOfZone THEN
+			TrayFeederIO.bout_Reset	:=	TRUE;
 		END_IF
-	//	Check status of servo and if have failure code resets it
-	//	Retract actuators needed for servo search refference
-	//	Servos search refference
-	//	Reset outputs
-	//	Set idle machine state and reset init sequencer
-		bInit_Finished								:=	TrayFeederIO.bin_initFinished;
-		IF bInit_Finished THEN
+		IF ST_TrayFeederIO.bin_initFinished THEN
 			diActualSeqStep							:=999;
 		END_IF
 END_CASE]]></ST>
@@ -228,7 +220,10 @@ METHOD Stop
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_TrayFeeder.Init">
-      <LineId Id="3" Count="20" />
+      <LineId Id="3" Count="6" />
+      <LineId Id="11" Count="1" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="21" Count="2" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_TrayFeeder.IO">
