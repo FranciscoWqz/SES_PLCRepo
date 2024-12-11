@@ -39,22 +39,22 @@ END_VAR]]></Declaration>
 										bChangeTrayRequest:=fbRobot.bPick_AllMaterialPicked);
 
 //	Robot instance
-	fbRobot(							sDeviceID:=	'',
-										bStopExecution:=bStopExecution,
-										bAlarmReset:=bAlarmReset,
-										diStationState:=diStationState,
-										bInit_StartPermissive:=bInit_StartPermissive,
-										bSafetyBoxPick_Permissive:=fbTrayFeeder.bSafetyBoxDeliver_isSafe,
-										bSafetyBoxPlace_Permissive:=bSafetyBoxPlace_permissive,
-										bSafetyBoxReject_Permissive:=FALSE,
-										bOKMaterialReadyToPick:=fbTrayFeeder.bMaterial_ReadyToPick,
-										bNGMaterialReadyToPick:=FALSE,
-										bPiceIsGood:=TRUE,
-										bPiceIsNG:=FALSE,
-										bPlace_MaterialRequest:=bPlace_MaterialRequest,
-										bReject_MaterialRequest:=bAvailableNests,
-										bSafetyBoxPlace_OutOfZone=>bSafetyBoxPlace_OutOfZone,
-										bPlace_Done=>bPlace_Done);
+//	fbRobot(							sDeviceID:=	'',
+//										bStopExecution:=bStopExecution,
+//										bAlarmReset:=bAlarmReset,
+//										diStationState:=diStationState,
+//										bInit_StartPermissive:=bInit_StartPermissive,
+//										bSafetyBoxPick_Permissive:=fbTrayFeeder.bSafetyBoxDeliver_isSafe,
+//										bSafetyBoxPlace_Permissive:=bSafetyBoxPlace_permissive,
+//										bSafetyBoxReject_Permissive:=FALSE,
+//										bOKMaterialReadyToPick:=fbTrayFeeder.bMaterial_ReadyToPick,
+//										bNGMaterialReadyToPick:=FALSE,
+//										bPiceIsGood:=TRUE,
+//										bPiceIsNG:=FALSE,
+//										bPlace_MaterialRequest:=bPlace_MaterialRequest,
+//										bReject_MaterialRequest:=bAvailableNests,
+//										bSafetyBoxPlace_OutOfZone=>bSafetyBoxPlace_OutOfZone,
+//										bPlace_Done=>bPlace_Done);
 
 //	Scanner insance
 	fbScanner(							sDeviceID:=	'',

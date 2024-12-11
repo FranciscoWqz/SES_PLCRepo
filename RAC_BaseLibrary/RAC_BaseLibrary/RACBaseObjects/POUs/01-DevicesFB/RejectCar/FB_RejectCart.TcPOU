@@ -163,15 +163,15 @@ CASE diActualSeqStep OF
 		fbCartLock.bExtendRequest		:= TRUE;
 		IF fbCartLock.bIsExtended THEN
 			fbCartLock.bExtendRequest	:= FALSE;
-			diActualSeqStep				:= 100;
-		END_IF
-	100:								// Check reject nest availability for release cart
-		IF siOccupedNests>=4 THEN
 			diActualSeqStep				:= 110;
+		END_IF
+	110:								// Check reject nest availability for release cart
+		IF siOccupedNests>=4 THEN
+			diActualSeqStep				:= 150;
 		ELSE
 			diActualSeqStep 			:= 999;
 		END_IF
-	110:								// Unlock cart and wait it's removed
+	150:								// Unlock cart and wait it's removed
 		bRemovePiecesRequest			:= TRUE;
 		fbCartLock.bRetractRequest		:= TRUE;
 		IF fbCartLock.bIsRetracted AND tonCartRemoved.Q THEN

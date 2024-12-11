@@ -19,12 +19,14 @@ VAR_OUTPUT
 	// Display current active alarms in device, in a CVS file concatenating type string
 	sAlarm								: STRING;
 END_VAR
-VAR_STAT
+VAR RETAIN
 	// Var to set timeout value in each step
 	tmStepTimeout						: TIME		:=T#1S;
 	
 	// General timeout TON
 	ton_StepTimeout						: TON;
+	// Pulse ton
+	ton_pulse							: TON;
 END_VAR
 ]]></Declaration>
     <Implementation>

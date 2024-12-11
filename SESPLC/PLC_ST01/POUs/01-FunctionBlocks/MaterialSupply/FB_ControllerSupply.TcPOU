@@ -39,7 +39,7 @@ END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[SUPER^.MachineMain();
 //	Tray Feeder instance
-	fbTrayFeeder(						sDeviceID:=	'',
+	fbTrayFeeder(						sDeviceID:=	'01',
 										bStopExecution:=bStopExecution,
 										bAlarmReset:=bAlarmReset,
 										diStationState:=diStationState,
@@ -48,7 +48,7 @@ END_VAR]]></Declaration>
 										bChangeTrayRequest:=fbRobot.bPick_AllMaterialPicked);
 
 //	Robot instance
-	fbRobot(							sDeviceID:=	'',
+	fbRobot(							sDeviceID:=	'01',
 										bStopExecution:=bStopExecution,
 										bAlarmReset:=bAlarmReset,
 										diStationState:=diStationState,
@@ -68,7 +68,7 @@ END_VAR]]></Declaration>
 										bReject_Done=>bReject_Done);
 
 //	Scanner insance
-	fbScanner(							sDeviceID:=	'',
+	fbScanner(							sDeviceID:=	'03',
 										bStopExecution:=bStopExecution,
 										bAlarmReset:=bAlarmReset,
 										bIn_Trigger:=bScann,

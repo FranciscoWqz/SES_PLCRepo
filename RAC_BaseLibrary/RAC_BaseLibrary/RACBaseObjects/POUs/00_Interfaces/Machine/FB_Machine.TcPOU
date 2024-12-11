@@ -10,7 +10,7 @@ VAR_OUTPUT
 	// Init finished
 	bInit_Finished						: BOOL;
 END_VAR
-VAR_STAT
+VAR RETAIN
 	// Sequencer
 	diActualSeqStep						: DINT;
 	
@@ -52,27 +52,26 @@ END_VAR]]></Declaration>
       <Declaration><![CDATA[METHOD MachineMain]]></Declaration>
       <Implementation>
         <ST><![CDATA[//	Enable Setting Alarm Routine Execution
-	IO();
+	THIS^.IO();
 
 //	Machine state control
 
 CASE diStationState OF
-	EN_StationStatus.stopped,			
+	EN_StationStatus.stopped,
 	EN_StationStatus.estopped:			//Enables Stop Routine Execution
-		bInit_Finished := FALSE;
-		Stop();
+		THIS^.Stop();
 	EN_StationStatus.initializing:		//Enables Init Routine Execution
-		Init();
+		THIS^.Init();
 	EN_StationStatus.idle:				//Enables Pause Routine
-		Pause();
+		THIS^.Pause();
 	EN_StationStatus.running:			//Enables Auto Routine Execution
-		Auto();
+		THIS^.Auto();
 	EN_StationStatus.maintenance:		//Enables Manual Routine Execution
-		Manual();
+		THIS^.Manual();
 END_CASE
 
 //	Enable Setting Alarm Routine Execution
-	Alarm();]]></ST>
+	THIS^.Alarm();]]></ST>
       </Implementation>
     </Method>
     <Method Name="Manual" Id="{8359edb3-69bc-4db2-8bd3-b94445442104}">
@@ -114,7 +113,8 @@ END_CASE
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_Machine.MachineMain">
-      <LineId Id="3" Count="20" />
+      <LineId Id="3" Count="7" />
+      <LineId Id="12" Count="11" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_Machine.Manual">

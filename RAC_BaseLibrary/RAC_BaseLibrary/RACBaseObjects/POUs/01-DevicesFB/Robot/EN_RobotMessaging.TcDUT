@@ -1,20 +1,21 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <DUT Name="EN_RobotMessaging" Id="{b82cd2ff-aedf-4a46-a332-f9752b39847d}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 {attribute 'strict'}
 {attribute 'to_string'}
 TYPE EN_RobotMessaging :
 (
-	clearedCmd 					:=0,
-	ok							:=1,
-	retry						:=2,
-	skip						:=3,
-	retriesExceeded				:=4,
+	clearedCmd 					:=10000,
+	ok							:=10001,
+	retry						:=10002,
+	skip						:=10003,
+	retriesExceeded				:=10004,
 	
-	initStart					:=10,
-	waitInitPermissive			:=20,
-	turnMotorsOFF				:=30,
+	initStart					:=0,
+	waitInitPermissive			:=10,
+	turnMotorsOFF				:=20,
+	waitRobotInAuto				:=30,
 	resetEStop					:=40,
 	PPToMain					:=50,
 	turnMotorsON				:=60,

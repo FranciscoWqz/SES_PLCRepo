@@ -1424,15 +1424,6 @@ External Setpoint Generation:
 			</Relations>
 		</DataType>
 		<DataType>
-			<Name GUID="{53AB2BCA-C5AB-B7CE-D17C-430953A42679}" IecBaseType="true" AutoDeleteType="true">ARRAY [0..127] OF BYTE</Name>
-			<BitSize>1024</BitSize>
-			<BaseType GUID="{18071995-0000-0000-0000-000000000001}">BYTE</BaseType>
-			<ArrayInfo>
-				<LBound>0</LBound>
-				<Elements>128</Elements>
-			</ArrayInfo>
-		</DataType>
-		<DataType>
 			<Name GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects" AutoDeleteType="true">ST_RAC_EIP</Name>
 			<BitSize>320</BitSize>
 			<SubItem>
@@ -1445,6 +1436,89 @@ External Setpoint Generation:
 				<BitSize>320</BitSize>
 				<BitOffs>0</BitOffs>
 			</SubItem>
+		</DataType>
+		<DataType>
+			<Name GUID="{53AB2BCA-C5AB-B7CE-D17C-430953A42679}" IecBaseType="true" AutoDeleteType="true">ARRAY [0..127] OF BYTE</Name>
+			<BitSize>1024</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000001}">BYTE</BaseType>
+			<ArrayInfo>
+				<LBound>0</LBound>
+				<Elements>128</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard" AutoDeleteType="true">TON</Name>
+			<BitSize>256</BitSize>
+			<SubItem>
+				<Name>IN</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
+				<Comment><![CDATA[ starts timer with rising edge, resets timer with falling edge ]]></Comment>
+				<BitSize>8</BitSize>
+				<BitOffs>64</BitOffs>
+				<Properties>
+					<Property>
+						<Name>ItemType</Name>
+						<Value>Input</Value>
+					</Property>
+				</Properties>
+			</SubItem>
+			<SubItem>
+				<Name>PT</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000048}">TIME</Type>
+				<Comment><![CDATA[ time to pass, before Q is set ]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>96</BitOffs>
+				<Properties>
+					<Property>
+						<Name>ItemType</Name>
+						<Value>Input</Value>
+					</Property>
+				</Properties>
+			</SubItem>
+			<SubItem>
+				<Name>Q</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
+				<Comment><![CDATA[ gets TRUE, delay time (PT) after a rising edge at IN ]]></Comment>
+				<BitSize>8</BitSize>
+				<BitOffs>128</BitOffs>
+				<Properties>
+					<Property>
+						<Name>ItemType</Name>
+						<Value>Output</Value>
+					</Property>
+				</Properties>
+			</SubItem>
+			<SubItem>
+				<Name>ET</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000048}">TIME</Type>
+				<Comment><![CDATA[ elapsed time ]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>160</BitOffs>
+				<Properties>
+					<Property>
+						<Name>ItemType</Name>
+						<Value>Output</Value>
+					</Property>
+				</Properties>
+			</SubItem>
+			<SubItem>
+				<Name>M</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
+				<BitSize>8</BitSize>
+				<BitOffs>192</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>StartTime</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000048}">TIME</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>224</BitOffs>
+			</SubItem>
+			<Properties>
+				<Property>
+					<Name>PouType</Name>
+					<Value>FunctionBlock</Value>
+				</Property>
+			</Properties>
 		</DataType>
 		<DataType>
 			<Name GUID="{481A0C15-D2DB-59F6-F498-C30AA9C1998C}" IecBaseType="true" AutoDeleteType="true">ARRAY [0..7] OF BOOL</Name>
@@ -1915,7 +1989,7 @@ External Setpoint Generation:
 		</Motion>
 		<Plc>
 			<Project GUID="{4D5621D0-6B94-459B-B4CC-290DF5B1AA61}" Name="PLC_ST01" PrjFilePath="PLC_ST01\PLC_ST01.plcproj" TmcFilePath="PLC_ST01\PLC_ST01.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="PLC_ST01\PLC_ST01.tmc" TmcHash="{0C368AC9-C585-853A-B773-077E27B55E7C}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="PLC_ST01\PLC_ST01.tmc" TmcHash="{64599CEE-DF56-5852-9764-E31816A96240}">
 					<Name>PLC_ST01 Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -1939,8 +2013,106 @@ External Setpoint Generation:
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
-							<Name>MAIN_ST01.fbConveyor.Motor.Motor.NcToPlc</Name>
-							<Type GUID="{25521FAA-EA5F-4C7F-8864-BBCCDACD2E98}" Namespace="MC">NCTOPLC_AXIS_REF</Type>
+							<Name>MAIN_ST01.fbControllerSupply.fbTrayFeeder.TrayFeederIO.uiin_ConnectionStatus</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbTrayFeeder.TrayFeederIO.eipInputs</Name>
+							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbRobot.RobotIO.uiin_ConnectionStatus</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbRobot.RobotIO.eipInputs</Name>
+							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbScanner.bInReadFailure</Name>
+							<Comment><![CDATA[From scanner]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbScanner.bInBusy</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbScanner.bInReady</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbScanner.bInReadComplete</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbScanner.iCommStatus</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbScanner.ResultData</Name>
+							<Comment><![CDATA[Check the array lenght (this is 127 array, from keyence sr2000)]]></Comment>
+							<Type GUID="{53AB2BCA-C5AB-B7CE-D17C-430953A42679}">ARRAY [0..127] OF BYTE</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbScanner.iResultDataSize</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.bSafetyBoxReject_permissive</Name>
+							<Comment><![CDATA[ Reject on belt in tray feeder safery box permissive]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.bReject_MaterialRequest</Name>
+							<Comment><![CDATA[ Reject on belt in tray feeder material request]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbTrayFeeder.TrayFeederIO.uiin_ConnectionStatus</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbTrayFeeder.TrayFeederIO.eipInputs</Name>
+							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbRobot.RobotIO.uiin_ConnectionStatus</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbRobot.RobotIO.eipInputs</Name>
+							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbScanner.bInReadFailure</Name>
+							<Comment><![CDATA[From scanner]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbScanner.bInBusy</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbScanner.bInReady</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbScanner.bInReadComplete</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbScanner.iCommStatus</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbScanner.ResultData</Name>
+							<Comment><![CDATA[Check the array lenght (this is 127 array, from keyence sr2000)]]></Comment>
+							<Type GUID="{53AB2BCA-C5AB-B7CE-D17C-430953A42679}">ARRAY [0..127] OF BYTE</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbScanner.iResultDataSize</Name>
+							<Type>UINT</Type>
 						</Var>
 						<Var>
 							<Name>MAIN_ST01.fbEndcapAsm.bIsEndcapInFeedPosition</Name>
@@ -2137,6 +2309,30 @@ External Setpoint Generation:
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
+							<Name>MAIN_ST01.fbStation01.bStopButton</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbStation01.bStartButton</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbStation01.bResetButton</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbStation01.AutoModeSelector</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbStation01.PressureSwitch</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbConveyor.Motor.Motor.NcToPlc</Name>
+							<Type GUID="{25521FAA-EA5F-4C7F-8864-BBCCDACD2E98}" Namespace="MC">NCTOPLC_AXIS_REF</Type>
+						</Var>
+						<Var>
 							<Name>MAIN_ST01.fbLoadStation.b_SensorLoadPos</Name>
 							<Type>BOOL</Type>
 						</Var>
@@ -2206,134 +2402,60 @@ External Setpoint Generation:
 							<Name>MAIN_ST01.fbLoadStation.Mtr_CenterRight.Motor.NcToPlc</Name>
 							<Type GUID="{25521FAA-EA5F-4C7F-8864-BBCCDACD2E98}" Namespace="MC">NCTOPLC_AXIS_REF</Type>
 						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbStation01.bStopButton</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbStation01.bStartButton</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbStation01.bResetButton</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbStation01.AutoModeSelector</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbStation01.PressureSwitch</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbTrayFeeder.TrayFeederIO.uiin_ConnectionStatus</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbTrayFeeder.TrayFeederIO.eipInputs</Name>
-							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbRobot.RobotIO.uiin_ConnectionStatus</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbRobot.RobotIO.eipInputs</Name>
-							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbScanner.bInReadFailure</Name>
-							<Comment><![CDATA[From scanner]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbScanner.bInBusy</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbScanner.bInReady</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbScanner.bInReadComplete</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbScanner.iCommStatus</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbScanner.ResultData</Name>
-							<Comment><![CDATA[Check the array lenght (this is 127 array, from keyence sr2000)]]></Comment>
-							<Type GUID="{53AB2BCA-C5AB-B7CE-D17C-430953A42679}">ARRAY [0..127] OF BYTE</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbScanner.iResultDataSize</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.bSafetyBoxReject_permissive</Name>
-							<Comment><![CDATA[ Reject on belt in tray feeder safery box permissive]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.bReject_MaterialRequest</Name>
-							<Comment><![CDATA[ Reject on belt in tray feeder material request]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbTrayFeeder.TrayFeederIO.uiin_ConnectionStatus</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbTrayFeeder.TrayFeederIO.eipInputs</Name>
-							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbRobot.RobotIO.uiin_ConnectionStatus</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbRobot.RobotIO.eipInputs</Name>
-							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbScanner.bInReadFailure</Name>
-							<Comment><![CDATA[From scanner]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbScanner.bInBusy</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbScanner.bInReady</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbScanner.bInReadComplete</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbScanner.iCommStatus</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbScanner.ResultData</Name>
-							<Comment><![CDATA[Check the array lenght (this is 127 array, from keyence sr2000)]]></Comment>
-							<Type GUID="{53AB2BCA-C5AB-B7CE-D17C-430953A42679}">ARRAY [0..127] OF BYTE</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbScanner.iResultDataSize</Name>
-							<Type>UINT</Type>
-						</Var>
 					</Vars>
 					<Vars VarGrpType="2" AreaNo="1">
 						<Name>PlcST01Task Outputs</Name>
 						<Var>
-							<Name>MAIN_ST01.fbConveyor.Motor.Motor.PlcToNc</Name>
-							<Type GUID="{96B75FEB-2D84-43BE-A3EC-D9A681F27D52}" Namespace="MC">PLCTONC_AXIS_REF</Type>
+							<Name>MAIN_ST01.fbControllerSupply.fbTrayFeeder.TrayFeederIO.eipOutputs</Name>
+							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbRobot.RobotIO.eipOutputs</Name>
+							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbScanner.bOutReadRequest</Name>
+							<Comment><![CDATA[To scanner]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbScanner.bOutErrorClear</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbScanner.bOutReadClear</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.bSafetyBoxReject_OutOfZone</Name>
+							<Comment><![CDATA[ Reject on belt in tray feeder out of safery box]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.bReject_Done</Name>
+							<Comment><![CDATA[ Reject on belt in tray feeder reject done]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbTrayFeeder.TrayFeederIO.eipOutputs</Name>
+							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbRobot.RobotIO.eipOutputs</Name>
+							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbScanner.bOutReadRequest</Name>
+							<Comment><![CDATA[To scanner]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbScanner.bOutErrorClear</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbScanner.bOutReadClear</Name>
+							<Type>BOOL</Type>
 						</Var>
 						<Var>
 							<Name>MAIN_ST01.fbEndcapAsm.bowlControl.bOut_Vibrate</Name>
@@ -2502,6 +2624,10 @@ External Setpoint Generation:
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
+							<Name>MAIN_ST01.fbConveyor.Motor.Motor.PlcToNc</Name>
+							<Type GUID="{96B75FEB-2D84-43BE-A3EC-D9A681F27D52}" Namespace="MC">PLCTONC_AXIS_REF</Type>
+						</Var>
+						<Var>
 							<Name>MAIN_ST01.fbLoadStation.k50_Left.Green</Name>
 							<Type>BOOL</Type>
 						</Var>
@@ -2554,57 +2680,812 @@ External Setpoint Generation:
 							<Name>MAIN_ST01.fbLoadStation.Mtr_CenterRight.Motor.PlcToNc</Name>
 							<Type GUID="{96B75FEB-2D84-43BE-A3EC-D9A681F27D52}" Namespace="MC">PLCTONC_AXIS_REF</Type>
 						</Var>
+					</Vars>
+					<Vars VarGrpType="8" AreaNo="4">
+						<Name>PlcST01Task Retains</Name>
 						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbTrayFeeder.TrayFeederIO.eipOutputs</Name>
-							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
+							<Name>MAIN_ST01.fbControllerSupply.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
 						</Var>
 						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbRobot.RobotIO.eipOutputs</Name>
-							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
+							<Name>MAIN_ST01.fbControllerSupply.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
 						</Var>
 						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbScanner.bOutReadRequest</Name>
-							<Comment><![CDATA[To scanner]]></Comment>
+							<Name>MAIN_ST01.fbControllerSupply.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.diActualSeqStep</Name>
+							<Comment><![CDATA[ Sequencer]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.diLastActiveStep</Name>
+							<Comment><![CDATA[ Var to follow sequencer and evaluate timeout	]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbTrayFeeder.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbTrayFeeder.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbTrayFeeder.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbTrayFeeder.diActualSeqStep</Name>
+							<Comment><![CDATA[ Sequencer]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbTrayFeeder.diLastActiveStep</Name>
+							<Comment><![CDATA[ Var to follow sequencer and evaluate timeout	]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbRobot.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbRobot.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbRobot.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbRobot.diActualSeqStep</Name>
+							<Comment><![CDATA[ Sequencer]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbRobot.diLastActiveStep</Name>
+							<Comment><![CDATA[ Var to follow sequencer and evaluate timeout	]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbRobot.bDryCycleON</Name>
+							<Comment><![CDATA[ Input: HMI setting for dry cycle]]></Comment>
 							<Type>BOOL</Type>
+							<InOut>7</InOut>
 						</Var>
 						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbScanner.bOutErrorClear</Name>
+							<Name>MAIN_ST01.fbControllerSupply.fbRobot.bRetrievalPermissive</Name>
+							<Comment><![CDATA[ Input: HMI Permissive to init with manually jogged robot]]></Comment>
 							<Type>BOOL</Type>
+							<InOut>7</InOut>
 						</Var>
 						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.fbScanner.bOutReadClear</Name>
+							<Name>MAIN_ST01.fbControllerSupply.fbRobot.bPickRetryPermissive</Name>
+							<Comment><![CDATA[ Input: HMI Permissive to retry pick when retries exceeded]]></Comment>
 							<Type>BOOL</Type>
+							<InOut>7</InOut>
 						</Var>
 						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.bSafetyBoxReject_OutOfZone</Name>
-							<Comment><![CDATA[ Reject on belt in tray feeder out of safery box]]></Comment>
+							<Name>MAIN_ST01.fbControllerSupply.fbScanner.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbScanner.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerSupply.fbScanner.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.diActualSeqStep</Name>
+							<Comment><![CDATA[ Sequencer]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.diLastActiveStep</Name>
+							<Comment><![CDATA[ Var to follow sequencer and evaluate timeout	]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbTrayFeeder.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbTrayFeeder.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbTrayFeeder.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbTrayFeeder.diActualSeqStep</Name>
+							<Comment><![CDATA[ Sequencer]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbTrayFeeder.diLastActiveStep</Name>
+							<Comment><![CDATA[ Var to follow sequencer and evaluate timeout	]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbRobot.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbRobot.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbRobot.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbRobot.diActualSeqStep</Name>
+							<Comment><![CDATA[ Sequencer]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbRobot.diLastActiveStep</Name>
+							<Comment><![CDATA[ Var to follow sequencer and evaluate timeout	]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbRobot.bDryCycleON</Name>
+							<Comment><![CDATA[ Input: HMI setting for dry cycle]]></Comment>
 							<Type>BOOL</Type>
+							<InOut>7</InOut>
 						</Var>
 						<Var>
-							<Name>MAIN_ST01.fbControllerSupply.bReject_Done</Name>
-							<Comment><![CDATA[ Reject on belt in tray feeder reject done]]></Comment>
+							<Name>MAIN_ST01.fbBatterySupply.fbRobot.bRetrievalPermissive</Name>
+							<Comment><![CDATA[ Input: HMI Permissive to init with manually jogged robot]]></Comment>
 							<Type>BOOL</Type>
+							<InOut>7</InOut>
 						</Var>
 						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbTrayFeeder.TrayFeederIO.eipOutputs</Name>
-							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbRobot.RobotIO.eipOutputs</Name>
-							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbScanner.bOutReadRequest</Name>
-							<Comment><![CDATA[To scanner]]></Comment>
+							<Name>MAIN_ST01.fbBatterySupply.fbRobot.bPickRetryPermissive</Name>
+							<Comment><![CDATA[ Input: HMI Permissive to retry pick when retries exceeded]]></Comment>
 							<Type>BOOL</Type>
+							<InOut>7</InOut>
 						</Var>
 						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbScanner.bOutErrorClear</Name>
-							<Type>BOOL</Type>
+							<Name>MAIN_ST01.fbBatterySupply.fbScanner.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
 						</Var>
 						<Var>
-							<Name>MAIN_ST01.fbBatterySupply.fbScanner.bOutReadClear</Name>
-							<Type>BOOL</Type>
+							<Name>MAIN_ST01.fbBatterySupply.fbScanner.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbBatterySupply.fbScanner.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.diActualSeqStep</Name>
+							<Comment><![CDATA[ Sequencer]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.diLastActiveStep</Name>
+							<Comment><![CDATA[ Var to follow sequencer and evaluate timeout	]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_ClampRail_Top.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_ClampRail_Top.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_ClampRail_Top.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_ClampRail_Bot.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_ClampRail_Bot.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_ClampRail_Bot.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_FeedEndcap.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_FeedEndcap.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_FeedEndcap.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_PushEndcap.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_PushEndcap.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_PushEndcap.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_SupportEndcap_Top.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_SupportEndcap_Top.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_SupportEndcap_Top.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_SupportEndcap_Bot.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_SupportEndcap_Bot.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbEndcapAsm.Cyl_SupportEndcap_Bot.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.diActualSeqStep</Name>
+							<Comment><![CDATA[ Sequencer]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.diLastActiveStep</Name>
+							<Comment><![CDATA[ Var to follow sequencer and evaluate timeout	]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_ClampRail_Top.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_ClampRail_Top.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_ClampRail_Top.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_ClampRail_Bot.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_ClampRail_Bot.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_ClampRail_Bot.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_BusbarSupport.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_BusbarSupport.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_BusbarSupport.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_FeedControl.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_FeedControl.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_FeedControl.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_PushControl.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_PushControl.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_PushControl.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_Flipper.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_Flipper.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_Flipper.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_SupportControl_Top.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_SupportControl_Top.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_SupportControl_Top.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_SupportControl_Bot.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_SupportControl_Bot.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_SupportControl_Bot.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_Center.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_Center.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Cyl_Center.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Vacuum.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Vacuum.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbControllerAsm.Vacuum.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbConveyor.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbConveyor.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbConveyor.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbConveyor.diActualSeqStep</Name>
+							<Comment><![CDATA[ Sequencer]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbConveyor.diLastActiveStep</Name>
+							<Comment><![CDATA[ Var to follow sequencer and evaluate timeout	]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbConveyor.Motor.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbConveyor.Motor.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbConveyor.Motor.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbConveyor.Motor.diActualSeqStep</Name>
+							<Comment><![CDATA[ Sequencer]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbConveyor.Motor.diLastActiveStep</Name>
+							<Comment><![CDATA[ Var to follow sequencer and evaluate timeout	]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.diActualSeqStep</Name>
+							<Comment><![CDATA[ Sequencer]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.diLastActiveStep</Name>
+							<Comment><![CDATA[ Var to follow sequencer and evaluate timeout	]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.k50_Left.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.k50_Left.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.k50_Left.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.k50_Right.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.k50_Right.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.k50_Right.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.ScanerReinsertionLoad.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.ScanerReinsertionLoad.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.ScanerReinsertionLoad.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.Mtr_CenterLeft.diActualSeqStep</Name>
+							<Comment><![CDATA[ Sequencer]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.Mtr_CenterLeft.diLastActiveStep</Name>
+							<Comment><![CDATA[ Var to follow sequencer and evaluate timeout	]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.Mtr_CenterLeft.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.Mtr_CenterLeft.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.Mtr_CenterLeft.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.Mtr_CenterRight.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.Mtr_CenterRight.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.Mtr_CenterRight.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.Mtr_CenterRight.diActualSeqStep</Name>
+							<Comment><![CDATA[ Sequencer]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST01.fbLoadStation.Mtr_CenterRight.diLastActiveStep</Name>
+							<Comment><![CDATA[ Var to follow sequencer and evaluate timeout	]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
 						</Var>
 					</Vars>
 					<Contexts>
@@ -2624,11 +3505,87 @@ External Setpoint Generation:
 				</Instance>
 			</Project>
 			<Project GUID="{18BBD500-7124-4BBD-8858-94E7E7E0784A}" Name="PLC_ST02" PrjFilePath="PLC_ST02\PLC_ST02.plcproj" TmcFilePath="PLC_ST02\PLC_ST02.tmc" ReloadTmc="true" AmsPort="852" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502040" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="PLC_ST02\PLC_ST02.tmc" TmcHash="{FF7F4A15-4689-9AF7-E31E-C37135CD993A}">
+				<Instance Id="#x08502040" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="PLC_ST02\PLC_ST02.tmc" TmcHash="{D24DE905-29F8-D008-6C0D-6D4E1D4A8C43}">
 					<Name>PLC_ST02 Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
 						<Name>PlcST02Task Inputs</Name>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRobot.RobotIO.uiin_ConnectionStatus</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRobot.RobotIO.eipInputs</Name>
+							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.bCartPresence</Name>
+							<Comment><![CDATA[ Cart is in position sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.byRejectNestsSensors</Name>
+							<Comment><![CDATA[ 8 sensor array]]></Comment>
+							<Type GUID="{481A0C15-D2DB-59F6-F498-C30AA9C1998C}">ARRAY [0..7] OF BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.fbCartLock.bSensorExtended</Name>
+							<Comment><![CDATA[	Clinder extended sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.fbCartLock.bSensorRetracted</Name>
+							<Comment><![CDATA[	Clinder retracted sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRobot.RobotIO.uiin_ConnectionStatus</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRobot.RobotIO.eipInputs</Name>
+							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRejectCart.bCartPresence</Name>
+							<Comment><![CDATA[ Cart is in position sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRejectCart.byRejectNestsSensors</Name>
+							<Comment><![CDATA[ 8 sensor array]]></Comment>
+							<Type GUID="{481A0C15-D2DB-59F6-F498-C30AA9C1998C}">ARRAY [0..7] OF BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRejectCart.fbCartLock.bSensorExtended</Name>
+							<Comment><![CDATA[	Clinder extended sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRejectCart.fbCartLock.bSensorRetracted</Name>
+							<Comment><![CDATA[	Clinder retracted sensor]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbStation02.bStopButton</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbStation02.bStartButton</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbStation02.bResetButton</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbStation02.AutoModeSelector</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbStation02.PressureSwitch</Name>
+							<Type>BOOL</Type>
+						</Var>
 						<Var>
 							<Name>MAIN_ST02.fbConveyor.Motor.Motor.NcToPlc</Name>
 							<Type GUID="{25521FAA-EA5F-4C7F-8864-BBCCDACD2E98}" Namespace="MC">NCTOPLC_AXIS_REF</Type>
@@ -2734,13 +3691,13 @@ External Setpoint Generation:
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
-							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbCyl_TapeApplicatorFront.bSensorExtended</Name>
-							<Comment><![CDATA[	Clinder extended sensor]]></Comment>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbCyl_TapeApplicatorFront.bSensorRetracted</Name>
+							<Comment><![CDATA[	Clinder retracted sensor]]></Comment>
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
-							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbCyl_TapeApplicatorFront.bSensorRetracted</Name>
-							<Comment><![CDATA[	Clinder retracted sensor]]></Comment>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbCyl_TapeApplicatorFront.bSensorExtended</Name>
+							<Comment><![CDATA[	Clinder extended sensor]]></Comment>
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
@@ -2785,85 +3742,37 @@ External Setpoint Generation:
 							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbVacc_RearPlate.VaccumSensor</Name>
 							<Type>BOOL</Type>
 						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbStation02.bStopButton</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbStation02.bStartButton</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbStation02.bResetButton</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbStation02.AutoModeSelector</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbStation02.PressureSwitch</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbTranslationStationIn.fbRobot.RobotIO.uiin_ConnectionStatus</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbTranslationStationIn.fbRobot.RobotIO.eipInputs</Name>
-							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.bCartPresence</Name>
-							<Comment><![CDATA[ Cart is in position sensor]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.byRejectNestsSensors</Name>
-							<Comment><![CDATA[ 8 sensor array]]></Comment>
-							<Type GUID="{481A0C15-D2DB-59F6-F498-C30AA9C1998C}">ARRAY [0..7] OF BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.fbCartLock.bSensorExtended</Name>
-							<Comment><![CDATA[	Clinder extended sensor]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.fbCartLock.bSensorRetracted</Name>
-							<Comment><![CDATA[	Clinder retracted sensor]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbTranslationStationOut.fbRobot.RobotIO.uiin_ConnectionStatus</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbTranslationStationOut.fbRobot.RobotIO.eipInputs</Name>
-							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbTranslationStationOut.fbRejectCart.bCartPresence</Name>
-							<Comment><![CDATA[ Cart is in position sensor]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbTranslationStationOut.fbRejectCart.byRejectNestsSensors</Name>
-							<Comment><![CDATA[ 8 sensor array]]></Comment>
-							<Type GUID="{481A0C15-D2DB-59F6-F498-C30AA9C1998C}">ARRAY [0..7] OF BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbTranslationStationOut.fbRejectCart.fbCartLock.bSensorExtended</Name>
-							<Comment><![CDATA[	Clinder extended sensor]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbTranslationStationOut.fbRejectCart.fbCartLock.bSensorRetracted</Name>
-							<Comment><![CDATA[	Clinder retracted sensor]]></Comment>
-							<Type>BOOL</Type>
-						</Var>
 					</Vars>
 					<Vars VarGrpType="2" AreaNo="1">
 						<Name>PlcST02Task Outputs</Name>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRobot.RobotIO.eipOutputs</Name>
+							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.fbCartLock.bValveExtend</Name>
+							<Comment><![CDATA[	Cylinder extend output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.fbCartLock.bValveRetract</Name>
+							<Comment><![CDATA[	Cylinder retract output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRobot.RobotIO.eipOutputs</Name>
+							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRejectCart.fbCartLock.bValveExtend</Name>
+							<Comment><![CDATA[	Cylinder extend output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRejectCart.fbCartLock.bValveRetract</Name>
+							<Comment><![CDATA[	Cylinder retract output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
 						<Var>
 							<Name>MAIN_ST02.fbConveyor.Motor.Motor.PlcToNc</Name>
 							<Type GUID="{96B75FEB-2D84-43BE-A3EC-D9A681F27D52}" Namespace="MC">PLCTONC_AXIS_REF</Type>
@@ -2955,17 +3864,17 @@ External Setpoint Generation:
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbCyl_Scissors.bValveExtend</Name>
+							<Comment><![CDATA[	Cylinder extend output]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
 							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbServo_Lift.Motor.PlcToNc</Name>
 							<Type GUID="{96B75FEB-2D84-43BE-A3EC-D9A681F27D52}" Namespace="MC">PLCTONC_AXIS_REF</Type>
 						</Var>
 						<Var>
 							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbServo_Picker.Motor.PlcToNc</Name>
 							<Type GUID="{96B75FEB-2D84-43BE-A3EC-D9A681F27D52}" Namespace="MC">PLCTONC_AXIS_REF</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbCyl_Scissors.bValveExtend</Name>
-							<Comment><![CDATA[	Cylinder extend output]]></Comment>
-							<Type>BOOL</Type>
 						</Var>
 						<Var>
 							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbCyl_Scissors.bValveRetract</Name>
@@ -3036,33 +3945,848 @@ External Setpoint Generation:
 							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbVacc_RearPlate.BlowValve</Name>
 							<Type>BOOL</Type>
 						</Var>
+					</Vars>
+					<Vars VarGrpType="8" AreaNo="4">
+						<Name>PlcST02Task Retains</Name>
 						<Var>
-							<Name>MAIN_ST02.fbTranslationStationIn.fbRobot.RobotIO.eipOutputs</Name>
-							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
+							<Name>MAIN_ST02.fbTranslationStationIn.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
 						</Var>
 						<Var>
-							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.fbCartLock.bValveExtend</Name>
-							<Comment><![CDATA[	Cylinder extend output]]></Comment>
+							<Name>MAIN_ST02.fbTranslationStationIn.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.diActualSeqStep</Name>
+							<Comment><![CDATA[ Sequencer]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.diLastActiveStep</Name>
+							<Comment><![CDATA[ Var to follow sequencer and evaluate timeout	]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRobot.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRobot.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRobot.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRobot.diActualSeqStep</Name>
+							<Comment><![CDATA[ Sequencer]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRobot.diLastActiveStep</Name>
+							<Comment><![CDATA[ Var to follow sequencer and evaluate timeout	]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRobot.bDryCycleON</Name>
+							<Comment><![CDATA[ Input: HMI setting for dry cycle]]></Comment>
 							<Type>BOOL</Type>
+							<InOut>7</InOut>
 						</Var>
 						<Var>
-							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.fbCartLock.bValveRetract</Name>
-							<Comment><![CDATA[	Cylinder retract output]]></Comment>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRobot.bRetrievalPermissive</Name>
+							<Comment><![CDATA[ Input: HMI Permissive to init with manually jogged robot]]></Comment>
 							<Type>BOOL</Type>
+							<InOut>7</InOut>
 						</Var>
 						<Var>
-							<Name>MAIN_ST02.fbTranslationStationOut.fbRobot.RobotIO.eipOutputs</Name>
-							<Type GUID="{F3F42D4B-E339-9BD8-34F5-BCDEABD34004}" Namespace="RACBaseObjects">ST_RAC_EIP</Type>
-						</Var>
-						<Var>
-							<Name>MAIN_ST02.fbTranslationStationOut.fbRejectCart.fbCartLock.bValveExtend</Name>
-							<Comment><![CDATA[	Cylinder extend output]]></Comment>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRobot.bPickRetryPermissive</Name>
+							<Comment><![CDATA[ Input: HMI Permissive to retry pick when retries exceeded]]></Comment>
 							<Type>BOOL</Type>
+							<InOut>7</InOut>
 						</Var>
 						<Var>
-							<Name>MAIN_ST02.fbTranslationStationOut.fbRejectCart.fbCartLock.bValveRetract</Name>
-							<Comment><![CDATA[	Cylinder retract output]]></Comment>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.diActualSeqStep</Name>
+							<Comment><![CDATA[ Sequencer]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.diLastActiveStep</Name>
+							<Comment><![CDATA[ Var to follow sequencer and evaluate timeout	]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.fbCartLock.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.fbCartLock.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationIn.fbRejectCart.fbCartLock.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.diActualSeqStep</Name>
+							<Comment><![CDATA[ Sequencer]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.diLastActiveStep</Name>
+							<Comment><![CDATA[ Var to follow sequencer and evaluate timeout	]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRobot.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRobot.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRobot.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRobot.diActualSeqStep</Name>
+							<Comment><![CDATA[ Sequencer]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRobot.diLastActiveStep</Name>
+							<Comment><![CDATA[ Var to follow sequencer and evaluate timeout	]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRobot.bDryCycleON</Name>
+							<Comment><![CDATA[ Input: HMI setting for dry cycle]]></Comment>
 							<Type>BOOL</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRobot.bRetrievalPermissive</Name>
+							<Comment><![CDATA[ Input: HMI Permissive to init with manually jogged robot]]></Comment>
+							<Type>BOOL</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRobot.bPickRetryPermissive</Name>
+							<Comment><![CDATA[ Input: HMI Permissive to retry pick when retries exceeded]]></Comment>
+							<Type>BOOL</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRejectCart.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRejectCart.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRejectCart.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRejectCart.diActualSeqStep</Name>
+							<Comment><![CDATA[ Sequencer]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRejectCart.diLastActiveStep</Name>
+							<Comment><![CDATA[ Var to follow sequencer and evaluate timeout	]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRejectCart.fbCartLock.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRejectCart.fbCartLock.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTranslationStationOut.fbRejectCart.fbCartLock.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbConveyor.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbConveyor.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbConveyor.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbConveyor.diActualSeqStep</Name>
+							<Comment><![CDATA[ Sequencer]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbConveyor.diLastActiveStep</Name>
+							<Comment><![CDATA[ Var to follow sequencer and evaluate timeout	]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbConveyor.Motor.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbConveyor.Motor.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbConveyor.Motor.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbConveyor.Motor.diActualSeqStep</Name>
+							<Comment><![CDATA[ Sequencer]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbConveyor.Motor.diLastActiveStep</Name>
+							<Comment><![CDATA[ Var to follow sequencer and evaluate timeout	]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.diActualSeqStep</Name>
+							<Comment><![CDATA[ Sequencer]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.diLastActiveStep</Name>
+							<Comment><![CDATA[ Var to follow sequencer and evaluate timeout	]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbServo_Translational.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbServo_Translational.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbServo_Translational.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbServo_Translational.diActualSeqStep</Name>
+							<Comment><![CDATA[ Sequencer]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbServo_Translational.diLastActiveStep</Name>
+							<Comment><![CDATA[ Var to follow sequencer and evaluate timeout	]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.diActualSeqStep</Name>
+							<Comment><![CDATA[ Sequencer]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.diLastActiveStep</Name>
+							<Comment><![CDATA[ Var to follow sequencer and evaluate timeout	]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbServo_Lift.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbServo_Lift.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbServo_Lift.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbServo_Lift.diActualSeqStep</Name>
+							<Comment><![CDATA[ Sequencer]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbServo_Lift.diLastActiveStep</Name>
+							<Comment><![CDATA[ Var to follow sequencer and evaluate timeout	]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbServo_Picker.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbServo_Picker.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbServo_Picker.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbServo_Picker.diActualSeqStep</Name>
+							<Comment><![CDATA[ Sequencer]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbServo_Picker.diLastActiveStep</Name>
+							<Comment><![CDATA[ Var to follow sequencer and evaluate timeout	]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbCyl_Scissors.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbCyl_Scissors.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbCyl_Scissors.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbCyl_TapeApplicatorFront.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbCyl_TapeApplicatorFront.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbCyl_TapeApplicatorFront.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbCyl_TapeApplicatorRear.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbCyl_TapeApplicatorRear.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbCyl_TapeApplicatorRear.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbCyl_Vacc.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbCyl_Vacc.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbCyl_Vacc.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbCyl_Picker.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbCyl_Picker.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbCyl_Picker.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbVacc_PickPlate.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbVacc_PickPlate.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbVacc_PickPlate.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbVacc_FrontPlate.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbVacc_FrontPlate.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbVacc_FrontPlate.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbVacc_RearPlate.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbVacc_RearPlate.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Left.fbVacc_RearPlate.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.diActualSeqStep</Name>
+							<Comment><![CDATA[ Sequencer]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.diLastActiveStep</Name>
+							<Comment><![CDATA[ Var to follow sequencer and evaluate timeout	]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbServo_Lift.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbServo_Lift.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbServo_Lift.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbServo_Lift.diActualSeqStep</Name>
+							<Comment><![CDATA[ Sequencer]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbServo_Lift.diLastActiveStep</Name>
+							<Comment><![CDATA[ Var to follow sequencer and evaluate timeout	]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbServo_Picker.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbServo_Picker.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbServo_Picker.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbServo_Picker.diActualSeqStep</Name>
+							<Comment><![CDATA[ Sequencer]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbServo_Picker.diLastActiveStep</Name>
+							<Comment><![CDATA[ Var to follow sequencer and evaluate timeout	]]></Comment>
+							<Type>DINT</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbCyl_Scissors.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbCyl_Scissors.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbCyl_Scissors.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbCyl_TapeApplicatorFront.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbCyl_TapeApplicatorFront.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbCyl_TapeApplicatorFront.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbCyl_TapeApplicatorRear.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbCyl_TapeApplicatorRear.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbCyl_TapeApplicatorRear.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbCyl_Vacc.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbCyl_Vacc.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbCyl_Vacc.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbCyl_Picker.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbCyl_Picker.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbCyl_Picker.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbVacc_PickPlate.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbVacc_PickPlate.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbVacc_PickPlate.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbVacc_FrontPlate.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbVacc_FrontPlate.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbVacc_FrontPlate.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbVacc_RearPlate.tmStepTimeout</Name>
+							<Comment><![CDATA[ Var to set timeout value in each step]]></Comment>
+							<Type>TIME</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbVacc_RearPlate.ton_StepTimeout</Name>
+							<Comment><![CDATA[ General timeout TON]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
+						</Var>
+						<Var>
+							<Name>MAIN_ST02.fbTapeApplicationMachine.fbTapeApplicator_Right.fbVacc_RearPlate.ton_pulse</Name>
+							<Comment><![CDATA[ Pulse ton]]></Comment>
+							<Type GUID="{1337BBBA-9A3F-D9E7-4ED6-FA23E60881AB}" Namespace="Tc2_Standard">TON</Type>
+							<InOut>7</InOut>
 						</Var>
 					</Vars>
 					<Contexts>
@@ -3204,10 +4928,12 @@ External Setpoint Generation:
 		<OwnerA Name="TIPC^PLC_ST01^PLC_ST01 Instance">
 			<OwnerB Name="TIID^Device 1 (ECAT EIP Scanner (EL6652))^Robot01_Controller">
 				<Link VarA="PlcST01Task Inputs^MAIN_ST01.fbControllerSupply.fbRobot.RobotIO.eipInputs" VarB="Connection 1 (Input/Output)^Inputs^inputRaw"/>
+				<Link VarA="PlcST01Task Inputs^MAIN_ST01.fbControllerSupply.fbRobot.RobotIO.uiin_ConnectionStatus" VarB="Inputs^State"/>
 				<Link VarA="PlcST01Task Outputs^MAIN_ST01.fbControllerSupply.fbRobot.RobotIO.eipOutputs" VarB="Connection 1 (Input/Output)^Outputs^outputRaw"/>
 			</OwnerB>
 			<OwnerB Name="TIID^Device 1 (ECAT EIP Scanner (EL6652))^Robot02_Battery">
 				<Link VarA="PlcST01Task Inputs^MAIN_ST01.fbBatterySupply.fbRobot.RobotIO.eipInputs" VarB="Connection 2 (Input/Output)^Inputs^inputRaw"/>
+				<Link VarA="PlcST01Task Inputs^MAIN_ST01.fbBatterySupply.fbRobot.RobotIO.uiin_ConnectionStatus" VarB="Inputs^State"/>
 				<Link VarA="PlcST01Task Outputs^MAIN_ST01.fbBatterySupply.fbRobot.RobotIO.eipOutputs" VarB="Connection 2 (Input/Output)^Outputs^outputRaw"/>
 			</OwnerB>
 			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1100)^Term 16 (EL1809)">

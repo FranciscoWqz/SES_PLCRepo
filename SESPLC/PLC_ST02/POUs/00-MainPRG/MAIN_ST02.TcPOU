@@ -12,11 +12,11 @@ END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[	fbStation02(						bInitFinished := fbTapeApplicationMachine.bInit_Finished);
 
-	fbTranslationStationIn(				sDeviceID := '', 
-										bStopExecution := fbStation02.bStop,
-										bAlarmReset := fbStation02.bAlarmReset,
-										diStationState := fbStation02.diStationState,
-										bInit_StartPermissive := FALSE);
+//	fbTranslationStationIn(				sDeviceID := '', 
+//										bStopExecution := fbStation02.bStop,
+//										bAlarmReset := fbStation02.bAlarmReset,
+//										diStationState := fbStation02.diStationState,
+//										bInit_StartPermissive := FALSE);
 
 	fbConveyor(							sDeviceID := '', 
 										bStopExecution := fbStation02.bStop,
@@ -31,11 +31,11 @@ END_VAR]]></Declaration>
 										diStationState := fbStation02.diStationState,
 										bInit_StartPermissive := FALSE);
 
-	fbTranslationStationOut(			sDeviceID := '', 
-										bStopExecution := fbStation02.bStop,
-										bAlarmReset := fbStation02.bAlarmReset,
-										diStationState := fbStation02.diStationState,
-										bInit_StartPermissive := FALSE);]]></ST>
+//	fbTranslationStationOut(			sDeviceID := '', 
+//										bStopExecution := fbStation02.bStop,
+//										bAlarmReset := fbStation02.bAlarmReset,
+//										diStationState := fbStation02.diStationState,
+//										bInit_StartPermissive := FALSE);]]></ST>
     </Implementation>
     <LineIds Name="MAIN_ST02">
       <LineId Id="3" Count="0" />
