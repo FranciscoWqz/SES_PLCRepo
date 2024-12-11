@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.56">
-	<Project ProjectGUID="{A2D1C980-3B20-4CE5-A6A2-FA51477A1C9D}" TargetNetId="192.168.0.166.1.1" Target64Bit="true" ShowHideConfigurations="#x347">
+	<Project ProjectGUID="{A2D1C980-3B20-4CE5-A6A2-FA51477A1C9D}" TargetNetId="192.168.0.166.1.1" ShowHideConfigurations="#x347">
 		<System>
 			<Tasks>
 				<Task Id="3" Priority="20" CycleTime="100000" AmsPort="350" AdtTasks="true">
@@ -10,7 +10,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{2C257504-FCB3-43D9-8216-20B75A57B6E7}" Name="RACBaseObjects" PrjFilePath="RACBaseObjects\RACBaseObjects.plcproj" TmcFilePath="RACBaseObjects\RACBaseObjects.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="RACBaseObjects\RACBaseObjects.tmc" TmcHash="{4ED76B66-95D9-95A7-FF28-7B7D8ECABF3F}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="RACBaseObjects\RACBaseObjects.tmc" TmcHash="{320EA4D5-A3A5-2EC6-0BCC-F578D1443485}">
 					<Name>RACBaseObjects Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Contexts>

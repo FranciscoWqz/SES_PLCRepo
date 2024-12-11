@@ -13,15 +13,18 @@ STRUCT
 	
 	bin_ServosFailure						:BOOL;
 	bin_initFinished						:BOOL;
+	bin_AutoOn								:BOOL;
+	bin_eStop								:BOOL;
 	
 	bout_Reset								:BOOL;
 	bout_Start								:BOOL;
 	bout_Stop								:BOOL;
 	bout_Init_startPermissive				:BOOL;
 	
+	bout_readyToScan						:BOOL;
+	bout_readyToPick						:BOOL;
 	bin_SafetyBoxPlace_OutOfZone	 		:BOOL;
 	bout_SafetyBoxPlace_Permissive 			:BOOL;
-	
 	
 	bin_inScanningPosition					:BOOL;
 	bout_scannninPieceIsOK					:BOOL;

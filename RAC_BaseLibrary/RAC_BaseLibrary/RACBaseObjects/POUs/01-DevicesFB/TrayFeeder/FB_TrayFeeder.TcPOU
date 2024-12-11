@@ -93,8 +93,38 @@ END_VAR]]></Declaration>
 	sAlarm:= CONCAT(STR1:=sSequenceCode,STR2:=sAsyncAlarmCodes);]]></ST>
       </Implementation>
     </Method>
-    <Method Name="Auto" Id="{14c02982-4d80-43cb-b362-810ef2a45b42}">
-      <Declaration><![CDATA[METHOD Auto]]></Declaration>
+    <Method Name="Auto_Feeder" Id="{14c02982-4d80-43cb-b362-810ef2a45b42}">
+      <Declaration><![CDATA[METHOD Auto_Feeder]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//	 Keep sequencer in range
+	IF (diActualSeqStep<1000) OR (diActualSeqStep>1999) THEN
+		diActualSeqStep												:=1000;
+	END_IF
+
+CASE diActualSeqStep OF
+	EN_TrayFeederMessaging.autoStart:
+		IF NOT ST_TrayFeederIO.bin_AutoOn THEN
+			ST_TrayFeederIO.bout_Start 								:=TRUE;
+		END_IF
+		IF ST_TrayFeederIO.bin_AutoOn THEN
+			ST_TrayFeederIO.bout_Start								:=FALSE;
+			diActualSeqStep											:= EN_TrayFeederMessaging.readyToPick;
+		END_IF
+	EN_TrayFeederMessaging.readyToPick:
+		IF ST_TrayFeederIO.bout_readyToPick AND ST_TrayFeederIO.bin_SafetyBoxPlace_OutOfZone THEN
+			ST_TrayFeederIO.bout_SafetyBoxPlace_Permissive			:=TRUE;
+			diActualSeqStep											:=En_TrayFeederMessaging.picking;
+		END_IF
+	En_TrayFeederMessaging.picking:
+		IF NOT ST_TrayfeederIO.bin_SafetyBoxPlace_OutOfZone THEN
+			ST_TrayFeederIO.bout_SafetyBoxPlace_Permissive			:=FALSE;
+			diActualSeqStep											:=En_TrayFeederMessaging.picking;
+		END_IF
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Auto_Gantry" Id="{c6a4d3a5-fa7e-4790-a59b-e7e2f2c1cf04}">
+      <Declaration><![CDATA[METHOD Auto_Gantry]]></Declaration>
       <Implementation>
         <ST><![CDATA[//	 Keep sequencer in range
 	IF (diActualSeqStep<1000) OR (diActualSeqStep>1999) THEN
@@ -102,7 +132,7 @@ END_VAR]]></Declaration>
 	END_IF
 
 CASE	diActualSeqStep OF
-	EN_TrayFeederMessaging.waitInitStart:	//	Get down empty lifter to traslation height
+	EN_TrayFeederMessaging.autoStart:	//	Get down empty lifter to traslation height
 	//	Check if have tray on lifter
 	//	Move empty lifter to feed tray tower position
 	//	Lift feed tray tower to unlock height
@@ -151,6 +181,9 @@ END_VAR]]></Declaration>
         <ST><![CDATA[// 	FB Direct Inputs
 	TrayFeederIO.bout_SafetyBoxPlace_Permissive		:= bSafetyBoxDeliver_permissive;
 	TrayFeederIO.bout_delivery_trayChangeRequest	:= bChangeTrayRequest;
+	TrayFeederIO.bout_readyToScan					:= bPart_ReadyToScan;
+	TrayFeederIO.bout_readyToPick					:= bMaterial_ReadyToPick;
+	
 	TrayFeederIO.bout_scannninPieceIsOK				:= bScanningPieceIsOK;
 	TrayFeederIO.bout_scannninPieceIsNG				:= bScanningPieceIsNG;
 	
@@ -215,7 +248,23 @@ METHOD Stop
       <LineId Id="3" Count="47" />
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_TrayFeeder.Auto">
+    <LineIds Name="FB_TrayFeeder.Auto_Feeder">
+      <LineId Id="3" Count="5" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="32" Count="2" />
+      <LineId Id="27" Count="1" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="35" Count="1" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="42" Count="2" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TrayFeeder.Auto_Gantry">
       <LineId Id="3" Count="23" />
       <LineId Id="2" Count="0" />
     </LineIds>
@@ -227,7 +276,11 @@ METHOD Stop
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_TrayFeeder.IO">
-      <LineId Id="3" Count="33" />
+      <LineId Id="3" Count="2" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="6" Count="30" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_TrayFeeder.Manual">
